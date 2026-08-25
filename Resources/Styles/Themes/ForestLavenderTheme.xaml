@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MugOverflowProject.Resources.Styles.Themes.ForestLavenderTheme">
+
+    <x:String x:Key="ThemeName">Forest Lavender</x:String>
+
+    <Color x:Key="PageBackgroundColor">#F3EFE6</Color>
+    <Color x:Key="NavigationBarColor">#184D37</Color>
+    <Color x:Key="PrimaryColor">#184D37</Color>
+    <Color x:Key="AccentColor">#7E57C2</Color>
+    <Color x:Key="SurfaceColor">#FFFFFF</Color>
+    <Color x:Key="SurfaceAltColor">#DAD7CD</Color>
+    <Color x:Key="BorderColor">#B8B1A1</Color>
+
+    <Color x:Key="PrimaryTextColor">#202124</Color>
+    <Color x:Key="SecondaryTextColor">#4B4F46</Color>
+    <Color x:Key="TertiaryTextColor">#777B70</Color>
+
+    <Color x:Key="SuccessColor">#2E7D32</Color>
+    <Color x:Key="WarningColor">#B7791F</Color>
+    <Color x:Key="ErrorColor">#8B1E3F</Color>
+    <Color x:Key="InfoColor">#007C89</Color>
+    <Color x:Key="DecorativeColor">#C7B7E8</Color>
+    <Color x:Key="TransparentColor">Transparent</Color>
+
+    <Color x:Key="PrimaryGradientStart">#184D37</Color>
+    <Color x:Key="PrimaryGradientEnd">#7E57C2</Color>
+    <Color x:Key="CardShadowColor">#1A202124</Color>
+    <Color x:Key="AppShadowColor">#26202124</Color>
+</ResourceDictionary>

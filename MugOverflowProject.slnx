@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="MugOverflowProject.csproj" Type="Classic C#" />
+  <Project Path="tests/MugOverflowProject.Tests/MugOverflowProject.Tests.csproj" Type="Classic C#" />
+</Solution>

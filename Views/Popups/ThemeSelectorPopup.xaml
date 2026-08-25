@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Views;assembly=CommunityToolkit.Maui"
+    xmlns:fluent="clr-namespace:FluentIcons.Maui;assembly=FluentIcons.Maui"
+    xmlns:vm="clr-namespace:MugOverflowProject.ViewModels"
+    x:Class="MugOverflowProject.Views.Popups.ThemeSelectorPopup"
+    x:DataType="vm:ThemeSelectorPopupViewModel"
+    Color="Transparent">
+
+    <Border
+        Style="{StaticResource CardBorderStyle}"
+        MaximumWidthRequest="450"
+        WidthRequest="380"
+        Padding="24"
+        HorizontalOptions="Center"
+        VerticalOptions="Center">
+
+        <VerticalStackLayout Spacing="16">
+            <!-- Header -->
+            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
+                <Border
+                    Grid.Column="0"
+                    BackgroundColor="{DynamicResource SurfaceAltColor}"
+                    StrokeThickness="0"
+                    Padding="10"
+                    WidthRequest="42"
+                    HeightRequest="42">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <fluent:SymbolIcon
+                        Symbol="Settings"
+                        FontSize="20"
+                        ForegroundColor="{DynamicResource PrimaryColor}" />
+                </Border>
+
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                    <Label Text="Select Theme" Style="{StaticResource MediumLabelStyle}" FontSize="18" />
+                    <Label Text="Choose your preferred visual palette" Style="{StaticResource CaptionLabelStyle}" />
+                </VerticalStackLayout>
+
+                <Button
+                    Grid.Column="2"
+                    Text="✕"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    WidthRequest="36"
+                    HeightRequest="36"
+                    Padding="0"
+                    Clicked="OnCloseClicked" />
+            </Grid>
+
+            <!-- Theme Choices -->
+            <VerticalStackLayout Spacing="8">
+                <Button
+                    Text="👑 Regal Earth (Purple / Gold)"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Command="{Binding SelectThemeCommand}"
+                    CommandParameter="Regal Earth" />
+
+                <Button
+                    Text="🍷 Wine Desert (Wine / Tan)"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Command="{Binding SelectThemeCommand}"
+                    CommandParameter="Wine Desert" />
+
+                <Button
+                    Text="🌲 Forest Lavender (Green / Lavender)"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Command="{Binding SelectThemeCommand}"
+                    CommandParameter="Forest Lavender" />
+
+                <Button
+                    Text="🌊 Pristine Clean (Teal / Mint)"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Command="{Binding SelectThemeCommand}"
+                    CommandParameter="Pristine Clean" />
+            </VerticalStackLayout>
+
+            <!-- Footer -->
+            <VerticalStackLayout Spacing="8" Margin="0,8,0,0">
+                <Button
+                    Text="Done"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Clicked="OnCloseClicked" />
+                <Label
+                    Text="AI engineered by EJRitter Development"
+                    Style="{StaticResource CaptionLabelStyle}"
+                    HorizontalTextAlignment="Center"
+                    FontSize="11" />
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </Border>
+</toolkit:Popup>

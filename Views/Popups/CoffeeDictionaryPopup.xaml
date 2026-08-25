@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Views;assembly=CommunityToolkit.Maui"
+    xmlns:fluent="clr-namespace:FluentIcons.Maui;assembly=FluentIcons.Maui"
+    xmlns:vm="clr-namespace:MugOverflowProject.ViewModels"
+    xmlns:models="clr-namespace:MugOverflowProject.Models"
+    x:Class="MugOverflowProject.Views.Popups.CoffeeDictionaryPopup"
+    x:DataType="vm:CoffeeDictionaryPopupViewModel"
+    Color="Transparent">
+
+    <Border
+        Style="{StaticResource CardBorderStyle}"
+        MaximumWidthRequest="650"
+        MaximumHeightRequest="600"
+        WidthRequest="550"
+        Padding="24"
+        HorizontalOptions="Center"
+        VerticalOptions="Center">
+
+        <Grid RowDefinitions="Auto, *, Auto" RowSpacing="16">
+            <!-- Modal Header -->
+            <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
+                <Border
+                    Grid.Column="0"
+                    BackgroundColor="{DynamicResource SurfaceAltColor}"
+                    StrokeThickness="0"
+                    Padding="10"
+                    WidthRequest="42"
+                    HeightRequest="42">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <fluent:SymbolIcon
+                        Symbol="BookOpen"
+                        FontSize="20"
+                        ForegroundColor="{DynamicResource PrimaryColor}" />
+                </Border>
+
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                    <Label Text="Coffee Type Dictionary" Style="{StaticResource MediumLabelStyle}" FontSize="18" />
+                    <Label Text="Standard caffeine ratings sourced from USDA FoodData Central &amp; Mayo Clinic" Style="{StaticResource CaptionLabelStyle}" />
+                </VerticalStackLayout>
+
+                <Button
+                    Grid.Column="2"
+                    Text="✕"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    WidthRequest="36"
+                    HeightRequest="36"
+                    Padding="0"
+                    Clicked="OnCloseClicked" />
+            </Grid>
+
+            <!-- Scrollable Dictionary List -->
+            <CollectionView
+                Grid.Row="1"
+                ItemsSource="{Binding Items}">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:CoffeeType">
+                        <Border
+                            BackgroundColor="{DynamicResource SurfaceColor}"
+                            Stroke="{DynamicResource BorderColor}"
+                            StrokeThickness="1"
+                            Padding="14">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="14" />
+                            </Border.StrokeShape>
+
+                            <Grid ColumnDefinitions="*, Auto" ColumnSpacing="12">
+                                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Label
+                                            Text="{Binding Name}"
+                                            FontAttributes="Bold"
+                                            FontSize="15"
+                                            TextColor="{DynamicResource PrimaryTextColor}" />
+                                        <Border
+                                            BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                            StrokeThickness="0"
+                                            Padding="6,2">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="6" />
+                                            </Border.StrokeShape>
+                                            <Label
+                                                Text="{Binding Volume}"
+                                                FontSize="10"
+                                                FontAttributes="Bold"
+                                                TextColor="{DynamicResource PrimaryColor}" />
+                                        </Border>
+                                    </HorizontalStackLayout>
+                                    <Label
+                                        Text="{Binding Desc}"
+                                        Style="{StaticResource CaptionLabelStyle}"
+                                        LineBreakMode="WordWrap" />
+                                </VerticalStackLayout>
+
+                                <Border
+                                    Grid.Column="1"
+                                    BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                    Stroke="{DynamicResource BorderColor}"
+                                    StrokeThickness="0.5"
+                                    Padding="10,6"
+                                    VerticalOptions="Center">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10" />
+                                    </Border.StrokeShape>
+                                    <VerticalStackLayout HorizontalOptions="Center">
+                                        <Label
+                                            Text="{Binding Caffeine}"
+                                            FontAttributes="Bold"
+                                            FontSize="18"
+                                            TextColor="{DynamicResource AccentColor}"
+                                            HorizontalTextAlignment="Center" />
+                                        <Label
+                                            Text="mg caffeine"
+                                            FontSize="9"
+                                            TextColor="{DynamicResource TertiaryTextColor}"
+                                            HorizontalTextAlignment="Center" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Modal Footer -->
+            <Grid Grid.Row="2" ColumnDefinitions="*, Auto">
+                <Label
+                    Grid.Column="0"
+                    Text="Values based on standard 8 oz serving unless specified."
+                    Style="{StaticResource CaptionLabelStyle}"
+                    VerticalOptions="Center" />
+                <Button
+                    Grid.Column="1"
+                    Text="Close"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Clicked="OnCloseClicked" />
+            </Grid>
+        </Grid>
+    </Border>
+</toolkit:Popup>

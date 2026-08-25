@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Views;assembly=CommunityToolkit.Maui"
+    xmlns:fluent="clr-namespace:FluentIcons.Maui;assembly=FluentIcons.Maui"
+    xmlns:vm="clr-namespace:MugOverflowProject.ViewModels"
+    xmlns:models="clr-namespace:MugOverflowProject.Models"
+    x:Class="MugOverflowProject.Views.Popups.EditLogPopup"
+    x:DataType="vm:EditLogPopupViewModel"
+    Color="Transparent">
+
+    <Border
+        Style="{StaticResource CardBorderStyle}"
+        MaximumWidthRequest="500"
+        WidthRequest="420"
+        Padding="24"
+        HorizontalOptions="Center"
+        VerticalOptions="Center">
+
+        <VerticalStackLayout Spacing="18">
+            <!-- Modal Header -->
+            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
+                <Border
+                    Grid.Column="0"
+                    BackgroundColor="{DynamicResource SurfaceAltColor}"
+                    StrokeThickness="0"
+                    Padding="10"
+                    WidthRequest="42"
+                    HeightRequest="42">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <fluent:SymbolIcon
+                        Symbol="Edit"
+                        FontSize="20"
+                        ForegroundColor="{DynamicResource PrimaryColor}" />
+                </Border>
+
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                    <Label Text="Edit Choice / Outcome" Style="{StaticResource MediumLabelStyle}" FontSize="18" />
+                    <Label Text="Correct your logged coffee drink or decision" Style="{StaticResource CaptionLabelStyle}" />
+                </VerticalStackLayout>
+
+                <Button
+                    Grid.Column="2"
+                    Text="✕"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    WidthRequest="36"
+                    HeightRequest="36"
+                    Padding="0"
+                    Clicked="OnCancelClicked" />
+            </Grid>
+
+            <!-- Oracle Verdict Info Card -->
+            <Border
+                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                Stroke="{DynamicResource BorderColor}"
+                StrokeThickness="1"
+                Padding="14">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="14" />
+                </Border.StrokeShape>
+                <Grid ColumnDefinitions="*, Auto">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="Oracle's Suggestion:" Style="{StaticResource CaptionLabelStyle}" />
+                        <Label
+                            Text="{Binding OracleVerdictText}"
+                            FontAttributes="Bold"
+                            FontSize="16"
+                            TextColor="{DynamicResource PrimaryColor}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" Spacing="2">
+                        <Label Text="Logged Time:" Style="{StaticResource CaptionLabelStyle}" HorizontalTextAlignment="End" />
+                        <Label
+                            Text="{Binding TimeString}"
+                            FontAttributes="Bold"
+                            FontSize="14"
+                            TextColor="{DynamicResource PrimaryTextColor}"
+                            HorizontalTextAlignment="End" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <!-- Drank vs Skipped Toggle Buttons -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Did you drink coffee?" Style="{StaticResource SmallLabelStyle}" FontAttributes="Bold" />
+                <Grid ColumnDefinitions="*, *" ColumnSpacing="10">
+                    <Button
+                        Grid.Column="0"
+                        Text="☕ Drank Coffee"
+                        Command="{Binding SetDrankCommand}"
+                        CommandParameter="{x:Boolean True}"
+                        Style="{StaticResource SecondaryButtonStyle}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding UserDrank}" Value="True">
+                                <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button
+                        Grid.Column="1"
+                        Text="🚫 Skipped Coffee"
+                        Command="{Binding SetDrankCommand}"
+                        CommandParameter="{x:Boolean False}"
+                        Style="{StaticResource SecondaryButtonStyle}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding UserDrank}" Value="False">
+                                <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </Grid>
+            </VerticalStackLayout>
+
+            <!-- Coffee Type Picker (Visible when Drank is True) -->
+            <VerticalStackLayout Spacing="6" IsVisible="{Binding UserDrank}">
+                <Label Text="Select Coffee Drink:" Style="{StaticResource SmallLabelStyle}" FontAttributes="Bold" />
+                <Border
+                    BackgroundColor="{DynamicResource SurfaceColor}"
+                    Stroke="{DynamicResource BorderColor}"
+                    StrokeThickness="1"
+                    Padding="6,0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Picker
+                        ItemsSource="{Binding AvailableCoffeeTypes}"
+                        ItemDisplayBinding="{Binding DisplayText}"
+                        SelectedItem="{Binding SelectedCoffeeType, Mode=TwoWay}"
+                        TextColor="{DynamicResource PrimaryTextColor}"
+                        Title="Choose coffee drink..." />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Modal Footer Actions -->
+            <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="10" Margin="0,10,0,0">
+                <Button
+                    Grid.Column="0"
+                    Text="🗑 Delete"
+                    Style="{StaticResource DestructiveButtonStyle}"
+                    Clicked="OnDeleteClicked" />
+
+                <Button
+                    Grid.Column="2"
+                    Text="Cancel"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Clicked="OnCancelClicked" />
+
+                <Button
+                    Grid.Column="3"
+                    Text="Save Changes"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Clicked="OnSaveClicked" />
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</toolkit:Popup>

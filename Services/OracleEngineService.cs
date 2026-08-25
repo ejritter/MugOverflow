@@ -1,0 +1,122 @@
+namespace MugOverflowProject.Services;
+
+public sealed class OracleEngineService : IOracleEngineService
+{
+	private static readonly Random Rng = new();
+
+	private static readonly string[] OracleYes =
+	[
+		"YES. The java divine forces have aligned. Pour yourself another cup!",
+		"Affirmative. Your neural pathways demand fresh caffeinated stimulation.",
+		"Absolutely. Life is short, drink the coffee.",
+		"YES! Code compile errors will tremble before your newly caffeinated speed.",
+		"Indubitably yes. A dark roast is calling your name right now.",
+		"YES. The beans have spoken in your favor.",
+		"Granted! May your energy be infinite and your focus laser-sharp.",
+		"YES. Fuel the engine of productivity!",
+		"100% Yes. One more cup turns caffeine into raw inspiration.",
+		"Proceed! Your mug is looking dangerously empty.",
+		"YES! The coffee gods grant you divine dispensation.",
+		"Approved. A freshly brewed cup is scientifically proven to boost morale.",
+		"YES. Resistance is futile; go fill your favorite mug.",
+		"Do it! Embrace the dark liquid gold.",
+		"YES. You have officially unlocked another caffeine token.",
+		"Positive! Another cup is the answer to all of life's complex problems.",
+		"YES. The universe commands you to brew.",
+		"Affirmative. Great ideas begin with fresh coffee.",
+		"YES! Elevate your alertness level to maximum capacity.",
+		"Indeed! Sip deeply and conquer your task list.",
+		"YES. Steam up that mug and enjoy every single sip.",
+		"Confirmed. You deserve a glorious coffee break.",
+		"YES! Science says coffee contains antioxidants. It's health food!",
+		"Go for it! Let the rich espresso aroma guide your soul.",
+		"YES. May your coffee be strong and your day be productive.",
+		"Affirmative! A warm cup in hand is pure happiness.",
+		"YES. Your productivity curve is requesting an upward surge.",
+		"Absolutely! Brew it fresh and wear that coffee smile.",
+		"YES. Break out the fresh beans and start grinding.",
+		"Granted! A mug overflow is better than a mental slowdown.",
+		"YES! Unleash the dark elixir of focus.",
+		"Proceed immediately to the coffee pot. Do not pass Go.",
+		"YES. Another cup is the ultimate solution.",
+		"Unquestionably YES. Today is built on coffee power.",
+		"YES! Your brain cell committee has voted unanimously for coffee.",
+		"Affirmative. Fill it up to the brim!",
+		"YES. Good things happen to those who brew.",
+		"Without a doubt YES. Taste the dark roast perfection.",
+		"YES! Another cup will make you unstoppable.",
+		"Approved. Let the warm java flow through your veins.",
+		"YES. Keep calm and carry another cup of coffee.",
+		"Positive! You are one cup away from brilliant genius.",
+		"YES! Pour, sip, repeat.",
+		"Affirmative. The aroma alone will revive your senses.",
+		"YES! Give your mug the purpose it was born for.",
+		"Definitely YES. Make it a double if you dare!",
+		"YES. Fresh brew is the truest luxury of the workday.",
+		"Yes, yes, a thousand times YES!",
+		"YES! The Java Oracle bestows its highest caffeine blessing upon you.",
+		"FINAL VERDICT: YES. Go get that fresh coffee right now!"
+	];
+
+	private static readonly string[] OracleNo =
+	[
+		"NO. Your jitter meter is approaching critical threshold. Hydro-reset instead!",
+		"Negative. Even the Java Oracle recommends a calm tea or water break.",
+		"NO. Another cup will turn your steady hand into a jackhammer.",
+		"Denied! Give your central nervous system a well-deserved breather.",
+		"NO. Your body has reached optimal caffeine saturation for now.",
+		"Hard Pass. Try a tall glass of ice water instead.",
+		"NO. Save your sleep schedule for tonight; step away from the brewer.",
+		"Negative. Your heart rate says 'let's chill for a couple hours'.",
+		"NO. You're already buzzing like a neon sign in Las Vegas.",
+		"Hold your horses! NO more coffee for the time being.",
+		"NO. The caffeine half-life curve warns against this cup.",
+		"Denied! Switch to herbal chamomile or peppermint tea.",
+		"NO. Your mug needs a timeout, and so do your adrenal glands.",
+		"Absolute NO. You'll be staring at the ceiling at 3 AM.",
+		"Negative. Your focus is already sharp; don't push into anxiety territory.",
+		"NO. The Java Oracle advises a crisp stretch walk instead of a refill.",
+		"Reject! Drink a cold glass of H2O to hydrate.",
+		"NO. The coffee pot is officially locked for your safety.",
+		"Negative. Save that next cup for tomorrow morning's triumph.",
+		"NO. Your current caffeine level is hovering in the red zone.",
+		"Denied! Deep breath in, cup down.",
+		"NO. Excessive coffee yields diminishing returns on alertness.",
+		"Negative! Your sleep score will thank you tonight if you refrain.",
+		"NO. Hydration station time—water wins this round.",
+		"Halt! NO more java until the current wave metabolizes.",
+		"NO. The Oracle foresees rapid eye twitches if you drink this cup.",
+		"Declined. Let your body naturally balance its energy levels.",
+		"NO. Put the coffee pot down gently and step away.",
+		"Negative. You have achieved maximum sustainable caffeine productivity.",
+		"NO. Swap out the dark roast for a refreshing herbal brew.",
+		"Denied! Let your liver finish metabolizing the previous cups.",
+		"NO. Keep the peace with your internal biological clock.",
+		"Negative. You don't need coffee right now, you need a quick 5-minute breather.",
+		"NO. Protect your precious REM sleep cycle tonight.",
+		"Denied! The java tank is already full.",
+		"NO. Cool down with a glass of lemon ice water.",
+		"Negative. Your heart rate monitor would disapprove.",
+		"NO. Don't trade tonight's rest for 20 minutes of jittery energy.",
+		"Halt! NO. Time to step outside for fresh air instead.",
+		"NO. The caffeine oracle commands a total pause.",
+		"Negative. Your mug has served its purpose for this half-day.",
+		"NO. Stay calm, drink water, and keep rocking.",
+		"Denied! Your adrenal system requests a temporary truce.",
+		"NO. Excess coffee now equals an afternoon crash later.",
+		"Negative. Rest your mug on the coaster and walk around.",
+		"NO. The force is strong with you, but the caffeine is already high.",
+		"Declined. Balance is the key to life—opt for water.",
+		"NO. Keep your energy steady, avoid the steep spike and drop.",
+		"Negative. The Oracle has spoken: Refrain for now!",
+		"FINAL VERDICT: NO. Put down the pot and grab a water bottle!"
+	];
+
+	public (bool SaidYes, string VerdictText) ConsultOracle()
+	{
+		bool isYes = Rng.Next(2) == 1;
+		string[] pool = isYes ? OracleYes : OracleNo;
+		string verdict = pool[Rng.Next(pool.Length)];
+		return (isYes, verdict);
+	}
+}

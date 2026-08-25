@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MugOverflowProject.Resources.Styles.Themes.PristineCleanTheme">
+
+    <x:String x:Key="ThemeName">Pristine Clean</x:String>
+
+    <Color x:Key="PageBackgroundColor">#F2FAF8</Color>
+    <Color x:Key="NavigationBarColor">#5B9E8A</Color>
+    <Color x:Key="PrimaryColor">#5B9E8A</Color>
+    <Color x:Key="AccentColor">#7DBBAA</Color>
+    <Color x:Key="SurfaceColor">#FFFFFF</Color>
+    <Color x:Key="SurfaceAltColor">#BDE9CE</Color>
+    <Color x:Key="BorderColor">#9DC8BB</Color>
+
+    <Color x:Key="PrimaryTextColor">#1A2421</Color>
+    <Color x:Key="SecondaryTextColor">#3A5850</Color>
+    <Color x:Key="TertiaryTextColor">#6B8C84</Color>
+
+    <Color x:Key="SuccessColor">#2A7A52</Color>
+    <Color x:Key="WarningColor">#C28000</Color>
+    <Color x:Key="ErrorColor">#B52626</Color>
+    <Color x:Key="InfoColor">#2766A0</Color>
+    <Color x:Key="DecorativeColor">#BDE9CE</Color>
+    <Color x:Key="TransparentColor">Transparent</Color>
+
+    <Color x:Key="PrimaryGradientStart">#5B9E8A</Color>
+    <Color x:Key="PrimaryGradientEnd">#7DBBAA</Color>
+    <Color x:Key="CardShadowColor">#1A1A2421</Color>
+    <Color x:Key="AppShadowColor">#261A2421</Color>
+</ResourceDictionary>

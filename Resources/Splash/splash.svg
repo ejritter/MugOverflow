@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <!-- Solid Purple Canvas Background -->
+    <rect width="456" height="456" fill="#4B1D6B" />
+
+    <!-- Top Oracle Mystical Sparkles (Gold Accent) -->
+    <path d="M 228 32 L 234 48 L 250 54 L 234 60 L 228 76 L 222 60 L 206 54 L 222 48 Z" fill="#C89B3C" />
+    <path d="M 160 74 L 163 84 L 173 87 L 163 90 L 160 100 L 157 90 L 147 87 L 157 84 Z" fill="#C89B3C" />
+    <path d="M 296 74 L 299 84 L 309 87 L 299 90 L 296 100 L 293 90 L 283 87 L 293 84 Z" fill="#C89B3C" />
+
+    <!-- Rising Oracle Steam Curves (White) -->
+    <path d="M 184 144 C 168 120 200 98 184 76" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" />
+    <path d="M 228 140 C 212 114 244 94 228 70" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" />
+    <path d="M 272 144 C 288 120 256 98 272 76" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" />
+
+    <!-- Mug Handle (White) -->
+    <path d="M 284 184 H 316 C 340 184 356 200 356 224 C 356 248 340 264 316 264 H 280" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Main Coffee Mug Body -->
+    <path d="M 144 160 H 292 V 246 C 292 290 258 326 218 326 C 178 326 144 290 144 246 V 160 Z" fill="#FFFFFF" />
+
+    <!-- Inner Coffee Surface & Overflowing Drip Accent -->
+    <ellipse cx="218" cy="164" rx="66" ry="12" fill="#310F4A" />
+    <ellipse cx="218" cy="164" rx="54" ry="8" fill="#C89B3C" />
+
+    <!-- Overflow Droplet On Rim -->
+    <path d="M 136 168 C 126 182 130 206 142 210 C 150 194 146 176 136 168 Z" fill="#C89B3C" />
+    <circle cx="132" cy="222" r="5" fill="#C89B3C" />
+
+    <!-- Decorative Cup Emblem (Mystic Oracle Eye) -->
+    <ellipse cx="218" cy="242" rx="24" ry="15" fill="#4B1D6B" />
+    <circle cx="218" cy="242" r="8" fill="#C89B3C" />
+    <circle cx="221" cy="239" r="2.5" fill="#FFFFFF" />
+
+    <!-- Sleek Saucer Base -->
+    <path d="M 130 340 H 306 C 314 340 322 346 322 354 C 322 358 316 362 306 362 H 130 C 120 362 114 358 114 354 C 114 346 122 340 130 340 Z" fill="#FFFFFF" />
+
+    <!-- Brand Typography -->
+    <text x="228" y="402" font-family="'Segoe UI', 'OpenSansSemibold', 'Helvetica', sans-serif" font-size="32" font-weight="bold" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">MugOverflow</text>
+    <text x="228" y="426" font-family="'Segoe UI', 'OpenSansRegular', 'Helvetica', sans-serif" font-size="12" font-weight="600" fill="#C89B3C" text-anchor="middle" letter-spacing="3">JAVA ORACLE &amp; TRACKER</text>
+</svg>
