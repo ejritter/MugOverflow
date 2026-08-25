@@ -22,7 +22,8 @@ public sealed partial class MainViewModel(
 	public partial bool IsStatsTabActive { get; set; }
 
 	[ObservableProperty]
-	public partial CoffeeType? SelectedCoffeePreference { get; set; }
+	[NotifyPropertyChangedFor(nameof(SelectedCoffeeCaffeineText))]
+	public partial CoffeeType? SelectedCoffeePreference { get; set; } = coffeeDictionaryService.GetDefault();
 
 	[ObservableProperty]
 	public partial bool HasHistoryLogs { get; set; }
@@ -37,15 +38,33 @@ public sealed partial class MainViewModel(
 	public partial string CurrentThemeName { get; set; } = ThemeManager.CurrentThemeName;
 
 	public ObservableCollection<CoffeeType> CoffeeTypes { get; } = new(coffeeDictionaryService.GetAll());
+	public ObservableCollection<CoffeeType> AvailableCoffeeTypes => CoffeeTypes;
+
+	public string SelectedCoffeeCaffeineText => $"{SelectedCoffeePreference?.Caffeine ?? 95} mg";
+
 	public ObservableCollection<ChatMessageItem> ChatMessages { get; } = [];
 	public ObservableCollection<OracleDecisionLog> HistoryLogs { get; } = [];
 	public CaffeineMetabolismDrawable MetabolismDrawable { get; } = new();
 
 	public Action? RequestChartInvalidation { get; set; }
 
+	// Direct properties for KPI cards to ensure crisp binding
+	public double ActiveCaffeineMg => Summary.ActiveCaffeineMg;
+	public int TotalCaffeineTodayMg => Summary.TotalCaffeineTodayMg;
+	public int CupsLoggedCount => Summary.CupsLoggedCount;
+	public int CompliancePercentage => Summary.CompliancePercentage;
+	public int ObeyedCount => Summary.ObeyedCount;
+	public int RebelledCount => Summary.RebelledCount;
+	public string HoursToSleepReadyText => Summary.SleepWindowDisplay;
+	public string HoursToClearanceText => Summary.ClearanceDisplay;
+	public ComplianceStats ComplianceStats => Compliance;
+
 	public async Task InitializeAsync()
 	{
-		SelectedCoffeePreference = CoffeeTypes.Count > 0 ? CoffeeTypes[0] : null;
+		if (SelectedCoffeePreference == null && CoffeeTypes.Count > 0)
+		{
+			SelectedCoffeePreference = CoffeeTypes[0];
+		}
 
 		// 1. Apply saved theme
 		string savedTheme = dataPersistenceService.GetSavedTheme();
@@ -65,7 +84,10 @@ public sealed partial class MainViewModel(
 		RecalculateAllMetrics();
 
 		// 4. Initialize welcome chat message
-		ResetConversation();
+		if (ChatMessages.Count == 0)
+		{
+			ResetConversation();
+		}
 	}
 
 	[RelayCommand]
@@ -93,7 +115,7 @@ public sealed partial class MainViewModel(
 		var userMsg = new ChatMessageItem
 		{
 			IsUserMessage = true,
-			MessageText = $"\"Should I have another cup of coffee right now?\"\nDefault preference: {defaultCoffee.Name}",
+			MessageText = $"\"Should I have a {defaultCoffee.Name} ({defaultCoffee.Caffeine} mg)?\"",
 			TimeString = DateTime.Now.ToString("hh:mm tt")
 		};
 		ChatMessages.Add(userMsg);
@@ -146,7 +168,7 @@ public sealed partial class MainViewModel(
 		item.SelectedCoffeeTypeId = coffee.Id;
 		item.SelectedCoffeeName = coffee.Name;
 		item.SelectedCaffeineMg = coffee.Caffeine;
-		item.OutcomeFeedbackText = $"Logged: {coffee.Name} ({coffee.Caffeine} mg)";
+		item.OutcomeFeedbackText = $"Logged: {coffee.Name} (+{coffee.Caffeine} mg)";
 		item.ComplianceTagText = complied ? "Complied with Oracle" : "Rebelled against Oracle";
 
 		var logEntry = new OracleDecisionLog
@@ -188,7 +210,7 @@ public sealed partial class MainViewModel(
 		item.IsActionPending = false;
 		item.IsConfirmed = true;
 		item.IsComplied = complied;
-		item.OutcomeFeedbackText = "Skipped coffee intake completely.";
+		item.OutcomeFeedbackText = "Skipped coffee intake.";
 		item.ComplianceTagText = complied ? "Complied with Oracle" : "Rebelled against Oracle";
 
 		var logEntry = new OracleDecisionLog
@@ -211,120 +233,100 @@ public sealed partial class MainViewModel(
 	}
 
 	[RelayCommand]
-	private void CancelAction(ChatMessageItem item)
-	{
-		item.IsActionPending = true;
-		item.IsSelectingCoffee = false;
-		item.IsConfirmingSkip = false;
-		item.IsConfirmingDrink = false;
-	}
-
-	[RelayCommand]
 	private void ResetConversation()
 	{
 		ChatMessages.Clear();
-		ChatMessages.Add(new ChatMessageItem
+		var welcomeMsg = new ChatMessageItem
 		{
+			IsOracleMessage = true,
 			IsWelcomeMessage = true,
-			MessageText = "Hello! I am your MugOverflow Java Oracle Assistant. ☕\n\nI have calculated 50 nuanced ways to say YES and 50 strategic ways to say NO. Tap the button below to ask me if you should indulge in another coffee right now!",
-			TimeString = "Java Oracle v1.0 • Ready"
-		});
+			IsActionPending = false,
+			OracleSaidYes = true,
+			MessageText = "Greetings, seeker of caffeinated truth. Pick your brew below and ask if you should drink another cup!",
+			TimeString = DateTime.Now.ToString("hh:mm tt")
+		};
+		ChatMessages.Add(welcomeMsg);
 	}
 
 	[RelayCommand]
-	private async Task OpenCoffeeDictionaryAsync(string? coffeeId = null)
+	private async Task OpenCoffeeDictionaryAsync()
 	{
-		await appPopupService.ShowCoffeeDictionaryAsync(coffeeId);
-	}
-
-	[RelayCommand]
-	private async Task OpenEditLogAsync(OracleDecisionLog log)
-	{
-		var result = await appPopupService.ShowEditLogAsync(log);
-		if (result is null)
-		{
-			// Item was deleted
-			HistoryLogs.Remove(log);
-			HasHistoryLogs = HistoryLogs.Count > 0;
-
-			// Sync chat bubble if present
-			var chatItem = ChatMessages.FirstOrDefault(c => c.Id == log.Id);
-			if (chatItem is not null)
-			{
-				ChatMessages.Remove(chatItem);
-			}
-		}
-		else
-		{
-			// Item was modified
-			int index = HistoryLogs.IndexOf(log);
-			if (index >= 0)
-			{
-				HistoryLogs[index] = result;
-			}
-
-			// Sync chat bubble feedback
-			var chatItem = ChatMessages.FirstOrDefault(c => c.Id == log.Id);
-			if (chatItem is not null)
-			{
-				chatItem.IsComplied = result.FollowedAdvice;
-				chatItem.SelectedCoffeeTypeId = result.CoffeeTypeId;
-				chatItem.SelectedCoffeeName = result.CoffeeName;
-				chatItem.SelectedCaffeineMg = result.CaffeineMg;
-				chatItem.OutcomeFeedbackText = result.UserDrank
-					? $"Logged: {result.CoffeeName} ({result.CaffeineMg} mg)"
-					: "Skipped coffee intake completely.";
-				chatItem.ComplianceTagText = result.FollowedAdvice
-					? "Complied with Oracle"
-					: "Rebelled against Oracle";
-			}
-		}
-
-		RecalculateAllMetrics();
-		await dataPersistenceService.SaveLogsAsync(HistoryLogs);
-	}
-
-	[RelayCommand]
-	private async Task DeleteLogDirectAsync(OracleDecisionLog log)
-	{
-		HistoryLogs.Remove(log);
-		HasHistoryLogs = HistoryLogs.Count > 0;
-
-		var chatItem = ChatMessages.FirstOrDefault(c => c.Id == log.Id);
-		if (chatItem is not null)
-		{
-			ChatMessages.Remove(chatItem);
-		}
-
-		RecalculateAllMetrics();
-		await dataPersistenceService.SaveLogsAsync(HistoryLogs);
+		await appPopupService.ShowCoffeeDictionaryAsync(SelectedCoffeePreference?.Id);
 	}
 
 	[RelayCommand]
 	private async Task OpenThemeSelectorAsync()
 	{
-		string? theme = await appPopupService.ShowThemeSelectorAsync();
-		if (!string.IsNullOrEmpty(theme))
+		string? chosenTheme = await appPopupService.ShowThemeSelectorAsync();
+		if (!string.IsNullOrWhiteSpace(chosenTheme))
 		{
-			CurrentThemeName = theme;
+			ThemeManager.ApplyTheme(chosenTheme);
+			CurrentThemeName = ThemeManager.CurrentThemeName;
+			dataPersistenceService.SaveTheme(chosenTheme);
+			RequestChartInvalidation?.Invoke();
 		}
 	}
 
-	public void RecalculateAllMetrics()
+	[RelayCommand]
+	private async Task EditLogAsync(OracleDecisionLog logToEdit)
 	{
-		var newCompliance = new ComplianceStats();
+		var result = await appPopupService.ShowEditLogAsync(logToEdit);
+		if (result == null)
+		{
+			// User deleted the log
+			HistoryLogs.Remove(logToEdit);
+			HasHistoryLogs = HistoryLogs.Count > 0;
+			RecalculateAllMetrics();
+			await dataPersistenceService.SaveLogsAsync(HistoryLogs);
+		}
+		else
+		{
+			int index = HistoryLogs.IndexOf(logToEdit);
+			if (index >= 0)
+			{
+				HistoryLogs[index] = result;
+				RecalculateAllMetrics();
+				await dataPersistenceService.SaveLogsAsync(HistoryLogs);
+			}
+		}
+	}
+
+	private void RecalculateAllMetrics()
+	{
+		// 1. Calculate compliance stats
+		int yy = 0, nn = 0, yn = 0, ny = 0;
 		foreach (var log in HistoryLogs)
 		{
-			if (log.OracleSaidYes && log.UserDrank) newCompliance.YesYes++;
-			else if (!log.OracleSaidYes && !log.UserDrank) newCompliance.NoNo++;
-			else if (log.OracleSaidYes && !log.UserDrank) newCompliance.YesNo++;
-			else if (!log.OracleSaidYes && log.UserDrank) newCompliance.NoYes++;
+			if (log.OracleSaidYes && log.UserDrank) yy++;
+			else if (!log.OracleSaidYes && !log.UserDrank) nn++;
+			else if (log.OracleSaidYes && !log.UserDrank) yn++;
+			else if (!log.OracleSaidYes && log.UserDrank) ny++;
 		}
-		Compliance = newCompliance;
 
+		Compliance = new ComplianceStats
+		{
+			YesYes = yy,
+			NoNo = nn,
+			YesNo = yn,
+			NoYes = ny
+		};
+
+		// 2. Calculate metabolism summary
 		Summary = caffeineMetabolismService.ComputeSummary(HistoryLogs.ToList(), Compliance);
 
+		// 3. Update Chart Drawable
 		MetabolismDrawable.InitialActiveMg = Summary.ActiveCaffeineMg;
 		RequestChartInvalidation?.Invoke();
+
+		// Notify direct property bindings
+		OnPropertyChanged(nameof(ActiveCaffeineMg));
+		OnPropertyChanged(nameof(TotalCaffeineTodayMg));
+		OnPropertyChanged(nameof(CupsLoggedCount));
+		OnPropertyChanged(nameof(CompliancePercentage));
+		OnPropertyChanged(nameof(ObeyedCount));
+		OnPropertyChanged(nameof(RebelledCount));
+		OnPropertyChanged(nameof(HoursToSleepReadyText));
+		OnPropertyChanged(nameof(HoursToClearanceText));
+		OnPropertyChanged(nameof(ComplianceStats));
 	}
 }
