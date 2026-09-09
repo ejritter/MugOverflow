@@ -4,7 +4,8 @@ namespace MugOverflowProject.Services;
 
 public interface IAppPopupService
 {
-	Task ShowCoffeeDictionaryAsync(string? targetCoffeeId = null);
+	Task<CoffeeType?> ShowCoffeeDictionaryAsync(string? targetCoffeeId = null);
 	Task<OracleDecisionLog?> ShowEditLogAsync(OracleDecisionLog logToEdit);
 	Task<string?> ShowThemeSelectorAsync();
+	Task<bool> ShowStorageSelectionPopupAsync();
 }

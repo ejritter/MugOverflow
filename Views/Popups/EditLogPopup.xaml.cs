@@ -12,6 +12,11 @@ public partial class EditLogPopup : Popup
 		InitializeComponent();
 		_viewModel = viewModel;
 		BindingContext = viewModel;
+
+		Closed += (s, e) =>
+		{
+			BindingContext = null;
+		};
 	}
 
 	private async void OnCancelClicked(object? sender, EventArgs e)

@@ -11,10 +11,26 @@ public sealed partial class CoffeeDictionaryPopupViewModel(ICoffeeDictionaryServ
 	[ObservableProperty]
 	public partial string? HighlightedCoffeeId { get; set; }
 
+	[ObservableProperty]
+	public partial CoffeeType? SelectedCoffee { get; set; }
+
+	public Action? RequestClose { get; set; }
+
 	public ObservableCollection<CoffeeType> Items { get; } = new(coffeeDictionaryService.GetAll());
 
 	public void SetHighlightedCoffee(string? id)
 	{
 		HighlightedCoffeeId = id;
+		if (!string.IsNullOrEmpty(id))
+		{
+			SelectedCoffee = Items.FirstOrDefault(c => string.Equals(c.Id, id, StringComparison.OrdinalIgnoreCase));
+		}
+	}
+
+	[RelayCommand]
+	private void SelectCoffee(CoffeeType coffee)
+	{
+		SelectedCoffee = coffee;
+		RequestClose?.Invoke();
 	}
 }

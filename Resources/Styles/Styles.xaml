@@ -8,6 +8,15 @@
         <Setter Property="BackgroundColor" Value="{DynamicResource PageBackgroundColor}" />
     </Style>
 
+    <!-- Core Picker Style -->
+    <Style TargetType="Picker">
+        <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}" />
+        <Setter Property="TitleColor" Value="{DynamicResource SecondaryTextColor}" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <!-- 2. Core Label Typography Styles -->
     <Style x:Key="LargeLabelStyle" TargetType="Label">
         <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}" />
@@ -52,7 +61,7 @@
     <!-- 3. Core Button Styles with VisualStateManager -->
     <Style x:Key="PrimaryButtonStyle" TargetType="Button">
         <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
-        <Setter Property="TextColor" Value="White" />
+        <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="CornerRadius" Value="14" />
         <Setter Property="HeightRequest" Value="46" />
@@ -77,8 +86,8 @@
     </Style>
 
     <Style x:Key="AccentButtonStyle" TargetType="Button">
-        <Setter Property="BackgroundColor" Value="{DynamicResource SecondaryColor}" />
-        <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}" />
+        <Setter Property="BackgroundColor" Value="{DynamicResource AccentColor}" />
+        <Setter Property="TextColor" Value="{DynamicResource AccentButtonTextColor}" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="CornerRadius" Value="14" />
         <Setter Property="HeightRequest" Value="46" />

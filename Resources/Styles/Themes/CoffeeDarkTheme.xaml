@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MugOverflowProject.Resources.Styles.Themes.CoffeeDarkTheme">
+
+    <x:String x:Key="ThemeName">Coffee Dark</x:String>
+
+    <Color x:Key="PageBackgroundColor">#1C1510</Color>
+    <Color x:Key="NavigationBarColor">#140F0B</Color>
+    <Color x:Key="PrimaryColor">#D4975A</Color>
+    <Color x:Key="SecondaryColor">#E8B878</Color>
+    <Color x:Key="AccentColor">#E8B878</Color>
+    <Color x:Key="SurfaceColor">#251E17</Color>
+    <Color x:Key="SurfaceAltColor">#322920</Color>
+    <Color x:Key="BorderColor">#44372B</Color>
+
+    <Color x:Key="PrimaryTextColor">#FBF8F2</Color>
+    <Color x:Key="SecondaryTextColor">#C4B5A5</Color>
+    <Color x:Key="TertiaryTextColor">#8E7E70</Color>
+
+    <Color x:Key="SuccessColor">#2E7D32</Color>
+    <Color x:Key="WarningColor">#D97706</Color>
+    <Color x:Key="ErrorColor">#C62828</Color>
+    <Color x:Key="InfoColor">#0288D1</Color>
+    <Color x:Key="DecorativeColor">#44372B</Color>
+    <Color x:Key="TransparentColor">Transparent</Color>
+
+    <Color x:Key="PrimaryGradientStart">#D4975A</Color>
+    <Color x:Key="PrimaryGradientEnd">#E8B878</Color>
+    <Color x:Key="CardShadowColor">#40000000</Color>
+    <Color x:Key="AppShadowColor">#66000000</Color>
+
+    <Color x:Key="PrimaryButtonTextColor">#1C1510</Color>
+    <Color x:Key="AccentButtonTextColor">#1C1510</Color>
+</ResourceDictionary>

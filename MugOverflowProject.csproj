@@ -16,7 +16,7 @@
 		<ApplicationTitle>MugOverflow</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.mugoverflow.app</ApplicationId>
+		<ApplicationId>ejritterdevelopment.mugflow.app</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -30,6 +30,9 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+		<EmbedAssembliesIntoApk Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">true</EmbedAssembliesIntoApk>
+		<AndroidUseFastDeployment Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">false</AndroidUseFastDeployment>
+		<NoWarn>$(NoWarn);NU1903;NU1608;XC0025</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -64,6 +67,13 @@
 		<PackageReference Include="Serilog" Version="4.3.0" />
 		<PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.11.285" />
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.10" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.68.0" />
 	</ItemGroup>
 
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<PackageReference Include="Xamarin.GooglePlayServices.Auth" Version="121.6.0.1" />
+		<PackageReference Include="Xamarin.GooglePlayServices.Auth.Base" Version="118.3.3.1" />
+	</ItemGroup>
 </Project>

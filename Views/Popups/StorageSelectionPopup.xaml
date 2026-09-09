@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Views;assembly=CommunityToolkit.Maui"
+    xmlns:fluent="clr-namespace:FluentIcons.Maui;assembly=FluentIcons.Maui"
+    xmlns:vm="clr-namespace:MugOverflowProject.ViewModels"
+    xmlns:storage="clr-namespace:MugOverflowProject.Services.Storage;assembly=MugOverflowProject"
+    xmlns:sync="clr-namespace:MugOverflowProject.Services.Sync;assembly=MugOverflowProject"
+    x:Class="MugOverflowProject.Views.Popups.StorageSelectionPopup"
+    x:DataType="vm:StorageSelectionViewModel">
+
+    <Border
+        Style="{StaticResource CardBorderStyle}"
+        MaximumWidthRequest="560"
+        Margin="16"
+        Padding="18"
+        HorizontalOptions="Center"
+        VerticalOptions="Center">
+
+        <ScrollView MaximumHeightRequest="640">
+            <VerticalStackLayout Spacing="16">
+
+                <!-- ========================================================= -->
+                <!-- 1. POPUP HEADER                                           -->
+                <!-- ========================================================= -->
+                <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
+                    <Border
+                        Grid.Column="0"
+                        BackgroundColor="{DynamicResource SurfaceAltColor}"
+                        StrokeThickness="0"
+                        Padding="10"
+                        WidthRequest="42"
+                        HeightRequest="42">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <fluent:SymbolIcon
+                            Symbol="CloudSync"
+                            FontSize="22"
+                            ForegroundColor="{DynamicResource PrimaryColor}" />
+                    </Border>
+
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                        <Label
+                            Text="Cloud Sync &amp; Storage"
+                            Style="{StaticResource MediumLabelStyle}"
+                            FontSize="18" />
+                        <Label
+                            Text="Configure storage provider and sync preferences"
+                            Style="{StaticResource CaptionLabelStyle}" />
+                    </VerticalStackLayout>
+
+                    <Button
+                        Grid.Column="2"
+                        Text="✕"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        WidthRequest="36"
+                        HeightRequest="36"
+                        Padding="0"
+                        Clicked="OnCloseClicked" />
+                </Grid>
+
+                <!-- ========================================================= -->
+                <!-- 2. CURRENT SYNC STATUS BANNER                             -->
+                <!-- ========================================================= -->
+                <Border
+                    BackgroundColor="{DynamicResource SurfaceAltColor}"
+                    Stroke="{DynamicResource BorderColor}"
+                    StrokeThickness="1"
+                    Padding="14,10">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                <fluent:SymbolIcon
+                                    Symbol="ArrowSync"
+                                    FontSize="14"
+                                    ForegroundColor="{DynamicResource PrimaryColor}" />
+                                <Label
+                                    Text="{Binding SyncStatusDisplay, StringFormat='Status: {0}'}"
+                                    FontAttributes="Bold"
+                                    FontSize="12"
+                                    TextColor="{DynamicResource PrimaryTextColor}"
+                                    VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                            <Label
+                                Text="{Binding LastSyncDisplay, StringFormat='Last Synced: {0}'}"
+                                Style="{StaticResource CaptionLabelStyle}"
+                                FontSize="11" />
+                        </VerticalStackLayout>
+
+                        <!-- Activity Spinner, Sign In Button & Sync Now Button -->
+                        <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                            <ActivityIndicator
+                                IsRunning="{Binding IsBusy}"
+                                IsVisible="{Binding IsBusy}"
+                                WidthRequest="18"
+                                HeightRequest="18"
+                                Color="{DynamicResource PrimaryColor}"
+                                VerticalOptions="Center" />
+                            <Button
+                                Text="Allow Access"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                HeightRequest="32"
+                                Padding="12,0"
+                                FontSize="11"
+                                IsVisible="{Binding IsAuthRequired}"
+                                IsEnabled="{Binding IsNotBusy}"
+                                Command="{Binding AuthenticateCurrentProviderCommand}"
+                                VerticalOptions="Center" />
+                            <Button
+                                Text="Sync Now"
+                                Style="{StaticResource AccentButtonStyle}"
+                                HeightRequest="32"
+                                Padding="12,0"
+                                FontSize="11"
+                                IsEnabled="{Binding IsNotBusy}"
+                                Command="{Binding SyncNowCommand}"
+                                VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Status Feedback Message -->
+                <Border
+                    IsVisible="{Binding HasStatusMessage}"
+                    BackgroundColor="{DynamicResource SurfaceAltColor}"
+                    Stroke="{DynamicResource BorderColor}"
+                    StrokeThickness="1"
+                    Padding="12,8">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8" />
+                    </Border.StrokeShape>
+                    <Label
+                        Text="{Binding StatusMessage}"
+                        FontSize="12"
+                        TextColor="{DynamicResource PrimaryTextColor}"
+                        HorizontalOptions="Center" />
+                </Border>
+
+                <!-- ========================================================= -->
+                <!-- 3. MANDATORY LOCAL STORAGE ISOLATION DISCLAIMER BANNER    -->
+                <!-- ========================================================= -->
+                <Border
+                    IsVisible="{Binding IsLocalStorageSelected}"
+                    BackgroundColor="#FFFBEB"
+                    Stroke="#F59E0B"
+                    StrokeThickness="1"
+                    Padding="12,10">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8" />
+                    </Border.StrokeShape>
+                    <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10" VerticalOptions="Center">
+                        <Label
+                            Grid.Column="0"
+                            Text="⚠️"
+                            FontSize="16"
+                            VerticalOptions="Center" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label
+                                Text="Device Isolation Warning"
+                                FontSize="11"
+                                FontAttributes="Bold"
+                                TextColor="#92400E" />
+                            <Label
+                                Text="{x:Static vm:StorageSelectionViewModel.LocalStorageDisclaimer}"
+                                FontSize="11"
+                                TextColor="#B45309"
+                                LineBreakMode="WordWrap" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- ========================================================= -->
+                <!-- 4. PROVIDER SELECTION CARDS                               -->
+                <!-- ========================================================= -->
+                <VerticalStackLayout Spacing="8">
+                    <Label
+                        Text="Storage Providers"
+                        Style="{StaticResource SmallLabelStyle}"
+                        FontAttributes="Bold" />
+
+                    <!-- Local Storage Option -->
+                    <Border
+                        BackgroundColor="{DynamicResource SurfaceColor}"
+                        Stroke="{DynamicResource BorderColor}"
+                        StrokeThickness="1"
+                        Padding="14,10">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12" VerticalOptions="Center">
+                            <Border
+                                Grid.Column="0"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                StrokeThickness="0"
+                                Padding="8"
+                                WidthRequest="36"
+                                HeightRequest="36">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8" />
+                                </Border.StrokeShape>
+                                <fluent:SymbolIcon
+                                    Symbol="Folder"
+                                    FontSize="18"
+                                    ForegroundColor="{DynamicResource PrimaryColor}" />
+                            </Border>
+
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                                <Label
+                                    Text="Local Storage"
+                                    Style="{StaticResource MediumLabelStyle}"
+                                    FontSize="14" />
+                                <Label
+                                    Text="Isolated to this device • No cloud account required"
+                                    Style="{StaticResource CaptionLabelStyle}" />
+                            </VerticalStackLayout>
+
+                            <Button
+                                Grid.Column="2"
+                                Text="Select"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                HeightRequest="30"
+                                Padding="12,0"
+                                FontSize="11"
+                                Command="{Binding SelectProviderCommand}"
+                                CommandParameter="{x:Static storage:StorageProviderType.LocalStorage}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Google Drive Option -->
+                    <Border
+                        BackgroundColor="{DynamicResource SurfaceColor}"
+                        Stroke="{DynamicResource BorderColor}"
+                        StrokeThickness="1"
+                        Padding="14,10">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12" VerticalOptions="Center">
+                            <Border
+                                Grid.Column="0"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                StrokeThickness="0"
+                                Padding="8"
+                                WidthRequest="36"
+                                HeightRequest="36">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8" />
+                                </Border.StrokeShape>
+                                <fluent:SymbolIcon
+                                    Symbol="Cloud"
+                                    FontSize="18"
+                                    ForegroundColor="#4285F4" />
+                            </Border>
+
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                                <Label
+                                    Text="Google Drive"
+                                    Style="{StaticResource MediumLabelStyle}"
+                                    FontSize="14" />
+                                <Label
+                                    Text="Sync coffee logs across devices via your Google account"
+                                    Style="{StaticResource CaptionLabelStyle}" />
+                            </VerticalStackLayout>
+
+                            <HorizontalStackLayout Grid.Column="2" Spacing="6" VerticalOptions="Center">
+                                <!-- Connected State: Badge + Disconnect Button -->
+                                <HorizontalStackLayout
+                                    Spacing="6"
+                                    VerticalOptions="Center"
+                                    IsVisible="{Binding IsGoogleDriveConnected}">
+                                    <Border
+                                        BackgroundColor="#E6F4EA"
+                                        StrokeThickness="0"
+                                        Padding="8,4">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="6" />
+                                        </Border.StrokeShape>
+                                        <Label
+                                            Text="Connected"
+                                            FontSize="11"
+                                            FontAttributes="Bold"
+                                            TextColor="#137333"
+                                            VerticalOptions="Center" />
+                                    </Border>
+                                    <Button
+                                        Text="Disconnect"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        HeightRequest="30"
+                                        Padding="10,0"
+                                        FontSize="11"
+                                        IsEnabled="{Binding IsNotBusy}"
+                                        Command="{Binding DisconnectGoogleCommand}" />
+                                </HorizontalStackLayout>
+
+                                <!-- Disconnected / Auth Required: 1-Click Allow Access Button -->
+                                <Button
+                                    Text="{Binding GoogleDriveButtonText}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    HeightRequest="30"
+                                    Padding="12,0"
+                                    FontSize="11"
+                                    IsVisible="{Binding IsGoogleDriveNotConnected}"
+                                    IsEnabled="{Binding IsNotBusy}"
+                                    Command="{Binding AllowGoogleDriveAccessCommand}" />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
+
+                    <!-- OneDrive Option -->
+                    <Border
+                        BackgroundColor="{DynamicResource SurfaceColor}"
+                        Stroke="{DynamicResource BorderColor}"
+                        StrokeThickness="1"
+                        Padding="14,10">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12" VerticalOptions="Center">
+                            <Border
+                                Grid.Column="0"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                StrokeThickness="0"
+                                Padding="8"
+                                WidthRequest="36"
+                                HeightRequest="36">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8" />
+                                </Border.StrokeShape>
+                                <fluent:SymbolIcon
+                                    Symbol="CloudFlow"
+                                    FontSize="18"
+                                    ForegroundColor="#0078D4" />
+                            </Border>
+
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                                <Label
+                                    Text="Microsoft OneDrive"
+                                    Style="{StaticResource MediumLabelStyle}"
+                                    FontSize="14" />
+                                <Label
+                                    Text="MSAL / Microsoft Graph approot sync"
+                                    Style="{StaticResource CaptionLabelStyle}" />
+                            </VerticalStackLayout>
+
+                            <Button
+                                Grid.Column="2"
+                                Text="Connect"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                HeightRequest="30"
+                                Padding="12,0"
+                                FontSize="11"
+                                Command="{Binding SelectProviderCommand}"
+                                CommandParameter="{x:Static storage:StorageProviderType.OneDrive}" />
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- ========================================================= -->
+                <!-- 5. 3-WAY MIGRATION STRATEGY PANEL                         -->
+                <!-- ========================================================= -->
+                <Border
+                    IsVisible="{Binding ShowMigrationOptions}"
+                    BackgroundColor="{DynamicResource SurfaceAltColor}"
+                    Stroke="{DynamicResource BorderColor}"
+                    StrokeThickness="1"
+                    Padding="14">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="12">
+                        <Label
+                            Text="Select Data Migration Strategy"
+                            Style="{StaticResource SmallLabelStyle}"
+                            FontAttributes="Bold" />
+
+                        <!-- Strategy 1: Two-Way Union Merge (Recommended) -->
+                        <Border
+                            BackgroundColor="{DynamicResource SurfaceColor}"
+                            Stroke="{DynamicResource BorderColor}"
+                            StrokeThickness="1"
+                            Padding="12,10">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding SelectMigrationOptionCommand}"
+                                    CommandParameter="{x:Static sync:MigrationOption.TwoWayMergeBoth}" />
+                            </Border.GestureRecognizers>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsMergeBothSelected}" Value="True">
+                                    <Setter Property="Stroke" Value="{DynamicResource PrimaryColor}" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12" VerticalOptions="Center">
+                                <Border
+                                    Grid.Column="0"
+                                    BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                    StrokeThickness="0"
+                                    Padding="8"
+                                    WidthRequest="36"
+                                    HeightRequest="36">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8" />
+                                    </Border.StrokeShape>
+                                    <fluent:SymbolIcon
+                                        Symbol="ArrowSync"
+                                        FontSize="18"
+                                        ForegroundColor="{DynamicResource PrimaryColor}" />
+                                </Border>
+
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                        <Label
+                                            Text="Two-Way Merge Both"
+                                            Style="{StaticResource MediumLabelStyle}"
+                                            FontSize="13" />
+                                        <Border
+                                            BackgroundColor="{DynamicResource PrimaryColor}"
+                                            Padding="6,2"
+                                            StrokeThickness="0"
+                                            VerticalOptions="Center">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="4" />
+                                            </Border.StrokeShape>
+                                            <Label
+                                                Text="Recommended"
+                                                TextColor="White"
+                                                FontSize="9"
+                                                FontAttributes="Bold" />
+                                        </Border>
+                                    </HorizontalStackLayout>
+                                    <Label
+                                        Text="Keeps all local and cloud data using last-write-wins"
+                                        Style="{StaticResource CaptionLabelStyle}"
+                                        FontSize="11" />
+                                </VerticalStackLayout>
+
+                                <fluent:SymbolIcon
+                                    Grid.Column="2"
+                                    Symbol="Circle"
+                                    FontSize="20"
+                                    ForegroundColor="{DynamicResource BorderColor}"
+                                    VerticalOptions="Center">
+                                    <fluent:SymbolIcon.Triggers>
+                                        <DataTrigger TargetType="fluent:SymbolIcon" Binding="{Binding IsMergeBothSelected}" Value="True">
+                                            <Setter Property="Symbol" Value="CheckmarkCircle" />
+                                            <Setter Property="ForegroundColor" Value="{DynamicResource PrimaryColor}" />
+                                        </DataTrigger>
+                                    </fluent:SymbolIcon.Triggers>
+                                </fluent:SymbolIcon>
+                            </Grid>
+                        </Border>
+
+                        <!-- Strategy 2: Upload Local to Cloud -->
+                        <Border
+                            BackgroundColor="{DynamicResource SurfaceColor}"
+                            Stroke="{DynamicResource BorderColor}"
+                            StrokeThickness="1"
+                            Padding="12,10">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding SelectMigrationOptionCommand}"
+                                    CommandParameter="{x:Static sync:MigrationOption.UploadLocalToCloud}" />
+                            </Border.GestureRecognizers>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsUploadLocalSelected}" Value="True">
+                                    <Setter Property="Stroke" Value="{DynamicResource PrimaryColor}" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12" VerticalOptions="Center">
+                                <Border
+                                    Grid.Column="0"
+                                    BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                    StrokeThickness="0"
+                                    Padding="8"
+                                    WidthRequest="36"
+                                    HeightRequest="36">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8" />
+                                    </Border.StrokeShape>
+                                    <fluent:SymbolIcon
+                                        Symbol="ArrowUpload"
+                                        FontSize="18"
+                                        ForegroundColor="{DynamicResource PrimaryColor}" />
+                                </Border>
+
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                    <Label
+                                        Text="Upload Local to Cloud"
+                                        Style="{StaticResource MediumLabelStyle}"
+                                        FontSize="13" />
+                                    <Label
+                                        Text="Overwrites cloud storage with this device's logs"
+                                        Style="{StaticResource CaptionLabelStyle}"
+                                        FontSize="11" />
+                                </VerticalStackLayout>
+
+                                <fluent:SymbolIcon
+                                    Grid.Column="2"
+                                    Symbol="Circle"
+                                    FontSize="20"
+                                    ForegroundColor="{DynamicResource BorderColor}"
+                                    VerticalOptions="Center">
+                                    <fluent:SymbolIcon.Triggers>
+                                        <DataTrigger TargetType="fluent:SymbolIcon" Binding="{Binding IsUploadLocalSelected}" Value="True">
+                                            <Setter Property="Symbol" Value="CheckmarkCircle" />
+                                            <Setter Property="ForegroundColor" Value="{DynamicResource PrimaryColor}" />
+                                        </DataTrigger>
+                                    </fluent:SymbolIcon.Triggers>
+                                </fluent:SymbolIcon>
+                            </Grid>
+                        </Border>
+
+                        <!-- Strategy 3: Download Cloud to Local -->
+                        <Border
+                            BackgroundColor="{DynamicResource SurfaceColor}"
+                            Stroke="{DynamicResource BorderColor}"
+                            StrokeThickness="1"
+                            Padding="12,10">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding SelectMigrationOptionCommand}"
+                                    CommandParameter="{x:Static sync:MigrationOption.DownloadCloudToLocal}" />
+                            </Border.GestureRecognizers>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsDownloadCloudSelected}" Value="True">
+                                    <Setter Property="Stroke" Value="{DynamicResource PrimaryColor}" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12" VerticalOptions="Center">
+                                <Border
+                                    Grid.Column="0"
+                                    BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                    StrokeThickness="0"
+                                    Padding="8"
+                                    WidthRequest="36"
+                                    HeightRequest="36">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8" />
+                                    </Border.StrokeShape>
+                                    <fluent:SymbolIcon
+                                        Symbol="ArrowDownload"
+                                        FontSize="18"
+                                        ForegroundColor="{DynamicResource PrimaryColor}" />
+                                </Border>
+
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                    <Label
+                                        Text="Download Cloud to Local"
+                                        Style="{StaticResource MediumLabelStyle}"
+                                        FontSize="13" />
+                                    <Label
+                                        Text="Replaces this device's logs with cloud storage data"
+                                        Style="{StaticResource CaptionLabelStyle}"
+                                        FontSize="11" />
+                                </VerticalStackLayout>
+
+                                <fluent:SymbolIcon
+                                    Grid.Column="2"
+                                    Symbol="Circle"
+                                    FontSize="20"
+                                    ForegroundColor="{DynamicResource BorderColor}"
+                                    VerticalOptions="Center">
+                                    <fluent:SymbolIcon.Triggers>
+                                        <DataTrigger TargetType="fluent:SymbolIcon" Binding="{Binding IsDownloadCloudSelected}" Value="True">
+                                            <Setter Property="Symbol" Value="CheckmarkCircle" />
+                                            <Setter Property="ForegroundColor" Value="{DynamicResource PrimaryColor}" />
+                                        </DataTrigger>
+                                    </fluent:SymbolIcon.Triggers>
+                                </fluent:SymbolIcon>
+                            </Grid>
+                        </Border>
+
+                        <!-- Action Buttons -->
+                        <Grid ColumnDefinitions="*, *" ColumnSpacing="10" Margin="0,6,0,0">
+                            <Button
+                                Grid.Column="0"
+                                Text="Cancel"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                HeightRequest="36"
+                                Padding="0"
+                                Command="{Binding CloseCommand}" />
+                            <Button
+                                Grid.Column="1"
+                                Text="Confirm Migration"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                HeightRequest="36"
+                                Padding="0"
+                                IsEnabled="{Binding IsNotBusy}"
+                                Command="{Binding ConfirmMigrationCommand}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ========================================================= -->
+                <!-- 6. POPUP FOOTER                                           -->
+                <!-- ========================================================= -->
+                <Button
+                    Text="Done"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    HeightRequest="38"
+                    Margin="0,4,0,0"
+                    Clicked="OnCloseClicked" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Border>
+</toolkit:Popup>

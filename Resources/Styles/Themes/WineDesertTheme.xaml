@@ -9,6 +9,7 @@
     <Color x:Key="PageBackgroundColor">#F6E7D2</Color>
     <Color x:Key="NavigationBarColor">#6B1E36</Color>
     <Color x:Key="PrimaryColor">#6B1E36</Color>
+    <Color x:Key="SecondaryColor">#C28B5B</Color>
     <Color x:Key="AccentColor">#7B3F00</Color>
     <Color x:Key="SurfaceColor">#FFF7EC</Color>
     <Color x:Key="SurfaceAltColor">#D9B88F</Color>

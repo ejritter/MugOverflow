@@ -10,4 +10,6 @@ public sealed class CoffeeType
 
 	public string DisplayText => $"{Name} ({Caffeine} mg)";
 	public string CaffeineDisplay => $"{Caffeine} mg";
+
+	public override string ToString() => Name;
 }

@@ -43,13 +43,23 @@ public sealed partial class EditLogPopupViewModel(ICoffeeDictionaryService coffe
 
 		SelectedCoffeeType = (!string.IsNullOrEmpty(log.CoffeeTypeId)
 			? AvailableCoffeeTypes.FirstOrDefault(c => string.Equals(c.Id, log.CoffeeTypeId, StringComparison.OrdinalIgnoreCase))
-			: null) ?? AvailableCoffeeTypes[0];
+			: null) ?? (AvailableCoffeeTypes.Count > 0 ? AvailableCoffeeTypes[0] : null);
 	}
 
 	[RelayCommand]
 	private void SetDrank(bool drank)
 	{
 		UserDrank = drank;
+		if (drank && SelectedCoffeeType == null && AvailableCoffeeTypes.Count > 0)
+		{
+			SelectedCoffeeType = AvailableCoffeeTypes[0];
+		}
+	}
+
+	[RelayCommand]
+	private void SelectCoffee(CoffeeType coffee)
+	{
+		SelectedCoffeeType = coffee;
 	}
 
 	[RelayCommand]

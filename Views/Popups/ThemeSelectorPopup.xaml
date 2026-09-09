@@ -6,14 +6,13 @@
     xmlns:fluent="clr-namespace:FluentIcons.Maui;assembly=FluentIcons.Maui"
     xmlns:vm="clr-namespace:MugOverflowProject.ViewModels"
     x:Class="MugOverflowProject.Views.Popups.ThemeSelectorPopup"
-    x:DataType="vm:ThemeSelectorPopupViewModel"
-    Color="Transparent">
+    x:DataType="vm:ThemeSelectorPopupViewModel">
 
     <Border
         Style="{StaticResource CardBorderStyle}"
-        MaximumWidthRequest="450"
-        WidthRequest="380"
-        Padding="24"
+        MaximumWidthRequest="420"
+        Margin="16"
+        Padding="20"
         HorizontalOptions="Center"
         VerticalOptions="Center">
 
@@ -53,29 +52,101 @@
 
             <!-- Theme Choices -->
             <VerticalStackLayout Spacing="8">
+                <!-- 1. Regal Earth (Default) -->
                 <Button
                     Text="👑 Regal Earth (Purple / Gold)"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Command="{Binding SelectThemeCommand}"
-                    CommandParameter="Regal Earth" />
+                    CommandParameter="Regal Earth">
+                    <Button.Triggers>
+                        <DataTrigger
+                            TargetType="Button"
+                            Binding="{Binding SelectedThemeName}"
+                            Value="Regal Earth">
+                            <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
 
+                <!-- 2. Wine Desert -->
                 <Button
                     Text="🍷 Wine Desert (Wine / Tan)"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Command="{Binding SelectThemeCommand}"
-                    CommandParameter="Wine Desert" />
+                    CommandParameter="Wine Desert">
+                    <Button.Triggers>
+                        <DataTrigger
+                            TargetType="Button"
+                            Binding="{Binding SelectedThemeName}"
+                            Value="Wine Desert">
+                            <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
 
+                <!-- 3. Forest Lavender -->
                 <Button
                     Text="🌲 Forest Lavender (Green / Lavender)"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Command="{Binding SelectThemeCommand}"
-                    CommandParameter="Forest Lavender" />
+                    CommandParameter="Forest Lavender">
+                    <Button.Triggers>
+                        <DataTrigger
+                            TargetType="Button"
+                            Binding="{Binding SelectedThemeName}"
+                            Value="Forest Lavender">
+                            <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
 
+                <!-- 4. Pristine Clean -->
                 <Button
                     Text="🌊 Pristine Clean (Teal / Mint)"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Command="{Binding SelectThemeCommand}"
-                    CommandParameter="Pristine Clean" />
+                    CommandParameter="Pristine Clean">
+                    <Button.Triggers>
+                        <DataTrigger
+                            TargetType="Button"
+                            Binding="{Binding SelectedThemeName}"
+                            Value="Pristine Clean">
+                            <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+
+                <!-- 5. Coffee Light (Latte / Caramel) -->
+                <Button
+                    Text="☕ Coffee Light (Latte / Caramel)"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Command="{Binding SelectThemeCommand}"
+                    CommandParameter="Coffee Light">
+                    <Button.Triggers>
+                        <DataTrigger
+                            TargetType="Button"
+                            Binding="{Binding SelectedThemeName}"
+                            Value="Coffee Light">
+                            <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+
+                <!-- 6. Coffee Dark (Espresso / Mocha) -->
+                <Button
+                    Text="🌙 Coffee Dark (Espresso / Mocha)"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Command="{Binding SelectThemeCommand}"
+                    CommandParameter="Coffee Dark">
+                    <Button.Triggers>
+                        <DataTrigger
+                            TargetType="Button"
+                            Binding="{Binding SelectedThemeName}"
+                            Value="Coffee Dark">
+                            <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
             </VerticalStackLayout>
 
             <!-- Footer -->

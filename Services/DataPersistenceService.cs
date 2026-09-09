@@ -14,10 +14,13 @@ public sealed class DataPersistenceService : IDataPersistenceService
 		PropertyNameCaseInsensitive = true
 	};
 
+	private readonly SemaphoreSlim _fileLock = new(1, 1);
+
 	private string FilePath => Path.Combine(FileSystem.AppDataDirectory, LogFileName);
 
-	public async Task<List<OracleDecisionLog>> LoadLogsAsync()
+	public async Task<List<OracleDecisionLog>> LoadLogsAsync(CancellationToken cancellationToken = default)
 	{
+		await _fileLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 		try
 		{
 			if (!File.Exists(FilePath))
@@ -25,26 +28,43 @@ public sealed class DataPersistenceService : IDataPersistenceService
 				return [];
 			}
 
-			string json = await File.ReadAllTextAsync(FilePath);
+			string json = await File.ReadAllTextAsync(FilePath, cancellationToken).ConfigureAwait(false);
 			var items = JsonSerializer.Deserialize<List<OracleDecisionLog>>(json, JsonOptions);
 			return items ?? [];
+		}
+		catch (OperationCanceledException)
+		{
+			throw;
 		}
 		catch
 		{
 			return [];
 		}
+		finally
+		{
+			_fileLock.Release();
+		}
 	}
 
-	public async Task SaveLogsAsync(IEnumerable<OracleDecisionLog> logs)
+	public async Task SaveLogsAsync(IEnumerable<OracleDecisionLog> logs, CancellationToken cancellationToken = default)
 	{
+		await _fileLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 		try
 		{
 			string json = JsonSerializer.Serialize(logs, JsonOptions);
-			await File.WriteAllTextAsync(FilePath, json);
+			await File.WriteAllTextAsync(FilePath, json, cancellationToken).ConfigureAwait(false);
+		}
+		catch (OperationCanceledException)
+		{
+			throw;
 		}
 		catch
 		{
 			// Safe fall-through
+		}
+		finally
+		{
+			_fileLock.Release();
 		}
 	}
 

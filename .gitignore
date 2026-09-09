@@ -39,3 +39,9 @@ artifacts/
 
 # MAUI generated
 .system_generated/
+
+# Agent and temporary logs
+agents/
+.agents/
+*.log
+log*.txt

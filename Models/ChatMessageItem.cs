@@ -8,6 +8,10 @@ public sealed partial class ChatMessageItem : ObservableObject
 	public bool IsUserMessage { get; init; }
 	public bool IsOracleMessage { get; init; }
 	public bool IsWelcomeMessage { get; init; }
+	public bool IsTypingIndicator { get; init; }
+
+	public bool IsOracleVerdictCard => IsOracleMessage && !IsTypingIndicator;
+	public bool IsTypingIndicatorMessage => IsOracleMessage && IsTypingIndicator;
 
 	[ObservableProperty]
 	public partial string MessageText { get; set; } = string.Empty;

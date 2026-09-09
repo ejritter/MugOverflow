@@ -2,7 +2,6 @@ namespace MugOverflowProject.Services;
 
 public sealed class OracleEngineService : IOracleEngineService
 {
-	private static readonly Random Rng = new();
 
 	private static readonly string[] OracleYes =
 	[
@@ -114,9 +113,9 @@ public sealed class OracleEngineService : IOracleEngineService
 
 	public (bool SaidYes, string VerdictText) ConsultOracle()
 	{
-		bool isYes = Rng.Next(2) == 1;
+		bool isYes = Random.Shared.Next(2) == 1;
 		string[] pool = isYes ? OracleYes : OracleNo;
-		string verdict = pool[Rng.Next(pool.Length)];
+		string verdict = pool[Random.Shared.Next(pool.Length)];
 		return (isYes, verdict);
 	}
 }

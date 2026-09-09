@@ -15,15 +15,24 @@ public sealed class AppPopupService(IServiceProvider serviceProvider) : IAppPopu
 			?? Shell.Current?.CurrentPage;
 	}
 
-	public async Task ShowCoffeeDictionaryAsync(string? targetCoffeeId = null)
+	public async Task<CoffeeType?> ShowCoffeeDictionaryAsync(string? targetCoffeeId = null)
 	{
 		var page = GetActivePage();
-		if (page is null) return;
+		if (page is null) return null;
 
 		var vm = serviceProvider.GetRequiredService<CoffeeDictionaryPopupViewModel>();
 		vm.SetHighlightedCoffee(targetCoffeeId);
 		var popup = new CoffeeDictionaryPopup(vm);
-		await page.ShowPopupAsync(popup);
+		try
+		{
+			await page.ShowPopupAsync(popup);
+			return vm.SelectedCoffee;
+		}
+		finally
+		{
+			vm.RequestClose = null;
+			popup.BindingContext = null;
+		}
 	}
 
 	public async Task<OracleDecisionLog?> ShowEditLogAsync(OracleDecisionLog logToEdit)
@@ -34,30 +43,37 @@ public sealed class AppPopupService(IServiceProvider serviceProvider) : IAppPopu
 		var vm = serviceProvider.GetRequiredService<EditLogPopupViewModel>();
 		vm.LoadLog(logToEdit);
 		var popup = new EditLogPopup(vm);
-		await page.ShowPopupAsync(popup);
-
-		if (vm.WasDeleted)
+		try
 		{
-			return null; // Signals deletion
-		}
+			await page.ShowPopupAsync(popup);
 
-		if (vm.WasSaved)
-		{
-			bool followedAdvice = (logToEdit.OracleSaidYes && vm.UserDrank) || (!logToEdit.OracleSaidYes && !vm.UserDrank);
-			return new OracleDecisionLog
+			if (vm.WasDeleted)
 			{
-				Id = logToEdit.Id,
-				Timestamp = logToEdit.Timestamp,
-				OracleSaidYes = logToEdit.OracleSaidYes,
-				UserDrank = vm.UserDrank,
-				FollowedAdvice = followedAdvice,
-				CoffeeTypeId = vm.UserDrank ? vm.SelectedCoffeeType?.Id : null,
-				CoffeeName = vm.UserDrank ? vm.SelectedCoffeeType?.Name : null,
-				CaffeineMg = vm.UserDrank ? (vm.SelectedCoffeeType?.Caffeine ?? 0) : 0
-			};
-		}
+				return null; // Signals deletion
+			}
 
-		return logToEdit;
+			if (vm.WasSaved)
+			{
+				bool followedAdvice = (logToEdit.OracleSaidYes && vm.UserDrank) || (!logToEdit.OracleSaidYes && !vm.UserDrank);
+				return new OracleDecisionLog
+				{
+					Id = logToEdit.Id,
+					Timestamp = logToEdit.Timestamp,
+					OracleSaidYes = logToEdit.OracleSaidYes,
+					UserDrank = vm.UserDrank,
+					FollowedAdvice = followedAdvice,
+					CoffeeTypeId = vm.UserDrank ? vm.SelectedCoffeeType?.Id : null,
+					CoffeeName = vm.UserDrank ? vm.SelectedCoffeeType?.Name : null,
+					CaffeineMg = vm.UserDrank ? (vm.SelectedCoffeeType?.Caffeine ?? 0) : 0
+				};
+			}
+
+			return logToEdit;
+		}
+		finally
+		{
+			popup.BindingContext = null;
+		}
 	}
 
 	public async Task<string?> ShowThemeSelectorAsync()
@@ -67,7 +83,33 @@ public sealed class AppPopupService(IServiceProvider serviceProvider) : IAppPopu
 
 		var vm = serviceProvider.GetRequiredService<ThemeSelectorPopupViewModel>();
 		var popup = new ThemeSelectorPopup(vm);
-		await page.ShowPopupAsync(popup);
-		return vm.SelectedThemeName;
+		try
+		{
+			await page.ShowPopupAsync(popup);
+			return vm.SelectedThemeName;
+		}
+		finally
+		{
+			popup.BindingContext = null;
+		}
+	}
+
+	public async Task<bool> ShowStorageSelectionPopupAsync()
+	{
+		var page = GetActivePage();
+		if (page is null) return false;
+
+		var vm = serviceProvider.GetRequiredService<StorageSelectionViewModel>();
+		await vm.InitializeAsync().ConfigureAwait(false);
+		var popup = new StorageSelectionPopup(vm);
+		try
+		{
+			await page.ShowPopupAsync(popup);
+			return vm.HasMigratedData;
+		}
+		finally
+		{
+			popup.CleanUp();
+		}
 	}
 }

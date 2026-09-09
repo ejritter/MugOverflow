@@ -1,3 +1,4 @@
+using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 
 namespace MugOverflowProject.Controls;
@@ -7,6 +8,13 @@ public sealed class CaffeineMetabolismDrawable : IDrawable
 	private const double TotalHours = 24.0;
 	private const double HalfLifeHours = 5.0;
 	private const double SleepThresholdMg = 20.0;
+
+	private static readonly float[] SleepDashPattern = [4f, 4f];
+	private static readonly Color GridStrokeColor = Color.FromArgb("#338E918F");
+	private static readonly Color GridFontColor = Color.FromArgb("#8E918F");
+	private static readonly Color SleepColor = Color.FromArgb("#2E7D32");
+	private static readonly Color FallbackCurveColor = Color.FromArgb("#7E57C2");
+	private static readonly Color FallbackPointFillColor = Color.FromArgb("#C89B3C");
 
 	public double InitialActiveMg { get; set; } = 0.0;
 
@@ -33,9 +41,9 @@ public sealed class CaffeineMetabolismDrawable : IDrawable
 
 		// 1. Draw Grid Lines and Y-Axis Labels
 		int ySteps = 4;
-		canvas.StrokeColor = Color.FromArgb("#338E918F");
+		canvas.StrokeColor = GridStrokeColor;
 		canvas.StrokeSize = 1f;
-		canvas.FontColor = Color.FromArgb("#8E918F");
+		canvas.FontColor = GridFontColor;
 		canvas.FontSize = 11f;
 
 		for (int i = 0; i <= ySteps; i++)
@@ -59,19 +67,22 @@ public sealed class CaffeineMetabolismDrawable : IDrawable
 		float sleepY = height - padBottom - (float)((SleepThresholdMg / maxY) * graphHeight);
 		if (sleepY >= padTop && sleepY <= height - padBottom)
 		{
-			canvas.StrokeColor = Color.FromArgb("#2E7D32");
-			canvas.StrokeDashPattern = [4f, 4f];
+			canvas.StrokeColor = SleepColor;
+			canvas.StrokeDashPattern = SleepDashPattern;
 			canvas.StrokeSize = 1.5f;
 			canvas.DrawLine(padLeft, sleepY, width - padRight, sleepY);
 			canvas.StrokeDashPattern = null; // Reset dash
 
-			canvas.FontColor = Color.FromArgb("#2E7D32");
+			canvas.FontColor = SleepColor;
 			canvas.FontSize = 10f;
 			canvas.DrawString("Sleep Threshold (20mg)", width - padRight - 140f, sleepY - 14f, 140f, 14f, HorizontalAlignment.Right, VerticalAlignment.Center);
 		}
 
 		if (InitialActiveMg > 0.1)
 		{
+			Color curveColor = GetThemeColor("PrimaryColor", FallbackCurveColor);
+			Color accentColor = GetThemeColor("AccentColor", FallbackPointFillColor);
+
 			// 4. Build Curve Path for Exponential Elimination Kinetics
 			var curvePath = new PathF();
 			var areaPath = new PathF();
@@ -104,28 +115,28 @@ public sealed class CaffeineMetabolismDrawable : IDrawable
 			areaPath.LineTo(padLeft + graphWidth, height - padBottom);
 			areaPath.Close();
 
-			// Fill under curve
+			// Fill under curve with dynamic primary gradient
 			var fillPaint = new LinearGradientPaint
 			{
 				StartPoint = new Point(0, 0),
 				EndPoint = new Point(0, 1),
 				GradientStops =
 				[
-					new PaintGradientStop(0.0f, Color.FromArgb("#66A87FFB")),
-					new PaintGradientStop(1.0f, Color.FromArgb("#05A87FFB"))
+					new PaintGradientStop(0.0f, curveColor.WithAlpha(0.25f)),
+					new PaintGradientStop(1.0f, curveColor.WithAlpha(0.0f))
 				]
 			};
 
 			canvas.SetFillPaint(fillPaint, new RectF(padLeft, padTop, graphWidth, graphHeight));
 			canvas.FillPath(areaPath);
 
-			// Stroke smooth curve
-			canvas.StrokeColor = Color.FromArgb("#7E57C2");
+			// Stroke smooth curve with dynamic PrimaryColor
+			canvas.StrokeColor = curveColor;
 			canvas.StrokeSize = 3f;
 			canvas.DrawPath(curvePath);
 
-			// Highlight active point (+0h)
-			canvas.FillColor = Color.FromArgb("#C89B3C");
+			// Highlight active point (+0h) with dynamic AccentColor
+			canvas.FillColor = accentColor;
 			canvas.FillCircle(startX, startY, 6f);
 			canvas.StrokeColor = Colors.White;
 			canvas.StrokeSize = 2f;
@@ -134,9 +145,30 @@ public sealed class CaffeineMetabolismDrawable : IDrawable
 		else
 		{
 			// Zero state baseline
-			canvas.FontColor = Color.FromArgb("#8E918F");
+			canvas.FontColor = GetThemeColor("SecondaryTextColor", GridFontColor);
 			canvas.FontSize = 12f;
 			canvas.DrawString("No active caffeine in system", padLeft, (padTop + height - padBottom) / 2 - 10f, graphWidth, 20f, HorizontalAlignment.Center, VerticalAlignment.Center);
 		}
+	}
+
+	private static Color GetThemeColor(string key, Color fallback)
+	{
+		try
+		{
+			if (Application.Current?.Resources is { } resources &&
+			    resources.TryGetValue(key, out var val))
+			{
+				if (val is Color color)
+					return color;
+				if (val is SolidColorBrush brush)
+					return brush.Color;
+			}
+		}
+		catch
+		{
+			// Safe headless fallback for unit test runners without an active Application
+		}
+
+		return fallback;
 	}
 }
