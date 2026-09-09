@@ -20,38 +20,37 @@
 
 ## 📸 Screenshots & How It Works
 
-### 1. Kinetics Dashboard — Real-Time Metabolism Modeling
-The dashboard calculates your dynamic blood caffeine concentration in milligrams using exponential decay modeling based on beverage timestamp, dosage, and customized half-life elimination rates.
-- **Dynamic Canvas Rendering**: Smooth vector metabolism curve rendered in real-time via `Microsoft.Maui.Graphics.IDrawable`.
-- **Bedtime & Sleep Risk**: Evaluates sleep disruption windows and warns when caffeine clearance exceeds bedtime thresholds.
-- **Daily Intake Gauge**: Visual circular limit tracker (FDA recommended 400 mg/day baseline).
+### 1. Metabolism & Kinetics Dashboard — Real-Time Decay & Sleep Risk
+The kinetics dashboard calculates your real-time blood caffeine concentration in milligrams using exponential decay modeling:
+$$\( N(t) = N_0 \cdot (0.5)^{t / t_{1/2}} \)$$
 
-![Kinetics Dashboard](docs/screenshots/dashboard.png)
+- **Live Metric Cards**:
+  - ⚡ **Active in Body**: Current systemic caffeine load (e.g., 44 mg calculated over active half-life kinetics).
+  - ☕ **Total Intake**: Cumulative daily consumption counter and cup count (e.g., 981 mg across 10 cups).
+  - ⚖️ **Compliance**: Percentage of adherence to Oracle verdicts (e.g., 58% — 7 Obeyed vs. 5 Rebelled).
+  - 🌙 **Sleep Ready Countdown**: Precise forecast of when systemic caffeine will fall below sleep interference thresholds (e.g., ~5h 42m until 20 mg threshold).
+- **24-Hour Elimination Decay Curve**: Smooth vector curve drawn on-device via `Microsoft.Maui.Graphics.IDrawable` showing decay trajectory, peak window (30–60 min), and bedtime threshold line.
 
----
-
-### 2. Java Oracle — Conversational Caffeine Intelligence
-The **Java Oracle** provides conversational compliance counsel and intake optimization. Ask questions about intake timing, espresso extraction, or clearance rates, with quick suggestion chips for logging drinks or calculating bedtime risk.
-
-![Java Oracle Chat](docs/screenshots/oracle_chat.png)
+![MugOverflow Metabolism & Kinetics Dashboard](docs/screenshots/metabolism_kinetics.png)
 
 ---
 
-### 3. Bring Your Own Storage (BYOS) & Cloud Synchronization
-MugOverflow respects your privacy and data sovereignty. It features a zero-vendor-lockin **BYOS (Bring Your Own Storage)** architecture:
-- **Local SQLite Persistence**: Low-latency, offline-first relational storage with Write-Ahead Logging (`PRAGMA journal_mode=WAL;`).
-- **Google Drive Cloud Sync**: Zero-backend OAuth 2.0 PKCE synchronization saving directly to your isolated Google Drive `appDataFolder`.
-- **Microsoft OneDrive Cloud Sync**: Enterprise-grade cloud synchronization using MSAL.NET and Microsoft Graph API (`special/approot`).
-- **3-Way Data Migration**: Upload local to cloud, download cloud to local, or perform automatic two-way union hydration with Last-Write-Wins (LWW) conflict resolution.
+### 2. Java Oracle — Conversational Caffeine Compliance
+The **Java Oracle** serves as your intelligent coffee counselor:
+- **Seek Caffeinated Truth**: Query the Oracle before brewing another cup. The Oracle analyzes current active blood levels, time of day, and past intake before issuing a verdict (**YES** or **NO**).
+- **Compliance Tracking**: Log whether you obeyed the Oracle's wisdom or rebelled to track behavioral compliance over time.
+- **Beverage Selector**: Select from standard brews (Drip Coffee, Pour Over, Cold Brew, Espresso, Matcha) with instant caffeine mg readouts.
 
-![Bring Your Own Storage Sync Settings](docs/screenshots/cloud_sync.png)
+![MugOverflow Java Oracle View](docs/screenshots/java_oracle.png)
 
 ---
 
-### 4. Coffee Dictionary & Brew Guide
-Browse standard caffeine dosages, extraction ratios, roast profiles, and acidity metrics for popular coffee styles (Espresso, Ethiopian Pour Over, Cold Brew, Flat White, Matcha Latte, and more) with one-tap logging into your kinetics engine.
-
-![Coffee Dictionary & Brew Guide](docs/screenshots/coffee_guide.png)
+### 3. Bring Your Own Storage (BYOS) Cloud Synchronization
+MugOverflow is engineered with privacy and data ownership as first principles:
+- **Local SQLite Persistence**: Low-latency relational storage powered by `sqlite-net-pcl` and `SQLitePCLRaw.bundle_green` with Write-Ahead Logging (`PRAGMA journal_mode=WAL;`).
+- **Google Drive Cloud Sync**: Direct, client-side zero-backend synchronization using OAuth 2.0 PKCE directly into your isolated Google Drive `appDataFolder` (`caffeine_consumption.json`).
+- **Microsoft OneDrive Cloud Sync**: Cloud synchronization using MSAL.NET and Microsoft Graph API targeting the sandboxed `special/approot`.
+- **3-Way Data Migration Engine**: Upload local records to cloud, download cloud records to local, or perform automatic two-way union hydration with Last-Write-Wins (LWW) timestamp conflict resolution.
 
 ---
 
