@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="MugOverflowProject.Resources.Styles.Themes.RegalEarthTheme">
 
-    <x:String x:Key="ThemeName">Regal Earth</x:String>
+    <x:String x:Key="ThemeName">Honey Lavender Latte</x:String>
 
     <Color x:Key="PageBackgroundColor">#F4E9D8</Color>
     <Color x:Key="NavigationBarColor">#4B1D6B</Color>
@@ -30,4 +30,7 @@
     <Color x:Key="PrimaryGradientEnd">#C89B3C</Color>
     <Color x:Key="CardShadowColor">#1A1E1E1E</Color>
     <Color x:Key="AppShadowColor">#261E1E1E</Color>
+
+    <Color x:Key="PrimaryButtonTextColor">White</Color>
+    <Color x:Key="AccentButtonTextColor">#1E1E1E</Color>
 </ResourceDictionary>

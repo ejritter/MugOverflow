@@ -2,905 +2,1321 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:MugOverflowProject.Controls"
     xmlns:fluent="clr-namespace:FluentIcons.Maui;assembly=FluentIcons.Maui"
     xmlns:models="clr-namespace:MugOverflowProject.Models"
     xmlns:viewmodels="clr-namespace:MugOverflowProject.ViewModels"
+    xmlns:views="clr-namespace:MugOverflowProject.Views"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     x:Class="MugOverflowProject.Views.MainPage"
     x:DataType="viewmodels:MainViewModel"
     Shell.NavBarIsVisible="False"
     NavigationPage.HasNavigationBar="False"
     Style="{StaticResource PageStyle}">
 
-    <Grid RowDefinitions="Auto, *">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+
+            <!-- Tactile Coffeehouse Pill Surface Style (44dp Accessible Touch Target) -->
+            <Style x:Key="TactilePillBorderStyle" TargetType="Border">
+                <Setter Property="BackgroundColor" Value="{DynamicResource SurfaceAltColor}" />
+                <Setter Property="Stroke" Value="{DynamicResource BorderColor}" />
+                <Setter Property="StrokeThickness" Value="1" />
+                <Setter Property="HeightRequest" Value="44" />
+                <Setter Property="Padding" Value="14,0" />
+                <Setter Property="StrokeShape">
+                    <RoundRectangle CornerRadius="14" />
+                </Setter>
+                <Setter Property="VisualStateManager.VisualStateGroups">
+                    <VisualStateGroupList>
+                        <VisualStateGroup Name="CommonStates">
+                            <VisualState Name="Normal" />
+                            <VisualState Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter Property="Stroke" Value="{DynamicResource PrimaryColor}" />
+                                    <Setter Property="StrokeThickness" Value="1.5" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Property="Scale" Value="0.98" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </Setter>
+            </Style>
+
+            <!-- Tactile Tap-Chip Bubble Button Style (44dp Accessible Touch Target) -->
+            <Style x:Key="CoffeeTapChipButtonStyle" TargetType="Button" BasedOn="{StaticResource PromptChipButtonStyle}">
+                <Setter Property="HeightRequest" Value="44" />
+                <Setter Property="MinimumHeightRequest" Value="44" />
+                <Setter Property="CornerRadius" Value="22" />
+                <Setter Property="Padding" Value="16,0" />
+                <Setter Property="FontSize" Value="12.5" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <!-- ===================================================================== -->
+    <!-- ROOT LAYERED STAGE: Main Coffeehouse Workspace + Slide-Over Drawer    -->
+    <!-- ===================================================================== -->
+    <Grid>
 
         <!-- ================================================================= -->
-        <!-- 1. TOP NAVIGATION HEADER (Minimalist & Streamlined)              -->
+        <!-- LAYER 0: COFFEEHOUSE TOP BAR + RESPONSIVE MASCOT & CHAT WORKSPACE -->
         <!-- ================================================================= -->
-        <!-- ================================================================= -->
-        <!-- 1. TOP NAVIGATION HEADER & VIEW SWITCHER (Responsive 2-Tier)     -->
-        <!-- ================================================================= -->
-        <Border
-            Grid.Row="0"
-            BackgroundColor="{DynamicResource SurfaceColor}"
-            Stroke="{DynamicResource BorderColor}"
-            StrokeThickness="0,0,0,1"
-            Padding="16,10">
-            <VerticalStackLayout Spacing="10" MaximumWidthRequest="1120">
-                <!-- Top Row: Brand & Quick Action Controls -->
-                <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10" VerticalOptions="Center">
+        <Grid RowDefinitions="Auto, *">
 
-                    <!-- Left: Minimalist Brand Header -->
-                    <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+            <!-- ============================================================= -->
+            <!-- ROW 0: COFFEEHOUSE TOP BAR                                    -->
+            <!-- ============================================================= -->
+            <Border
+                Grid.Row="0"
+                BackgroundColor="{DynamicResource SurfaceColor}"
+                Stroke="{DynamicResource BorderColor}"
+                StrokeThickness="0,0,0,1"
+                Padding="20,10">
+                <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="14" VerticalOptions="Center">
+
+                    <!-- Left: 44x44 Drawer Button + Espresso Brand Badge + Title -->
+                    <Grid Grid.Column="0" ColumnDefinitions="Auto, Auto, Auto" ColumnSpacing="12" VerticalOptions="Center">
+
+                        <!-- 44x44 Hamburger Drawer Toggle -->
                         <Border
-                            WidthRequest="36"
-                            HeightRequest="36"
-                            BackgroundColor="{DynamicResource PrimaryColor}"
-                            StrokeThickness="0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="10" />
-                            </Border.StrokeShape>
+                            Grid.Column="0"
+                            Style="{StaticResource TactilePillBorderStyle}"
+                            WidthRequest="44"
+                            HeightRequest="44"
+                            Padding="0"
+                            VerticalOptions="Center"
+                            SemanticProperties.Description="Open coffeehouse menu and past brew sessions">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleDrawerCommand}" />
+                            </Border.GestureRecognizers>
                             <Label
-                                Text="☕"
+                                Text="☰"
                                 FontSize="18"
+                                FontAttributes="Bold"
+                                TextColor="{DynamicResource PrimaryTextColor}"
                                 HorizontalOptions="Center"
                                 VerticalOptions="Center" />
                         </Border>
 
-                        <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                            <Label
-                                Text="Java Oracle"
-                                FontSize="16"
-                                FontAttributes="Bold"
-                                TextColor="{DynamicResource PrimaryTextColor}" />
-                            <Label
-                                Text="Kinetics &amp; Counsel"
-                                Style="{StaticResource CaptionLabelStyle}"
-                                FontSize="10" />
-                        </VerticalStackLayout>
-                    </HorizontalStackLayout>
-
-                    <!-- Right: Quick Utilities Cluster -->
-                    <HorizontalStackLayout Grid.Column="2" Spacing="8" VerticalOptions="Center">
-
-                        <!-- Storage Sync Status Badge / Launcher Pill -->
+                        <!-- Warm Espresso Gradient Badge -->
                         <Border
-                            BackgroundColor="{DynamicResource SurfaceAltColor}"
-                            Stroke="{DynamicResource BorderColor}"
-                            StrokeThickness="1"
-                            Padding="10,0"
-                            HeightRequest="36"
+                            Grid.Column="1"
+                            WidthRequest="40"
+                            HeightRequest="40"
+                            StrokeThickness="0"
                             VerticalOptions="Center">
                             <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="18" />
+                                <RoundRectangle CornerRadius="13" />
                             </Border.StrokeShape>
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="{DynamicResource PrimaryGradientStart}" Offset="0.0" />
+                                    <GradientStop Color="{DynamicResource PrimaryGradientEnd}" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Label
+                                Text="☕"
+                                FontSize="19"
+                                TextColor="{DynamicResource PrimaryButtonTextColor}"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
+                        </Border>
+
+                        <!-- App Brand Title & Subtitle -->
+                        <VerticalStackLayout Grid.Column="2" Spacing="1" VerticalOptions="Center">
+                            <Label
+                                Text="MugOverflow"
+                                FontSize="17"
+                                FontAttributes="Bold"
+                                FontFamily="OpenSansSemibold"
+                                TextColor="{DynamicResource PrimaryTextColor}"
+                                LineBreakMode="TailTruncation" />
+                            <Label
+                                Text="Specialty Barista Chatbot"
+                                Style="{StaticResource CaptionLabelStyle}"
+                                FontSize="11"
+                                LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- Right: Roast Theme Pill + Roast Ledger + New Brew -->
+                    <Grid Grid.Column="2" ColumnDefinitions="Auto, Auto, Auto" ColumnSpacing="10" VerticalOptions="Center">
+
+                        <!-- Roast Theme Selector Pill (Fluent Icons Settings Gear, 44dp) -->
+                        <Border
+                            Grid.Column="0"
+                            Style="{StaticResource TactilePillBorderStyle}"
+                            VerticalOptions="Center"
+                            SemanticProperties.Description="Select coffeehouse roast theme">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenThemeSelectorCommand}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto, Auto, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                                <fluent:SymbolIcon
+                                    Grid.Column="0"
+                                    Symbol="Settings"
+                                    FontSize="16"
+                                    ForegroundColor="{DynamicResource PrimaryColor}"
+                                    VerticalOptions="Center"
+                                    SemanticProperties.Description="Roast Theme Settings" />
+                                <Label
+                                    Grid.Column="1"
+                                    x:Name="TopBarThemeLabel"
+                                    Text="{Binding CurrentThemeName}"
+                                    FontSize="12"
+                                    FontAttributes="Bold"
+                                    TextColor="{DynamicResource PrimaryTextColor}"
+                                    MaximumWidthRequest="150"
+                                    LineBreakMode="TailTruncation"
+                                    VerticalOptions="Center" />
+                                <Label
+                                    Grid.Column="2"
+                                    Text="▾"
+                                    FontSize="11"
+                                    FontAttributes="Bold"
+                                    TextColor="{DynamicResource SecondaryTextColor}"
+                                    VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Roast Ledger Navigation Button (44dp) -->
+                        <Button
+                            Grid.Column="1"
+                            Text="📈  Roast Ledger"
+                            Command="{Binding SwitchToStatsTabCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            HeightRequest="44"
+                            CornerRadius="14"
+                            Padding="16,0"
+                            FontSize="12.5"
+                            VerticalOptions="Center" />
+
+                        <!-- Primary New Brew Button (44dp) -->
+                        <Button
+                            Grid.Column="2"
+                            Text="＋  New Brew"
+                            Command="{Binding ResetConversationCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HeightRequest="44"
+                            CornerRadius="14"
+                            Padding="18,0"
+                            FontSize="12.5"
+                            VerticalOptions="Center" />
+                    </Grid>
+
+                </Grid>
+            </Border>
+
+            <!-- ============================================================= -->
+            <!-- ROW 1: RESPONSIVE SIDE-BY-SIDE COFFEEHOUSE WORKSPACE          -->
+            <!-- ============================================================= -->
+            <Grid
+                Grid.Row="1"
+                x:Name="WorkspaceGrid"
+                ColumnDefinitions="320, *"
+                RowDefinitions="*"
+                ColumnSpacing="18"
+                Padding="20,14,20,18">
+
+                <!-- ========================================================= -->
+                <!-- LEFT STAGE: BIG HERO MASCOT & LIVE BREW CARD              -->
+                <!-- ========================================================= -->
+                <Border
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    x:Name="HeroStageCard"
+                    Style="{StaticResource CardBorderStyle}"
+                    Padding="18,16"
+                    VerticalOptions="Fill">
+                    <Grid RowDefinitions="Auto, *, Auto, Auto, Auto" RowSpacing="12">
+
+                        <!-- Subtle Gradient Accent Header -->
+                        <Border
+                            Grid.Row="0"
+                            Stroke="{DynamicResource BorderColor}"
+                            StrokeThickness="1"
+                            Padding="12,8">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="13" />
+                            </Border.StrokeShape>
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="{DynamicResource SurfaceAltColor}" Offset="0.0" />
+                                    <GradientStop Color="{DynamicResource SurfaceColor}" Offset="1.0" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                <Label
+                                    Grid.Column="0"
+                                    Text="☕  MUGSY'S ESPRESSO STAGE"
+                                    FontSize="10.5"
+                                    FontAttributes="Bold"
+                                    CharacterSpacing="0.8"
+                                    TextColor="{DynamicResource PrimaryColor}"
+                                    LineBreakMode="TailTruncation"
+                                    VerticalOptions="Center" />
+                                <Label
+                                    Grid.Column="1"
+                                    Text="5.0h t½"
+                                    FontSize="10.5"
+                                    FontAttributes="Bold"
+                                    TextColor="{DynamicResource SecondaryColor}"
+                                    VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Centered 60fps Animated Mugsy Mascot + Expressive Mood Copy -->
+                        <Grid Grid.Row="1" RowDefinitions="Auto, Auto" RowSpacing="6" VerticalOptions="Center">
+                            <controls:CoffeeMascotView
+                                Grid.Row="0"
+                                x:Name="HeroMascotView"
+                                WidthRequest="220"
+                                HeightRequest="200"
+                                ActiveCaffeineMg="{Binding ActiveCaffeineMg}"
+                                IsBrewing="{Binding IsOracleThinking}"
+                                ReactionState="{Binding MascotReactionState}"
+                                IsMiniAvatar="False"
+                                AnimateContinuously="True"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
+
+                            <VerticalStackLayout Grid.Row="1" Spacing="4" HorizontalOptions="Fill">
+                                <Label
+                                    Text="{Binding MascotMoodTitle}"
+                                    FontSize="17"
+                                    FontAttributes="Bold"
+                                    FontFamily="OpenSansSemibold"
+                                    TextColor="{DynamicResource PrimaryTextColor}"
+                                    HorizontalTextAlignment="Center" />
+                                <Label
+                                    Text="{Binding MascotMoodSubtitle}"
+                                    FontSize="12"
+                                    FontFamily="OpenSansRegular"
+                                    TextColor="{DynamicResource SecondaryTextColor}"
+                                    LineBreakMode="WordWrap"
+                                    HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <!-- Clean 2x2 Live Buzz Mini-Grid -->
+                        <Grid Grid.Row="2" RowDefinitions="Auto, Auto" ColumnDefinitions="*, *" RowSpacing="8" ColumnSpacing="8">
+
+                            <!-- Active Buzz -->
+                            <Border
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                Stroke="{DynamicResource BorderColor}"
+                                StrokeThickness="0.75"
+                                Padding="11,8">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="Active" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" />
+                                    <Label
+                                        Text="{Binding ActiveCaffeineMg, StringFormat='{0:F0} mg'}"
+                                        FontSize="15"
+                                        FontAttributes="Bold"
+                                        LineBreakMode="TailTruncation"
+                                        TextColor="{DynamicResource PrimaryColor}" />
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <!-- Today's Brews -->
+                            <Border
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                Stroke="{DynamicResource BorderColor}"
+                                StrokeThickness="0.75"
+                                Padding="11,8">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="Today" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" />
+                                    <Label
+                                        Text="{Binding TotalCaffeineTodayMg, StringFormat='{0} mg'}"
+                                        FontSize="15"
+                                        FontAttributes="Bold"
+                                        LineBreakMode="TailTruncation"
+                                        TextColor="{DynamicResource PrimaryTextColor}" />
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <!-- Barista Alignment -->
+                            <Border
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                Stroke="{DynamicResource BorderColor}"
+                                StrokeThickness="0.75"
+                                Padding="11,8">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="Aligned" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" />
+                                    <Label
+                                        Text="{Binding CompliancePercentage, StringFormat='{0}%'}"
+                                        FontSize="15"
+                                        FontAttributes="Bold"
+                                        LineBreakMode="TailTruncation"
+                                        TextColor="{DynamicResource SuccessColor}" />
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <!-- Sleep Window -->
+                            <Border
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                Stroke="{DynamicResource BorderColor}"
+                                StrokeThickness="0.75"
+                                Padding="11,8">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="Sleep" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" />
+                                    <Label
+                                        Text="{Binding SleepWindowDisplay}"
+                                        FontSize="13"
+                                        FontAttributes="Bold"
+                                        LineBreakMode="TailTruncation"
+                                        TextColor="{DynamicResource SecondaryColor}" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </Grid>
+
+                        <!-- Interactive 24h Decay Curve Pill (44dp) -->
+                        <Button
+                            Grid.Row="3"
+                            Text="📈  View 24h Decay Curve ↗"
+                            Command="{Binding SwitchToStatsTabCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            HeightRequest="44"
+                            CornerRadius="14"
+                            FontSize="12.5"
+                            HorizontalOptions="Fill" />
+
+                        <!-- Subtle Coffeehouse Attribution -->
+                        <Label
+                            Grid.Row="4"
+                            Text="AI engineered by EJRitter Development"
+                            Style="{StaticResource CaptionLabelStyle}"
+                            FontSize="10"
+                            HorizontalTextAlignment="Center" />
+
+                    </Grid>
+                </Border>
+
+                <!-- ========================================================= -->
+                <!-- RIGHT STAGE: IMMERSIVE CHATBOT STREAM + TAP-CHIP DOCK     -->
+                <!-- ========================================================= -->
+                <Grid
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    x:Name="ChatStageGrid"
+                    RowDefinitions="*, Auto"
+                    RowSpacing="12">
+
+                    <!-- 1. Conversational Barista Stream -->
+                    <CollectionView
+                        Grid.Row="0"
+                        x:Name="ChatMessagesCollectionView"
+                        ItemsSource="{Binding ChatMessages}"
+                        SelectionMode="None"
+                        HorizontalOptions="Fill"
+                        VerticalOptions="Fill"
+                        Margin="0">
+
+                        <CollectionView.Header>
+                            <BoxView HeightRequest="6" Color="Transparent" />
+                        </CollectionView.Header>
+
+                        <CollectionView.Footer>
+                            <BoxView HeightRequest="10" Color="Transparent" />
+                        </CollectionView.Footer>
+
+                        <!-- Warm Coffeehouse Empty State -->
+                        <CollectionView.EmptyView>
+                            <Grid VerticalOptions="Center" HorizontalOptions="Fill" Padding="32,24">
+                                <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
+                                    <controls:CoffeeMascotView
+                                        WidthRequest="96"
+                                        HeightRequest="90"
+                                        IsMiniAvatar="False"
+                                        AnimateContinuously="False"
+                                        HorizontalOptions="Center" />
+                                    <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                                        <Label
+                                            Text="Mugsy's behind the espresso bar!"
+                                            FontSize="20"
+                                            FontAttributes="Bold"
+                                            TextColor="{DynamicResource PrimaryTextColor}"
+                                            HorizontalTextAlignment="Center" />
+                                        <Label
+                                            Text="Pick your house drink in the barista dock below and tap any prompt chip to pull a fresh verdict."
+                                            Style="{StaticResource SmallLabelStyle}"
+                                            FontSize="13"
+                                            HorizontalTextAlignment="Center" />
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </CollectionView.EmptyView>
+
+                        <!-- Chat Stream ItemTemplate -->
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:ChatMessageItem">
+                                <Grid Padding="8,6,12,6" HorizontalOptions="Fill">
+
+                                    <!-- ===================================== -->
+                                    <!-- A. USER CHAT BUBBLE (Right-Aligned)   -->
+                                    <!-- ===================================== -->
+                                    <Grid
+                                        IsVisible="{Binding IsUserMessage}"
+                                        ColumnDefinitions="56, *, 38"
+                                        ColumnSpacing="10"
+                                        HorizontalOptions="Fill"
+                                        Loaded="OnChatBubbleLoaded"
+                                        Unloaded="OnChatBubbleUnloaded">
+
+                                        <Grid Grid.Column="1" RowDefinitions="Auto, Auto" RowSpacing="4" HorizontalOptions="End">
+                                            <HorizontalStackLayout Grid.Row="0" Spacing="6" HorizontalOptions="End" Margin="0,0,4,0">
+                                                <Label
+                                                    Text="☕ You"
+                                                    Style="{StaticResource CaptionLabelStyle}"
+                                                    FontAttributes="Bold" />
+                                                <Label
+                                                    Text="•"
+                                                    Style="{StaticResource CaptionLabelStyle}" />
+                                                <Label
+                                                    Text="{Binding TimeString}"
+                                                    Style="{StaticResource CaptionLabelStyle}" />
+                                            </HorizontalStackLayout>
+
+                                            <Border Grid.Row="1" Style="{StaticResource UserChatBubbleStyle}" HorizontalOptions="End">
+                                                <Label
+                                                    Text="{Binding VisibleMessageText}"
+                                                    FontSize="14.5"
+                                                    FontAttributes="Bold"
+                                                    LineHeight="1.22"
+                                                    TextColor="{DynamicResource PrimaryButtonTextColor}"
+                                                    LineBreakMode="WordWrap" />
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- User Coffeehouse Patron Badge -->
+                                        <Border
+                                            Grid.Column="2"
+                                            WidthRequest="38"
+                                            HeightRequest="38"
+                                            BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                            Stroke="{DynamicResource BorderColor}"
+                                            StrokeThickness="1"
+                                            VerticalOptions="End">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="19" />
+                                            </Border.StrokeShape>
+                                            <fluent:SymbolIcon
+                                                Symbol="Person"
+                                                FontSize="16"
+                                                ForegroundColor="{DynamicResource PrimaryColor}"
+                                                HorizontalOptions="Center"
+                                                VerticalOptions="Center" />
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- ===================================== -->
+                                    <!-- B. BARISTA BOT BUBBLE (Left-Aligned)  -->
+                                    <!-- ===================================== -->
+                                    <Grid
+                                        IsVisible="{Binding IsOracleVerdictCard}"
+                                        ColumnDefinitions="38, *, 40"
+                                        ColumnSpacing="12"
+                                        HorizontalOptions="Fill"
+                                        Loaded="OnChatBubbleLoaded"
+                                        Unloaded="OnChatBubbleUnloaded">
+
+                                        <!-- Mini Mugsy Avatar -->
+                                        <controls:CoffeeMascotView
+                                            Grid.Column="0"
+                                            WidthRequest="38"
+                                            HeightRequest="38"
+                                            IsMiniAvatar="True"
+                                            ActiveCaffeineMg="{Binding Source={RelativeSource AncestorType={x:Type views:MainPage}}, Path=BindingContext.ActiveCaffeineMg}"
+                                            ReactionState="{Binding MascotAvatarReaction}"
+                                            AnimateContinuously="False"
+                                            VerticalOptions="Start"
+                                            Margin="0,2,0,0" />
+
+                                        <!-- Barista Message Column -->
+                                        <Grid Grid.Column="1" RowDefinitions="Auto, Auto" RowSpacing="6" HorizontalOptions="Start">
+
+                                            <!-- Header: Barista Title, Timestamp & Roast Verdict Chip -->
+                                            <Grid Grid.Row="0" ColumnDefinitions="Auto, Auto, *, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                                                <Label
+                                                    Grid.Column="0"
+                                                    Text="{Binding OracleHeaderTitle}"
+                                                    FontSize="13"
+                                                    FontAttributes="Bold"
+                                                    TextColor="{DynamicResource PrimaryTextColor}"
+                                                    VerticalOptions="Center" />
+                                                <Label
+                                                    Grid.Column="1"
+                                                    Text="{Binding TimeString}"
+                                                    Style="{StaticResource CaptionLabelStyle}"
+                                                    VerticalOptions="Center" />
+
+                                                <Border
+                                                    Grid.Column="3"
+                                                    IsVisible="{Binding ShowVerdictBadge}"
+                                                    BackgroundColor="{Binding VerdictBadgeBgColor}"
+                                                    Stroke="{Binding VerdictBadgeBorderColor}"
+                                                    StrokeThickness="1"
+                                                    Padding="10,3"
+                                                    VerticalOptions="Center">
+                                                    <Border.StrokeShape>
+                                                        <RoundRectangle CornerRadius="10" />
+                                                    </Border.StrokeShape>
+                                                    <Label
+                                                        Text="{Binding VerdictBadgeDisplay}"
+                                                        FontSize="11"
+                                                        FontAttributes="Bold"
+                                                        TextColor="{Binding VerdictBadgeTextColor}" />
+                                                </Border>
+                                            </Grid>
+
+                                            <!-- Assistant Chat Bubble Surface -->
+                                            <Border
+                                                Grid.Row="1"
+                                                Style="{StaticResource AssistantChatBubbleStyle}"
+                                                HorizontalOptions="Start">
+                                                <VerticalStackLayout Spacing="12">
+
+                                                    <!-- Streamed Barista Message Text -->
+                                                    <Label
+                                                        Text="{Binding VisibleMessageText}"
+                                                        FontSize="15"
+                                                        LineHeight="1.28"
+                                                        TextColor="{DynamicResource PrimaryTextColor}"
+                                                        LineBreakMode="WordWrap" />
+
+                                                    <!-- Subtle "✓ Logged" Chip on Original Verdict Card -->
+                                                    <Border
+                                                        BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                                        Stroke="{DynamicResource BorderColor}"
+                                                        StrokeThickness="1"
+                                                        Padding="10,4"
+                                                        HorizontalOptions="Start">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="10" />
+                                                        </Border.StrokeShape>
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="IsVisible" Value="False" />
+                                                                <Style.Triggers>
+                                                                    <MultiTrigger TargetType="Border">
+                                                                        <MultiTrigger.Conditions>
+                                                                            <BindingCondition Binding="{Binding IsConfirmed}" Value="True" />
+                                                                            <BindingCondition Binding="{Binding IsOutcomeReactionCard}" Value="False" />
+                                                                        </MultiTrigger.Conditions>
+                                                                        <Setter Property="IsVisible" Value="True" />
+                                                                    </MultiTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                                            <Label
+                                                                Text="✓ Logged"
+                                                                FontSize="11"
+                                                                FontAttributes="Bold"
+                                                                TextColor="{DynamicResource SuccessColor}"
+                                                                VerticalOptions="Center" />
+                                                            <Label
+                                                                Text="•"
+                                                                Style="{StaticResource CaptionLabelStyle}"
+                                                                VerticalOptions="Center" />
+                                                            <Label
+                                                                Text="{Binding ComplianceEmoji}"
+                                                                FontSize="11"
+                                                                VerticalOptions="Center" />
+                                                            <Label
+                                                                Text="{Binding ComplianceTagText}"
+                                                                FontSize="11"
+                                                                FontAttributes="Bold"
+                                                                TextColor="{DynamicResource SecondaryTextColor}"
+                                                                VerticalOptions="Center" />
+                                                        </HorizontalStackLayout>
+                                                    </Border>
+
+                                                    <!-- Full Colorful Barista Log Receipt Pill on Outcome Reaction Card -->
+                                                    <Border
+                                                        IsVisible="{Binding IsOutcomeReactionCard}"
+                                                        BackgroundColor="{Binding ComplianceBadgeBgColor}"
+                                                        Stroke="{Binding ComplianceBadgeBorderColor}"
+                                                        StrokeThickness="1"
+                                                        Padding="12,9">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="12" />
+                                                        </Border.StrokeShape>
+                                                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10" VerticalOptions="Center">
+                                                            <Label
+                                                                Grid.Column="0"
+                                                                Text="{Binding ComplianceEmoji}"
+                                                                FontSize="16"
+                                                                VerticalOptions="Center" />
+                                                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                                                <Label
+                                                                    Text="{Binding ComplianceTagText}"
+                                                                    FontSize="12"
+                                                                    FontAttributes="Bold"
+                                                                    TextColor="{Binding ComplianceBadgeTextColor}" />
+                                                                <Label
+                                                                    Text="{Binding OutcomeFeedbackText}"
+                                                                    FontSize="11"
+                                                                    LineBreakMode="WordWrap"
+                                                                    TextColor="{Binding ComplianceBadgeTextColor}" />
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- Buzz Check Quick-Jump Action Pill (44dp) -->
+                                                    <Button
+                                                        IsVisible="{Binding IsBuzzCheckCard}"
+                                                        Text="📈  Open Full 24h Roast Curve ↗"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type views:MainPage}}, Path=BindingContext.SwitchToStatsTabCommand}"
+                                                        Style="{StaticResource SecondaryButtonStyle}"
+                                                        HeightRequest="44"
+                                                        CornerRadius="14"
+                                                        Padding="16,0"
+                                                        FontSize="12.5"
+                                                        HorizontalOptions="Start" />
+
+                                                </VerticalStackLayout>
+                                            </Border>
+                                        </Grid>
+                                    </Grid>
+
+                                    <!-- ===================================== -->
+                                    <!-- C. BREWING INDICATOR BUBBLE           -->
+                                    <!-- ===================================== -->
+                                    <Grid
+                                        IsVisible="{Binding IsTypingIndicatorMessage}"
+                                        ColumnDefinitions="38, Auto"
+                                        ColumnSpacing="12"
+                                        HorizontalOptions="Start"
+                                        Loaded="OnTypingIndicatorLoaded"
+                                        Unloaded="OnTypingIndicatorUnloaded">
+
+                                        <controls:CoffeeMascotView
+                                            Grid.Column="0"
+                                            WidthRequest="38"
+                                            HeightRequest="38"
+                                            IsMiniAvatar="True"
+                                            IsBrewing="True"
+                                            AnimateContinuously="True"
+                                            VerticalOptions="Center" />
+
+                                        <Border
+                                            Grid.Column="1"
+                                            Style="{StaticResource AssistantChatBubbleStyle}"
+                                            Padding="18,12">
+                                            <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                                                <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                                    <Ellipse WidthRequest="8" HeightRequest="8" Fill="{DynamicResource PrimaryColor}" Opacity="0.3" StyleId="Dot1" />
+                                                    <Ellipse WidthRequest="8" HeightRequest="8" Fill="{DynamicResource SecondaryColor}" Opacity="0.3" StyleId="Dot2" />
+                                                    <Ellipse WidthRequest="8" HeightRequest="8" Fill="{DynamicResource PrimaryColor}" Opacity="0.3" StyleId="Dot3" />
+                                                </HorizontalStackLayout>
+                                                <Label
+                                                    Text="{Binding VisibleMessageText}"
+                                                    Style="{StaticResource CaptionLabelStyle}"
+                                                    FontSize="12"
+                                                    FontAttributes="Bold"
+                                                    VerticalOptions="Center" />
+                                            </HorizontalStackLayout>
+                                        </Border>
+                                    </Grid>
+
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <!-- ===================================================== -->
+                    <!-- 2. BOTTOM FLOATING TAP-CHIP COFFEEHOUSE DOCK          -->
+                    <!-- ===================================================== -->
+                    <Border
+                        Grid.Row="1"
+                        Style="{StaticResource FloatingComposerDockStyle}"
+                        HorizontalOptions="Fill"
+                        Padding="16,14">
+                        <Grid>
+
+                            <!-- STATE 1: Prompt Chips & Drink Selector Dock -->
+                            <Grid
+                                IsVisible="{Binding ShowPromptChipsDock}"
+                                RowDefinitions="Auto, Auto"
+                                RowSpacing="10">
+
+                                <!-- Top Bar: Attached Drink Pill (44dp) + More Prompts Pill (44dp) -->
+                                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" ColumnSpacing="10" VerticalOptions="Center">
+
+                                    <Border
+                                        Grid.Column="0"
+                                        Style="{StaticResource TactilePillBorderStyle}"
+                                        HorizontalOptions="Start"
+                                        VerticalOptions="Center"
+                                        SemanticProperties.Description="Change selected coffee drink">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding OpenCoffeeDictionaryCommand}" />
+                                        </Border.GestureRecognizers>
+                                        <Grid ColumnDefinitions="Auto, Auto, Auto, Auto, Auto" ColumnSpacing="7" VerticalOptions="Center">
+                                            <Label Grid.Column="0" Text="☕" FontSize="14" VerticalOptions="Center" />
+                                            <Label
+                                                Grid.Column="1"
+                                                Text="{Binding SelectedCoffeePreference.Name, FallbackValue='Select Drink'}"
+                                                FontSize="13"
+                                                FontAttributes="Bold"
+                                                TextColor="{DynamicResource PrimaryTextColor}"
+                                                MaximumWidthRequest="200"
+                                                LineBreakMode="TailTruncation"
+                                                VerticalOptions="Center" />
+                                            <Label Grid.Column="2" Text="•" Style="{StaticResource CaptionLabelStyle}" VerticalOptions="Center" />
+                                            <Label
+                                                Grid.Column="3"
+                                                Text="{Binding SelectedCoffeeCaffeineText, StringFormat='⚡ {0}'}"
+                                                FontSize="12"
+                                                FontAttributes="Bold"
+                                                TextColor="{DynamicResource SecondaryColor}"
+                                                VerticalOptions="Center" />
+                                            <Label
+                                                Grid.Column="4"
+                                                Text="•  Change ▾"
+                                                FontSize="11"
+                                                FontAttributes="Bold"
+                                                TextColor="{DynamicResource PrimaryColor}"
+                                                VerticalOptions="Center" />
+                                        </Grid>
+                                    </Border>
+
+                                    <Button
+                                        Grid.Column="1"
+                                        Text="🎲  More Prompts"
+                                        Command="{Binding ShufflePromptChipsCommand}"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        HeightRequest="44"
+                                        CornerRadius="14"
+                                        Padding="14,0"
+                                        FontSize="12"
+                                        VerticalOptions="Center" />
+                                </Grid>
+
+                                <!-- Wrapping Tap-Chip Prompt Bubbles -->
+                                <FlexLayout
+                                    Grid.Row="1"
+                                    Direction="Row"
+                                    Wrap="Wrap"
+                                    JustifyContent="Start"
+                                    AlignItems="Center"
+                                    AlignContent="Start"
+                                    BindableLayout.ItemsSource="{Binding PromptChips}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="models:PromptChipItem">
+                                            <Button
+                                                Text="{Binding DisplayText}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type views:MainPage}}, Path=BindingContext.SendPromptChipCommand}"
+                                                CommandParameter="{Binding .}"
+                                                Style="{StaticResource CoffeeTapChipButtonStyle}"
+                                                Margin="0,0,8,8">
+                                                <Button.Triggers>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsBuzzCheck}" Value="True">
+                                                        <Setter Property="BorderColor" Value="{DynamicResource SecondaryColor}" />
+                                                        <Setter Property="TextColor" Value="{DynamicResource SecondaryColor}" />
+                                                    </DataTrigger>
+                                                </Button.Triggers>
+                                            </Button>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </FlexLayout>
+                            </Grid>
+
+                            <!-- STATE 2: Back-and-Forth Quick-Reply Chips -->
+                            <Grid
+                                RowDefinitions="Auto, Auto"
+                                RowSpacing="10">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="IsVisible" Value="False" />
+                                        <Style.Triggers>
+                                            <MultiTrigger TargetType="Grid">
+                                                <MultiTrigger.Conditions>
+                                                    <BindingCondition Binding="{Binding HasPendingVerdict}" Value="True" />
+                                                    <BindingCondition Binding="{Binding IsOracleThinking}" Value="False" />
+                                                </MultiTrigger.Conditions>
+                                                <Setter Property="IsVisible" Value="True" />
+                                            </MultiTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+
+                                <Label
+                                    Grid.Row="0"
+                                    Text="☕ Your turn—tap a reply bubble to log what you did:"
+                                    FontSize="12.5"
+                                    FontAttributes="Bold"
+                                    TextColor="{DynamicResource SecondaryTextColor}" />
+
+                                <FlexLayout
+                                    Grid.Row="1"
+                                    Direction="Row"
+                                    Wrap="Wrap"
+                                    JustifyContent="Start"
+                                    AlignItems="Center"
+                                    AlignContent="Start">
+
+                                    <Button
+                                        Text="{Binding PendingDrinkButtonText}"
+                                        Command="{Binding ReplyDrankCommand}"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        HeightRequest="44"
+                                        CornerRadius="22"
+                                        Padding="18,0"
+                                        FontSize="13"
+                                        Margin="0,0,8,6" />
+
+                                    <Button
+                                        Text="🫗 Skipped this round"
+                                        Command="{Binding ReplySkippedCommand}"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        HeightRequest="44"
+                                        CornerRadius="22"
+                                        Padding="16,0"
+                                        FontSize="12.5"
+                                        Margin="0,0,8,6" />
+
+                                    <Button
+                                        Text="🔄 Swap drink"
+                                        Command="{Binding SwapPendingDrinkCommand}"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        HeightRequest="44"
+                                        CornerRadius="22"
+                                        Padding="16,0"
+                                        FontSize="12.5"
+                                        Margin="0,0,0,6" />
+                                </FlexLayout>
+                            </Grid>
+
+                            <!-- STATE 3: Steady Brewing Status Bar (During 1.2s Shot Pull) -->
+                            <Grid
+                                IsVisible="{Binding IsOracleThinking}"
+                                ColumnDefinitions="Auto, *"
+                                ColumnSpacing="12"
+                                MinimumHeightRequest="56"
+                                VerticalOptions="Center">
+
+                                <ActivityIndicator
+                                    Grid.Column="0"
+                                    IsRunning="{Binding IsOracleThinking}"
+                                    WidthRequest="20"
+                                    HeightRequest="20"
+                                    Color="{DynamicResource PrimaryColor}"
+                                    VerticalOptions="Center" />
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label
+                                        Text="☕ Tamping grounds &amp; pulling a fresh verdict..."
+                                        FontSize="13.5"
+                                        FontAttributes="Bold"
+                                        TextColor="{DynamicResource PrimaryTextColor}" />
+                                    <Label
+                                        Text="Mugsy is dialing in your espresso shot—hang tight for a second."
+                                        Style="{StaticResource CaptionLabelStyle}" />
+                                </VerticalStackLayout>
+                            </Grid>
+
+                        </Grid>
+                    </Border>
+
+                </Grid>
+
+            </Grid>
+        </Grid>
+
+        <!-- ================================================================= -->
+        <!-- LAYER 1: SLIDE-OVER COFFEEHOUSE DRAWER OVERLAY                    -->
+        <!-- ================================================================= -->
+        <Grid
+            x:Name="DrawerOverlayGrid"
+            IsVisible="False"
+            InputTransparent="True"
+            HorizontalOptions="Fill"
+            VerticalOptions="Fill">
+
+            <!-- Tinted Espresso Scrim Backdrop -->
+            <BoxView
+                x:Name="DrawerBackdropBox"
+                Color="{DynamicResource NavigationBarColor}"
+                Opacity="0"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill">
+                <BoxView.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding CloseDrawerCommand}" />
+                </BoxView.GestureRecognizers>
+            </BoxView>
+
+            <!-- Slide-Over Coffeehouse Drawer Sheet -->
+            <Border
+                x:Name="DrawerSheetBorder"
+                WidthRequest="316"
+                HorizontalOptions="Start"
+                VerticalOptions="Fill"
+                TranslationX="-324"
+                BackgroundColor="{DynamicResource SurfaceColor}"
+                Stroke="{DynamicResource BorderColor}"
+                StrokeThickness="0,0,1,0"
+                Padding="18,16">
+                <Border.Shadow>
+                    <Shadow
+                        Brush="{DynamicResource AppShadowColor}"
+                        Offset="6,0"
+                        Radius="20"
+                        Opacity="0.65" />
+                </Border.Shadow>
+
+                <Grid RowDefinitions="Auto, Auto, *, Auto" RowSpacing="14">
+
+                    <!-- 1. Coffeehouse Header + Close Button + New Brew Chat -->
+                    <Grid Grid.Row="0" RowDefinitions="Auto, Auto" RowSpacing="12">
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10" VerticalOptions="Center">
+                            <Border
+                                Grid.Column="0"
+                                WidthRequest="38"
+                                HeightRequest="38"
+                                StrokeThickness="0"
+                                VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="{DynamicResource PrimaryGradientStart}" Offset="0.0" />
+                                        <GradientStop Color="{DynamicResource PrimaryGradientEnd}" Offset="1.0" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Label
+                                    Text="☕"
+                                    FontSize="18"
+                                    TextColor="{DynamicResource PrimaryButtonTextColor}"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center" />
+                            </Border>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label
+                                    Text="Mugsy's Roastery"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    TextColor="{DynamicResource PrimaryTextColor}"
+                                    LineBreakMode="TailTruncation" />
+                                <Label
+                                    Text="Menu, Past Brews &amp; Sync"
+                                    Style="{StaticResource CaptionLabelStyle}"
+                                    FontSize="11"
+                                    LineBreakMode="TailTruncation" />
+                            </VerticalStackLayout>
+
+                            <Button
+                                Grid.Column="2"
+                                Text="✕"
+                                Command="{Binding CloseDrawerCommand}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                WidthRequest="44"
+                                HeightRequest="44"
+                                CornerRadius="14"
+                                Padding="0"
+                                FontSize="14"
+                                VerticalOptions="Center" />
+                        </Grid>
+
+                        <Button
+                            Grid.Row="1"
+                            Text="＋  New Brew Chat"
+                            Command="{Binding ResetConversationCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HeightRequest="44"
+                            CornerRadius="14"
+                            FontSize="13"
+                            HorizontalOptions="Fill" />
+                    </Grid>
+
+                    <!-- 2. Coffeehouse Quick Links -->
+                    <Grid Grid.Row="1" RowDefinitions="Auto, Auto, Auto" RowSpacing="6">
+                        <Label
+                            Grid.Row="0"
+                            Text="COFFEEHOUSE QUICK LINKS"
+                            Style="{StaticResource CaptionLabelStyle}"
+                            FontSize="10"
+                            FontAttributes="Bold"
+                            CharacterSpacing="1.1"
+                            Margin="4,0,0,2" />
+
+                        <Button
+                            Grid.Row="1"
+                            Text="📖   House Coffee Menu"
+                            Command="{Binding OpenCoffeeDictionaryCommand}"
+                            Style="{StaticResource SidebarNavInactiveButtonStyle}"
+                            HeightRequest="44"
+                            HorizontalOptions="Fill" />
+
+                        <Button
+                            Grid.Row="2"
+                            Text="📈   Roast Kinetics &amp; Ledger"
+                            Command="{Binding SwitchToStatsTabCommand}"
+                            Style="{StaticResource SidebarNavInactiveButtonStyle}"
+                            HeightRequest="44"
+                            HorizontalOptions="Fill" />
+                    </Grid>
+
+                    <!-- 3. Scrollable Past Brew Sessions -->
+                    <Grid Grid.Row="2" RowDefinitions="Auto, *" RowSpacing="6" VerticalOptions="Fill">
+                        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" VerticalOptions="Center" Margin="4,0,4,0">
+                            <Label
+                                Grid.Column="0"
+                                Text="PAST BREW SESSIONS"
+                                Style="{StaticResource CaptionLabelStyle}"
+                                FontSize="10"
+                                FontAttributes="Bold"
+                                CharacterSpacing="1.1"
+                                VerticalOptions="Center" />
+                            <Border
+                                Grid.Column="1"
+                                IsVisible="{Binding HasConsultationHistory}"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                Stroke="{DynamicResource BorderColor}"
+                                StrokeThickness="1"
+                                Padding="7,1"
+                                VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="6" />
+                                </Border.StrokeShape>
+                                <Label
+                                    Text="{Binding ConsultationHistory.Count}"
+                                    FontSize="9.5"
+                                    FontAttributes="Bold"
+                                    TextColor="{DynamicResource PrimaryColor}" />
+                            </Border>
+                        </Grid>
+
+                        <!-- Empty Past Sessions Hint -->
+                        <Border
+                            Grid.Row="1"
+                            IsVisible="{Binding HasConsultationHistory, Converter={StaticResource InvertedBoolConverter}}"
+                            BackgroundColor="{DynamicResource SurfaceAltColor}"
+                            Stroke="{DynamicResource BorderColor}"
+                            StrokeThickness="0.75"
+                            Padding="12,10"
+                            VerticalOptions="Start">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+                            <Label
+                                Text="Past barista chats appear here whenever you tap ＋ New Brew."
+                                Style="{StaticResource CaptionLabelStyle}"
+                                FontSize="11"
+                                LineBreakMode="WordWrap" />
+                        </Border>
+
+                        <!-- Scrollable Preserved Brew Sessions -->
+                        <ScrollView
+                            Grid.Row="1"
+                            IsVisible="{Binding HasConsultationHistory}"
+                            VerticalScrollBarVisibility="Default"
+                            VerticalOptions="Fill">
+                            <VerticalStackLayout
+                                BindableLayout.ItemsSource="{Binding ConsultationHistory}"
+                                Spacing="6">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:ConsultationSession">
+                                        <Border
+                                            BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                            Stroke="{DynamicResource BorderColor}"
+                                            StrokeThickness="{Binding SelectionStrokeThickness}"
+                                            MinimumHeightRequest="46"
+                                            Padding="10,8">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="12" />
+                                            </Border.StrokeShape>
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="Stroke" Value="{DynamicResource PrimaryColor}" />
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type views:MainPage}}, Path=BindingContext.SelectConsultationCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+                                            <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                                                <BoxView
+                                                    Grid.Column="0"
+                                                    WidthRequest="3"
+                                                    HeightRequest="26"
+                                                    CornerRadius="1.5"
+                                                    Color="{DynamicResource PrimaryColor}"
+                                                    IsVisible="{Binding IsSelected}"
+                                                    VerticalOptions="Center" />
+
+                                                <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                                    <Label
+                                                        Text="{Binding Title}"
+                                                        FontSize="12"
+                                                        FontAttributes="Bold"
+                                                        TextColor="{DynamicResource PrimaryTextColor}"
+                                                        LineBreakMode="TailTruncation" />
+                                                    <Label
+                                                        Text="{Binding Subtitle}"
+                                                        Style="{StaticResource CaptionLabelStyle}"
+                                                        FontSize="10"
+                                                        LineBreakMode="TailTruncation" />
+                                                </VerticalStackLayout>
+
+                                                <Border
+                                                    Grid.Column="2"
+                                                    BackgroundColor="{Binding VerdictBadgeBgColor}"
+                                                    Stroke="{Binding VerdictBadgeBorderColor}"
+                                                    StrokeThickness="1"
+                                                    Padding="6,2"
+                                                    VerticalOptions="Center">
+                                                    <Border.StrokeShape>
+                                                        <RoundRectangle CornerRadius="6" />
+                                                    </Border.StrokeShape>
+                                                    <Label
+                                                        Text="{Binding LastVerdictBadge}"
+                                                        FontSize="9"
+                                                        FontAttributes="Bold"
+                                                        TextColor="{Binding VerdictBadgeTextColor}" />
+                                                </Border>
+
+                                                <Border
+                                                    Grid.Column="3"
+                                                    BackgroundColor="Transparent"
+                                                    StrokeThickness="0"
+                                                    WidthRequest="30"
+                                                    HeightRequest="30"
+                                                    VerticalOptions="Center">
+                                                    <Border.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type views:MainPage}}, Path=BindingContext.DeleteConsultationCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Border.GestureRecognizers>
+                                                    <Label
+                                                        Text="✕"
+                                                        FontSize="10"
+                                                        FontAttributes="Bold"
+                                                        TextColor="{DynamicResource SecondaryTextColor}"
+                                                        VerticalOptions="Center"
+                                                        HorizontalOptions="Center" />
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </ScrollView>
+                    </Grid>
+
+                    <!-- 4. Cloud Sync Pill, Roast Theme Pill & Attribution Footer -->
+                    <Grid Grid.Row="3" RowDefinitions="Auto, Auto, Auto" RowSpacing="8">
+
+                        <!-- Cloud Sync Status Pill (44dp) -->
+                        <Border
+                            Grid.Row="0"
+                            Style="{StaticResource TactilePillBorderStyle}"
+                            Padding="12,0">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding OpenStorageSettingsCommand}" />
                             </Border.GestureRecognizers>
-                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8" VerticalOptions="Center">
                                 <fluent:SymbolIcon
+                                    Grid.Column="0"
                                     Symbol="CloudSync"
-                                    FontSize="16"
+                                    FontSize="15"
                                     ForegroundColor="{Binding SyncStatusColor}"
                                     VerticalOptions="Center" />
+                                <Label
+                                    Grid.Column="1"
+                                    Text="{Binding SyncStatusText}"
+                                    FontSize="12"
+                                    FontAttributes="Bold"
+                                    TextColor="{Binding SyncStatusColor}"
+                                    LineBreakMode="TailTruncation"
+                                    VerticalOptions="Center" />
                                 <ActivityIndicator
+                                    Grid.Column="2"
                                     IsRunning="{Binding IsSyncing}"
                                     IsVisible="{Binding IsSyncing}"
                                     WidthRequest="14"
                                     HeightRequest="14"
                                     Color="{Binding SyncStatusColor}"
                                     VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Roast Theme Selector Pill (44dp, Fluent Icons Settings) -->
+                        <Border
+                            Grid.Row="1"
+                            Style="{StaticResource TactilePillBorderStyle}"
+                            Padding="12,0">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenThemeSelectorCommand}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                                <fluent:SymbolIcon
+                                    Grid.Column="0"
+                                    Symbol="Settings"
+                                    FontSize="15"
+                                    ForegroundColor="{DynamicResource PrimaryColor}"
+                                    VerticalOptions="Center" />
                                 <Label
-                                    Text="{Binding SyncStatusText}"
+                                    Grid.Column="1"
+                                    Text="{Binding CurrentThemeName}"
                                     FontSize="12"
                                     FontAttributes="Bold"
-                                    TextColor="{Binding SyncStatusColor}"
+                                    TextColor="{DynamicResource PrimaryTextColor}"
+                                    LineBreakMode="TailTruncation"
                                     VerticalOptions="Center" />
-                            </HorizontalStackLayout>
+                                <Label
+                                    Grid.Column="2"
+                                    Text="Roast ▾"
+                                    FontSize="10"
+                                    FontAttributes="Bold"
+                                    TextColor="{DynamicResource SecondaryTextColor}"
+                                    VerticalOptions="Center" />
+                            </Grid>
                         </Border>
 
-                        <!-- Coffee Guide Quick Launcher -->
-                        <Button
-                            Text="📖 Guide"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            HeightRequest="36"
-                            Padding="12,0"
-                            FontSize="12"
-                            Command="{Binding OpenCoffeeDictionaryCommand}" />
+                        <!-- Mandatory Attribution Footer -->
+                        <Label
+                            Grid.Row="2"
+                            Text="AI engineered by EJRitter Development"
+                            Style="{StaticResource CaptionLabelStyle}"
+                            FontSize="10"
+                            HorizontalTextAlignment="Center"
+                            Margin="0,2,0,0" />
+                    </Grid>
 
-                        <!-- Settings Gear (Opens Theme Selector) -->
-                        <Button
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            WidthRequest="36"
-                            HeightRequest="36"
-                            Padding="0"
-                            Command="{Binding OpenThemeSelectorCommand}">
-                            <Button.ImageSource>
-                                <fluent:SymbolImageSource
-                                    Symbol="Settings"
-                                    Size="18"
-                                    Color="{DynamicResource PrimaryTextColor}" />
-                            </Button.ImageSource>
-                        </Button>
-                    </HorizontalStackLayout>
                 </Grid>
+            </Border>
+        </Grid>
 
-                <!-- Bottom Row: Dedicated Full-Width Segmented View Switcher Tabs -->
-                <Border
-                    BackgroundColor="{DynamicResource SurfaceAltColor}"
-                    Stroke="{DynamicResource BorderColor}"
-                    StrokeThickness="1"
-                    Padding="3"
-                    HorizontalOptions="Fill">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="14" />
-                    </Border.StrokeShape>
-                    <Grid ColumnDefinitions="*, *" ColumnSpacing="4">
-                        <Button
-                            Grid.Column="0"
-                            Text="✨ Java Oracle"
-                            HeightRequest="38"
-                            FontSize="13"
-                            FontAttributes="Bold"
-                            Command="{Binding SwitchToChatTabCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}">
-                            <Button.Triggers>
-                                <DataTrigger TargetType="Button" Binding="{Binding IsChatTabActive}" Value="True">
-                                    <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
-                                </DataTrigger>
-                            </Button.Triggers>
-                        </Button>
-                        <Button
-                            Grid.Column="1"
-                            Text="📊 Metabolism &amp; Kinetics"
-                            HeightRequest="38"
-                            FontSize="13"
-                            FontAttributes="Bold"
-                            Command="{Binding SwitchToStatsTabCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}">
-                            <Button.Triggers>
-                                <DataTrigger TargetType="Button" Binding="{Binding IsStatsTabActive}" Value="True">
-                                    <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
-                                </DataTrigger>
-                            </Button.Triggers>
-                        </Button>
-                    </Grid>
-                </Border>
-            </VerticalStackLayout>
-        </Border>
-
-        <!-- ================================================================= -->
-        <!-- 2. MAIN BODY VIEWPORT (Scrollable)                               -->
-        <!-- ================================================================= -->
-        <ScrollView Grid.Row="1">
-            <VerticalStackLayout Spacing="16" Padding="20,16,20,24" MaximumWidthRequest="1120">
-
-                <!-- ============================================================= -->
-                <!-- VIEW 1: JAVA ORACLE CHAT STREAM (When IsChatTabActive = True) -->
-                <!-- ============================================================= -->
-                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsChatTabActive}">
-
-                    <!-- Oracle Welcome Card -->
-                    <Border
-                        Style="{StaticResource CardBorderStyle}"
-                        BackgroundColor="{DynamicResource SurfaceColor}"
-                        Padding="18,14">
-                        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="16" VerticalOptions="Center">
-                            <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
-                                <Label
-                                    Text="🔮 Seek Caffeinated Truth"
-                                    FontSize="16"
-                                    FontAttributes="Bold"
-                                    TextColor="{DynamicResource PrimaryTextColor}" />
-                                <Label
-                                    Text="Ask the Oracle if you should brew another cup, then log whether you obeyed or rebelled."
-                                    Style="{StaticResource SmallLabelStyle}" />
-                            </VerticalStackLayout>
-
-                            <Button
-                                Grid.Column="1"
-                                Text="🔄 Reset"
-                                Style="{StaticResource SecondaryButtonStyle}"
-                                HeightRequest="34"
-                                Padding="12,0"
-                                FontSize="12"
-                                Command="{Binding ResetConversationCommand}"
-                                VerticalOptions="Center" />
-                        </Grid>
-                    </Border>
-
-                    <!-- Chat Messages Stream (CollectionView) -->
-                    <CollectionView
-                        ItemsSource="{Binding ChatMessages}"
-                        SelectionMode="None">
-                        <CollectionView.EmptyView>
-                            <Border
-                                Style="{StaticResource CardBorderStyle}"
-                                BackgroundColor="{DynamicResource SurfaceColor}"
-                                Padding="32,36"
-                                Margin="0,8">
-                                <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
-                                    <Label
-                                        Text="☕"
-                                        FontSize="44"
-                                        HorizontalTextAlignment="Center" />
-                                    <Label
-                                        Text="The Oracle is Listening"
-                                        FontSize="17"
-                                        FontAttributes="Bold"
-                                        TextColor="{DynamicResource PrimaryTextColor}"
-                                        HorizontalTextAlignment="Center" />
-                                    <Label
-                                        Text="Select your intended coffee drink below and tap 'Ask the Oracle'."
-                                        Style="{StaticResource SmallLabelStyle}"
-                                        HorizontalTextAlignment="Center" />
-                                </VerticalStackLayout>
-                            </Border>
-                        </CollectionView.EmptyView>
-
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="models:ChatMessageItem">
-                                <Grid Margin="0,6">
-
-                                    <!-- A. USER QUESTION BUBBLE (Right Aligned) -->
-                                    <Border
-                                        IsVisible="{Binding IsUserMessage}"
-                                        HorizontalOptions="End"
-                                        MaximumWidthRequest="560"
-                                        BackgroundColor="{DynamicResource SurfaceAltColor}"
-                                        Stroke="{DynamicResource BorderColor}"
-                                        StrokeThickness="1"
-                                        Padding="16,12">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="16,16,4,16" />
-                                        </Border.StrokeShape>
-                                        <VerticalStackLayout Spacing="4">
-                                            <HorizontalStackLayout Spacing="6" HorizontalOptions="End">
-                                                <Label
-                                                    Text="You Asked"
-                                                    Style="{StaticResource CaptionLabelStyle}"
-                                                    FontAttributes="Bold" />
-                                                <Label
-                                                    Text="{Binding TimeString}"
-                                                    Style="{StaticResource CaptionLabelStyle}" />
-                                            </HorizontalStackLayout>
-                                            <Label
-                                                Text="{Binding MessageText}"
-                                                FontSize="14"
-                                                TextColor="{DynamicResource PrimaryTextColor}"
-                                                LineBreakMode="WordWrap" />
-                                        </VerticalStackLayout>
-                                    </Border>
-
-                                    <!-- B1. ORACLE RESPONSE BUBBLE (Left Aligned Card) -->
-                                    <Border
-                                        IsVisible="{Binding IsOracleVerdictCard}"
-                                        HorizontalOptions="Start"
-                                        MaximumWidthRequest="620"
-                                        Style="{StaticResource CardBorderStyle}"
-                                        BackgroundColor="{DynamicResource SurfaceColor}"
-                                        Padding="18,16">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="16,16,16,4" />
-                                        </Border.StrokeShape>
-                                        <VerticalStackLayout Spacing="12">
-
-                                             <!-- Oracle Header & Verdict Badge -->
-                                            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10" VerticalOptions="Center">
-                                                <Border
-                                                    Grid.Column="0"
-                                                    WidthRequest="32"
-                                                    HeightRequest="32"
-                                                    BackgroundColor="{DynamicResource PrimaryColor}"
-                                                    StrokeThickness="0">
-                                                    <Border.StrokeShape>
-                                                        <RoundRectangle CornerRadius="16" />
-                                                    </Border.StrokeShape>
-                                                    <Label
-                                                        Text="🔮"
-                                                        FontSize="15"
-                                                        HorizontalOptions="Center"
-                                                        VerticalOptions="Center" />
-                                                </Border>
-
-                                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0">
-                                                    <Label
-                                                        Text="Oracle Verdict"
-                                                        FontSize="13"
-                                                        FontAttributes="Bold"
-                                                        TextColor="{DynamicResource PrimaryTextColor}" />
-                                                    <Label
-                                                        Text="{Binding TimeString}"
-                                                        Style="{StaticResource CaptionLabelStyle}" />
-                                                </VerticalStackLayout>
-
-                                                <!-- Verdict Badge (YES vs NO) -->
-                                                <Border
-                                                    Grid.Column="2"
-                                                    BackgroundColor="{Binding VerdictBadgeBgColor}"
-                                                    Stroke="{Binding VerdictBadgeBorderColor}"
-                                                    StrokeThickness="1"
-                                                    Padding="10,4"
-                                                    VerticalOptions="Center">
-                                                    <Border.StrokeShape>
-                                                        <RoundRectangle CornerRadius="12" />
-                                                    </Border.StrokeShape>
-                                                    <Label
-                                                        Text="{Binding VerdictBadgeDisplay}"
-                                                        FontSize="12"
-                                                        FontAttributes="Bold"
-                                                        TextColor="{Binding VerdictBadgeTextColor}" />
-                                                </Border>
-                                            </Grid>
-
-                                            <!-- Oracle Verdict Text -->
-                                            <Label
-                                                Text="{Binding MessageText}"
-                                                FontSize="14"
-                                                TextColor="{DynamicResource PrimaryTextColor}"
-                                                LineBreakMode="WordWrap" />
-
-                                            <!-- Step 1: Decision Buttons (Drank vs Skipped) -->
-                                            <Border
-                                                IsVisible="{Binding IsActionPending}"
-                                                BackgroundColor="{DynamicResource SurfaceAltColor}"
-                                                Stroke="{DynamicResource BorderColor}"
-                                                StrokeThickness="1"
-                                                Padding="12"
-                                                Margin="0,2,0,0">
-                                                <Border.StrokeShape>
-                                                    <RoundRectangle CornerRadius="12" />
-                                                </Border.StrokeShape>
-                                                <VerticalStackLayout Spacing="8">
-                                                    <Label
-                                                        Text="What did you do?"
-                                                        FontSize="12"
-                                                        FontAttributes="Bold"
-                                                        TextColor="{DynamicResource PrimaryTextColor}" />
-
-                                                    <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
-                                                        <Button
-                                                            Grid.Column="0"
-                                                            Text="☕ I Drank Coffee"
-                                                            HeightRequest="44"
-                                                            Padding="8,0"
-                                                            FontSize="12"
-                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=StartDrinkSelectionCommand}"
-                                                            CommandParameter="{Binding .}"
-                                                            Style="{StaticResource PrimaryButtonStyle}" />
-                                                        <Button
-                                                            Grid.Column="1"
-                                                            Text="🚫 I Skipped"
-                                                            HeightRequest="44"
-                                                            Padding="8,0"
-                                                            FontSize="12"
-                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=PromptSkipCommand}"
-                                                            CommandParameter="{Binding .}"
-                                                            Style="{StaticResource SecondaryButtonStyle}" />
-                                                    </Grid>
-                                                </VerticalStackLayout>
-                                            </Border>
-
-                                            <!-- Step 2A: Confirm Drink -->
-                                            <Border
-                                                IsVisible="{Binding IsSelectingCoffee}"
-                                                BackgroundColor="{DynamicResource SurfaceAltColor}"
-                                                Stroke="{DynamicResource BorderColor}"
-                                                StrokeThickness="1"
-                                                Padding="12"
-                                                Margin="0,2,0,0">
-                                                <Border.StrokeShape>
-                                                    <RoundRectangle CornerRadius="12" />
-                                                </Border.StrokeShape>
-                                                <VerticalStackLayout Spacing="8">
-                                                    <Label
-                                                        Text="Select the coffee you had:"
-                                                        FontSize="12"
-                                                        FontAttributes="Bold"
-                                                        TextColor="{DynamicResource PrimaryTextColor}" />
-
-                                                    <!-- Coffee Guide Drink Selector Card -->
-                                                    <Border
-                                                        BackgroundColor="{DynamicResource SurfaceColor}"
-                                                        Stroke="{DynamicResource BorderColor}"
-                                                        StrokeThickness="1"
-                                                        Padding="12,8"
-                                                        HeightRequest="44">
-                                                        <Border.StrokeShape>
-                                                            <RoundRectangle CornerRadius="10" />
-                                                        </Border.StrokeShape>
-                                                        <Border.GestureRecognizers>
-                                                            <TapGestureRecognizer
-                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=OpenCoffeeDictionaryForCardCommand}"
-                                                                CommandParameter="{Binding .}" />
-                                                        </Border.GestureRecognizers>
-                                                        <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
-                                                            <HorizontalStackLayout Grid.Column="0" Spacing="6" VerticalOptions="Center">
-                                                                <Label
-                                                                    Text="☕"
-                                                                    FontSize="14"
-                                                                    VerticalOptions="Center" />
-                                                                <Label
-                                                                    Text="{Binding SelectedCoffeeName, FallbackValue='Select Coffee Drink...'}"
-                                                                    FontSize="13"
-                                                                    FontAttributes="Bold"
-                                                                    TextColor="{DynamicResource PrimaryTextColor}"
-                                                                    VerticalOptions="Center"
-                                                                    LineBreakMode="TailTruncation" />
-                                                            </HorizontalStackLayout>
-                                                            <Border
-                                                                Grid.Column="1"
-                                                                BackgroundColor="{DynamicResource SurfaceAltColor}"
-                                                                StrokeThickness="0"
-                                                                Padding="8,4"
-                                                                VerticalOptions="Center">
-                                                                <Border.StrokeShape>
-                                                                    <RoundRectangle CornerRadius="6" />
-                                                                </Border.StrokeShape>
-                                                                <Label
-                                                                    Text="📖 Change ▾"
-                                                                    FontSize="11"
-                                                                    FontAttributes="Bold"
-                                                                    TextColor="{DynamicResource PrimaryColor}"
-                                                                    VerticalOptions="Center" />
-                                                            </Border>
-                                                        </Grid>
-                                                    </Border>
-
-                                                    <Button
-                                                        Text="✅ Confirm Drank Coffee"
-                                                        HeightRequest="44"
-                                                        Padding="12,0"
-                                                        FontSize="12"
-                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=ConfirmDrankOutcomeCommand}"
-                                                        CommandParameter="{Binding .}"
-                                                        Style="{StaticResource PrimaryButtonStyle}" />
-                                                </VerticalStackLayout>
-                                            </Border>
-
-                                            <!-- Step 2B: Confirm Skip -->
-                                            <Border
-                                                IsVisible="{Binding IsConfirmingSkip}"
-                                                BackgroundColor="{DynamicResource SurfaceAltColor}"
-                                                Stroke="{DynamicResource BorderColor}"
-                                                StrokeThickness="1"
-                                                Padding="12"
-                                                Margin="0,2,0,0">
-                                                <Border.StrokeShape>
-                                                    <RoundRectangle CornerRadius="12" />
-                                                </Border.StrokeShape>
-                                                <VerticalStackLayout Spacing="8">
-                                                    <Label
-                                                        Text="Confirm that you skipped coffee:"
-                                                        FontSize="12"
-                                                        FontAttributes="Bold"
-                                                        TextColor="{DynamicResource PrimaryTextColor}" />
-
-                                                    <Button
-                                                        Text="✅ Confirm Skipped"
-                                                        HeightRequest="44"
-                                                        Padding="12,0"
-                                                        FontSize="12"
-                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=ConfirmSkipOutcomeCommand}"
-                                                        CommandParameter="{Binding .}"
-                                                        Style="{StaticResource PrimaryButtonStyle}" />
-                                                </VerticalStackLayout>
-                                            </Border>
-
-                                            <!-- Outcome Completed Badge -->
-                                            <Border
-                                                IsVisible="{Binding IsConfirmed}"
-                                                BackgroundColor="{Binding ComplianceBadgeBgColor}"
-                                                Stroke="{Binding ComplianceBadgeBorderColor}"
-                                                StrokeThickness="1"
-                                                Padding="12,8">
-                                                <Border.StrokeShape>
-                                                    <RoundRectangle CornerRadius="10" />
-                                                </Border.StrokeShape>
-                                                <VerticalStackLayout Spacing="2">
-                                                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
-                                                        <Label
-                                                            Text="{Binding ComplianceEmoji}"
-                                                            FontSize="14"
-                                                            VerticalOptions="Center" />
-                                                        <Label
-                                                            Text="{Binding ComplianceTagText}"
-                                                            FontSize="12"
-                                                            FontAttributes="Bold"
-                                                            TextColor="{Binding ComplianceBadgeTextColor}"
-                                                            VerticalOptions="Center" />
-                                                    </HorizontalStackLayout>
-                                                    <Label
-                                                        Text="{Binding OutcomeFeedbackText}"
-                                                        FontSize="11"
-                                                        TextColor="{Binding ComplianceBadgeTextColor}" />
-                                                </VerticalStackLayout>
-                                            </Border>
-
-                                        </VerticalStackLayout>
-                                    </Border>
-
-                                    <!-- B2. ORACLE TYPING INDICATOR BUBBLE -->
-                                    <Border
-                                        IsVisible="{Binding IsTypingIndicatorMessage}"
-                                        HorizontalOptions="Start"
-                                        Style="{StaticResource CardBorderStyle}"
-                                        BackgroundColor="{DynamicResource SurfaceColor}"
-                                        Padding="18,14"
-                                        Loaded="OnTypingIndicatorLoaded"
-                                        Unloaded="OnTypingIndicatorUnloaded">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="16,16,16,4" />
-                                        </Border.StrokeShape>
-                                        <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
-                                            <Border
-                                                WidthRequest="28"
-                                                HeightRequest="28"
-                                                BackgroundColor="{DynamicResource PrimaryColor}"
-                                                StrokeThickness="0">
-                                                <Border.StrokeShape>
-                                                    <RoundRectangle CornerRadius="14" />
-                                                </Border.StrokeShape>
-                                                <Label
-                                                    Text="🔮"
-                                                    FontSize="13"
-                                                    HorizontalOptions="Center"
-                                                    VerticalOptions="Center" />
-                                            </Border>
-                                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center" x:Name="DotsContainer">
-                                                <Ellipse WidthRequest="8" HeightRequest="8" Fill="{DynamicResource SecondaryTextColor}" Opacity="0.3" StyleId="Dot1" />
-                                                <Ellipse WidthRequest="8" HeightRequest="8" Fill="{DynamicResource SecondaryTextColor}" Opacity="0.3" StyleId="Dot2" />
-                                                <Ellipse WidthRequest="8" HeightRequest="8" Fill="{DynamicResource SecondaryTextColor}" Opacity="0.3" StyleId="Dot3" />
-                                            </HorizontalStackLayout>
-                                            <Label
-                                                Text="The Oracle is pondering..."
-                                                Style="{StaticResource CaptionLabelStyle}"
-                                                VerticalOptions="Center"
-                                                Margin="4,0,0,0" />
-                                        </HorizontalStackLayout>
-                                    </Border>
-                                </Grid>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-
-                    <!-- Bottom Oracle Input / Action Bar (Responsive 2-Row Layout) -->
-                    <Border
-                        Style="{StaticResource CardBorderStyle}"
-                        BackgroundColor="{DynamicResource SurfaceColor}"
-                        Padding="14,12"
-                        Margin="0,4,0,0">
-                        <Grid RowDefinitions="Auto, Auto" RowSpacing="10">
-
-                            <!-- Row 0: Coffee Drink Selection & Quick Caffeine Metric -->
-                            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" ColumnSpacing="8" VerticalOptions="Center">
-                                <!-- Interactive Drink Selector Button -->
-                                <Border
-                                    Grid.Column="0"
-                                    BackgroundColor="{DynamicResource SurfaceAltColor}"
-                                    Stroke="{DynamicResource BorderColor}"
-                                    StrokeThickness="1"
-                                    Padding="12,6"
-                                    HeightRequest="44"
-                                    VerticalOptions="Center">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="10" />
-                                    </Border.StrokeShape>
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding OpenCoffeeDictionaryCommand}" />
-                                    </Border.GestureRecognizers>
-                                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="6" VerticalOptions="Center">
-                                        <Label
-                                            Grid.Column="0"
-                                            Text="☕"
-                                            FontSize="14"
-                                            VerticalOptions="Center" />
-                                        <Label
-                                            Grid.Column="1"
-                                            Text="{Binding SelectedCoffeePreference.Name, FallbackValue='Select Coffee from Guide...'}"
-                                            FontSize="13"
-                                            FontAttributes="Bold"
-                                            TextColor="{DynamicResource PrimaryTextColor}"
-                                            VerticalOptions="Center"
-                                            LineBreakMode="TailTruncation" />
-                                        <Border
-                                            Grid.Column="2"
-                                            BackgroundColor="{DynamicResource SurfaceColor}"
-                                            Stroke="{DynamicResource BorderColor}"
-                                            StrokeThickness="0.5"
-                                            Padding="8,3"
-                                            VerticalOptions="Center">
-                                            <Border.StrokeShape>
-                                                <RoundRectangle CornerRadius="6" />
-                                            </Border.StrokeShape>
-                                            <Label
-                                                Text="📖 Guide ▾"
-                                                FontSize="11"
-                                                FontAttributes="Bold"
-                                                TextColor="{DynamicResource PrimaryColor}"
-                                                VerticalOptions="Center" />
-                                        </Border>
-                                    </Grid>
-                                </Border>
-
-                                <!-- Guaranteed Caffeine Badge -->
-                                <Border
-                                    Grid.Column="1"
-                                    BackgroundColor="{DynamicResource SurfaceAltColor}"
-                                    Stroke="{DynamicResource BorderColor}"
-                                    StrokeThickness="1"
-                                    Padding="10,0"
-                                    HeightRequest="44"
-                                    VerticalOptions="Center">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="10" />
-                                    </Border.StrokeShape>
-                                    <Label
-                                        Text="{Binding SelectedCoffeeCaffeineText, StringFormat='⚡ {0}'}"
-                                        FontSize="12"
-                                        FontAttributes="Bold"
-                                        TextColor="{DynamicResource SecondaryColor}"
-                                        VerticalOptions="Center"
-                                        HorizontalOptions="Center" />
-                                </Border>
-                            </Grid>
-
-                            <!-- Row 1: Primary "Ask Oracle" Button (Full Width, 46dp height) -->
-                            <Button
-                                Grid.Row="1"
-                                Text="🔮 Ask the Oracle"
-                                Style="{StaticResource PrimaryButtonStyle}"
-                                Command="{Binding AskOracleCommand}"
-                                HeightRequest="46"
-                                HorizontalOptions="Fill" />
-                        </Grid>
-                    </Border>
-
-                </VerticalStackLayout>
-
-                <!-- ============================================================= -->
-                <!-- VIEW 2: METABOLISM & PHARMACOKINETICS DASHBOARD               -->
-                <!-- ============================================================= -->
-                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsStatsTabActive}">
-
-                    <!-- 4 Top KPI Stat Cards (2x2 Responsive Grid) -->
-                    <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="*, *" RowSpacing="10" ColumnSpacing="10">
-
-                        <!-- Card 1: Active Caffeine In Body -->
-                        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource CardBorderStyle}" Padding="14,12">
-                            <VerticalStackLayout Spacing="2">
-                                <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
-                                    <Label Text="⚡" FontSize="13" />
-                                    <Label Text="Active in Body" Style="{StaticResource CaptionLabelStyle}" FontAttributes="Bold" />
-                                </HorizontalStackLayout>
-                                <Label
-                                    Text="{Binding ActiveCaffeineMg, StringFormat='{0:F0} mg'}"
-                                    FontSize="24"
-                                    FontAttributes="Bold"
-                                    TextColor="{DynamicResource PrimaryColor}" />
-                                <Label Text="5h half-life kinetics" Style="{StaticResource CaptionLabelStyle}" />
-                            </VerticalStackLayout>
-                        </Border>
-
-                        <!-- Card 2: Today's Total Intake -->
-                        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource CardBorderStyle}" Padding="14,12">
-                            <VerticalStackLayout Spacing="2">
-                                <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
-                                    <Label Text="☕" FontSize="13" />
-                                    <Label Text="Total Intake" Style="{StaticResource CaptionLabelStyle}" FontAttributes="Bold" />
-                                </HorizontalStackLayout>
-                                <Label
-                                    Text="{Binding TotalCaffeineTodayMg, StringFormat='{0} mg'}"
-                                    FontSize="24"
-                                    FontAttributes="Bold"
-                                    TextColor="{DynamicResource PrimaryTextColor}" />
-                                <Label
-                                    Text="{Binding CupsLoggedCount, StringFormat='{0} cups logged'}"
-                                    Style="{StaticResource CaptionLabelStyle}" />
-                            </VerticalStackLayout>
-                        </Border>
-
-                        <!-- Card 3: Oracle Compliance Index -->
-                        <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource CardBorderStyle}" Padding="14,12">
-                            <VerticalStackLayout Spacing="2">
-                                <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
-                                    <Label Text="⚖️" FontSize="13" />
-                                    <Label Text="Compliance" Style="{StaticResource CaptionLabelStyle}" FontAttributes="Bold" />
-                                </HorizontalStackLayout>
-                                <Label
-                                    Text="{Binding CompliancePercentage, StringFormat='{0}%'}"
-                                    FontSize="24"
-                                    FontAttributes="Bold"
-                                    TextColor="{DynamicResource SuccessColor}" />
-                                <Label
-                                    Text="{Binding ComplianceBreakdownText}"
-                                    Style="{StaticResource CaptionLabelStyle}" />
-                            </VerticalStackLayout>
-                        </Border>
-
-                        <!-- Card 4: Safe Sleep Countdown -->
-                        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CardBorderStyle}" Padding="14,12">
-                            <VerticalStackLayout Spacing="2">
-                                <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
-                                    <Label Text="🌙" FontSize="13" />
-                                    <Label Text="Sleep Ready" Style="{StaticResource CaptionLabelStyle}" FontAttributes="Bold" />
-                                </HorizontalStackLayout>
-                                <Label
-                                    Text="{Binding HoursToSleepReadyText}"
-                                    FontSize="24"
-                                    FontAttributes="Bold"
-                                    TextColor="{DynamicResource SecondaryColor}" />
-                                <Label
-                                    Text="{Binding HoursToClearanceText, StringFormat='Clear: {0}'}"
-                                    Style="{StaticResource CaptionLabelStyle}" />
-                            </VerticalStackLayout>
-                        </Border>
-                    </Grid>
-
-                    <!-- 24-Hour Pharmacokinetic Elimination Decay Curve -->
-                    <Border Style="{StaticResource CardBorderStyle}" Padding="18,14">
-                        <VerticalStackLayout Spacing="10">
-                            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
-                                <VerticalStackLayout Grid.Column="0" Spacing="1">
-                                    <Label
-                                        Text="⚡ 24-Hour Elimination Decay Curve"
-                                        Style="{StaticResource MediumLabelStyle}" />
-                                    <Label
-                                        Text="Real-time exponential elimination modeling: N(t) = N₀ · (0.5)^(t / 5.0h)"
-                                        Style="{StaticResource SmallLabelStyle}" />
-                                </VerticalStackLayout>
-
-                                <!-- Legend -->
-                                <HorizontalStackLayout Grid.Column="1" Spacing="12" VerticalOptions="Center">
-                                    <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
-                                        <BoxView WidthRequest="12" HeightRequest="3" Color="#7E57C2" VerticalOptions="Center" />
-                                        <Label Text="Decay Curve" Style="{StaticResource CaptionLabelStyle}" />
-                                    </HorizontalStackLayout>
-                                    <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
-                                        <BoxView WidthRequest="12" HeightRequest="2" Color="#2E7D32" VerticalOptions="Center" />
-                                        <Label Text="Sleep (20mg)" Style="{StaticResource CaptionLabelStyle}" />
-                                    </HorizontalStackLayout>
-                                </HorizontalStackLayout>
-                            </Grid>
-
-                            <!-- Native GraphicsView Chart -->
-                            <Border
-                                BackgroundColor="{DynamicResource SurfaceAltColor}"
-                                Stroke="{DynamicResource BorderColor}"
-                                StrokeThickness="1"
-                                HeightRequest="220"
-                                Padding="6">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="12" />
-                                </Border.StrokeShape>
-                                <GraphicsView
-                                    x:Name="MetabolismChartView"
-                                    Drawable="{Binding MetabolismDrawable}"
-                                    HeightRequest="208" />
-                            </Border>
-
-                            <!-- Kinetics Summary Footer -->
-                            <Grid ColumnDefinitions="*, *, *" ColumnSpacing="10" Margin="0,2,0,0">
-                                <Border Grid.Column="0" BackgroundColor="{DynamicResource SurfaceAltColor}" StrokeThickness="0" Padding="8,5">
-                                    <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
-                                    <Label Text="⏱️ Peak: 30–60 min" Style="{StaticResource CaptionLabelStyle}" HorizontalTextAlignment="Center" />
-                                </Border>
-                                <Border Grid.Column="1" BackgroundColor="{DynamicResource SurfaceAltColor}" StrokeThickness="0" Padding="8,5">
-                                    <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
-                                    <Label Text="📉 Half-Life: 5.0h" Style="{StaticResource CaptionLabelStyle}" HorizontalTextAlignment="Center" />
-                                </Border>
-                                <Border Grid.Column="2" BackgroundColor="{DynamicResource SurfaceAltColor}" StrokeThickness="0" Padding="8,5">
-                                    <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
-                                    <Label Text="🔬 24h Remaining: ~3.1%" Style="{StaticResource CaptionLabelStyle}" HorizontalTextAlignment="Center" />
-                                </Border>
-                            </Grid>
-                        </VerticalStackLayout>
-                    </Border>
-
-                    <!-- Section: 2x2 Compliance Matrix (Full-Width Card) -->
-                    <Border Style="{StaticResource CardBorderStyle}" Padding="16,14">
-                        <VerticalStackLayout Spacing="10">
-                            <Label Text="⚖️ Compliance Matrix" Style="{StaticResource MediumLabelStyle}" />
-                            <Label Text="Oracle advice vs your actual decisions." Style="{StaticResource SmallLabelStyle}" />
-
-                            <Grid RowDefinitions="Auto, Auto" ColumnDefinitions="*, *" RowSpacing="10" ColumnSpacing="10" Margin="0,4,0,0">
-                                <!-- YES • DRANK (Obeyed) -->
-                                <Border Grid.Row="0" Grid.Column="0" BackgroundColor="#E8F5E9" Stroke="#2E7D32" StrokeThickness="1" Padding="12">
-                                    <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
-                                    <VerticalStackLayout Spacing="2">
-                                        <Label Text="YES • DRANK" FontSize="11" FontAttributes="Bold" TextColor="#2E7D32" />
-                                        <Label Text="{Binding ComplianceStats.YesYes}" FontSize="22" FontAttributes="Bold" TextColor="#2E7D32" />
-                                        <Label Text="😇 Obeyed &amp; Had Coffee" FontSize="11" TextColor="#2E7D32" />
-                                    </VerticalStackLayout>
-                                </Border>
-
-                                <!-- NO • SKIPPED (Obeyed) -->
-                                <Border Grid.Row="0" Grid.Column="1" BackgroundColor="#E8F5E9" Stroke="#2E7D32" StrokeThickness="1" Padding="12">
-                                    <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
-                                    <VerticalStackLayout Spacing="2">
-                                        <Label Text="NO • SKIPPED" FontSize="11" FontAttributes="Bold" TextColor="#2E7D32" />
-                                        <Label Text="{Binding ComplianceStats.NoNo}" FontSize="22" FontAttributes="Bold" TextColor="#2E7D32" />
-                                        <Label Text="😇 Obeyed &amp; Rested" FontSize="11" TextColor="#2E7D32" />
-                                    </VerticalStackLayout>
-                                </Border>
-
-                                <!-- YES • SKIPPED (Rebelled) -->
-                                <Border Grid.Row="1" Grid.Column="0" BackgroundColor="#FFF3E0" Stroke="#D97706" StrokeThickness="1" Padding="12">
-                                    <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
-                                    <VerticalStackLayout Spacing="2">
-                                        <Label Text="YES • SKIPPED" FontSize="11" FontAttributes="Bold" TextColor="#D97706" />
-                                        <Label Text="{Binding ComplianceStats.YesNo}" FontSize="22" FontAttributes="Bold" TextColor="#D97706" />
-                                        <Label Text="😈 Rebelled &amp; Refrained" FontSize="11" TextColor="#D97706" />
-                                    </VerticalStackLayout>
-                                </Border>
-
-                                <!-- NO • DRANK (Rebelled) -->
-                                <Border Grid.Row="1" Grid.Column="1" BackgroundColor="#FFEBEE" Stroke="#C62828" StrokeThickness="1" Padding="12">
-                                    <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
-                                    <VerticalStackLayout Spacing="2">
-                                        <Label Text="NO • DRANK" FontSize="11" FontAttributes="Bold" TextColor="#C62828" />
-                                        <Label Text="{Binding ComplianceStats.NoYes}" FontSize="22" FontAttributes="Bold" TextColor="#C62828" />
-                                        <Label Text="😈 Rebelled &amp; Caffeinated" FontSize="11" TextColor="#C62828" />
-                                    </VerticalStackLayout>
-                                </Border>
-                            </Grid>
-                        </VerticalStackLayout>
-                    </Border>
-
-                    <!-- Section: Query & Intake History Ledger (Full-Width Card) -->
-                    <Border Style="{StaticResource CardBorderStyle}" Padding="16,14">
-                        <VerticalStackLayout Spacing="10">
-                            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
-                                <Label Grid.Column="0" Text="📜 Intake &amp; Decision Ledger" Style="{StaticResource MediumLabelStyle}" />
-                                <Label Grid.Column="1" Text="{Binding HistoryLogs.Count, StringFormat='{0} Entries'}" Style="{StaticResource CaptionLabelStyle}" />
-                            </Grid>
-
-                            <CollectionView ItemsSource="{Binding HistoryLogs}" SelectionMode="None" HeightRequest="240">
-                                <CollectionView.EmptyView>
-                                    <Label Text="No decisions logged yet today." Style="{StaticResource SmallLabelStyle}" HorizontalTextAlignment="Center" Margin="0,40" />
-                                </CollectionView.EmptyView>
-                                <CollectionView.ItemTemplate>
-                                    <DataTemplate x:DataType="models:OracleDecisionLog">
-                                        <Border BackgroundColor="{DynamicResource SurfaceAltColor}" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" Padding="12,10" Margin="0,3">
-                                            <Border.StrokeShape><RoundRectangle CornerRadius="10" /></Border.StrokeShape>
-                                            <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="10" VerticalOptions="Center">
-                                                <!-- Time -->
-                                                <Label Grid.Column="0" Text="{Binding FormattedTime}" Style="{StaticResource CaptionLabelStyle}" FontAttributes="Bold" VerticalOptions="Center" />
-
-                                                <!-- Drink & mg -->
-                                                <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
-                                                    <Label Text="{Binding FormattedCoffeeName}" FontSize="13" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" LineBreakMode="TailTruncation" />
-                                                    <Label Text="{Binding CaffeineDisplayText}" Style="{StaticResource CaptionLabelStyle}" />
-                                                </VerticalStackLayout>
-
-                                                <!-- Oracle Verdict & Outcome Badge -->
-                                                <Border Grid.Column="2" BackgroundColor="{DynamicResource SurfaceColor}" Stroke="{DynamicResource BorderColor}" StrokeThickness="1" Padding="8,4" VerticalOptions="Center">
-                                                    <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
-                                                    <Label Text="{Binding StatusBadgeText}" FontSize="11" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
-                                                </Border>
-
-                                                <!-- Edit Action Button -->
-                                                <Button
-                                                    Grid.Column="3"
-                                                    Text="✏️"
-                                                    Style="{StaticResource SecondaryButtonStyle}"
-                                                    WidthRequest="36"
-                                                    HeightRequest="36"
-                                                    Padding="0"
-                                                    FontSize="12"
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=EditLogCommand}"
-                                                    CommandParameter="{Binding .}"
-                                                    VerticalOptions="Center" />
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </CollectionView.ItemTemplate>
-                            </CollectionView>
-                        </VerticalStackLayout>
-                    </Border>
-
-                </VerticalStackLayout>
-
-            </VerticalStackLayout>
-        </ScrollView>
     </Grid>
 </ContentPage>

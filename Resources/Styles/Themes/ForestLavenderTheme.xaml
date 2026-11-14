@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="MugOverflowProject.Resources.Styles.Themes.ForestLavenderTheme">
 
-    <x:String x:Key="ThemeName">Forest Lavender</x:String>
+    <x:String x:Key="ThemeName">Iced Matcha Latte</x:String>
 
     <Color x:Key="PageBackgroundColor">#F3EFE6</Color>
     <Color x:Key="NavigationBarColor">#184D37</Color>
@@ -30,4 +30,7 @@
     <Color x:Key="PrimaryGradientEnd">#7E57C2</Color>
     <Color x:Key="CardShadowColor">#1A202124</Color>
     <Color x:Key="AppShadowColor">#26202124</Color>
+
+    <Color x:Key="PrimaryButtonTextColor">White</Color>
+    <Color x:Key="AccentButtonTextColor">White</Color>
 </ResourceDictionary>

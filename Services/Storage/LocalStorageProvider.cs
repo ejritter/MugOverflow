@@ -23,9 +23,19 @@ public sealed class LocalStorageProvider : IStorageProvider
 	/// <param name="logger">Optional logger instance.</param>
 	public LocalStorageProvider(string? baseDirectory = null, ILogger<LocalStorageProvider>? logger = null)
 	{
+		string fallbackDir;
+		try
+		{
+			fallbackDir = FileSystem.AppDataDirectory;
+		}
+		catch
+		{
+			fallbackDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MugOverflow");
+		}
+
 		_baseDirectory = !string.IsNullOrWhiteSpace(baseDirectory)
 			? baseDirectory
-			: FileSystem.AppDataDirectory;
+			: fallbackDir;
 		_logger = logger;
 	}
 

@@ -43,7 +43,7 @@ public sealed class OneDriveStorageProvider : IStorageProvider
 		ILogger<OneDriveStorageProvider>? logger = null)
 	{
 		_secureStorage = secureStorage ?? throw new ArgumentNullException(nameof(secureStorage));
-		_httpClient = httpClient ?? new HttpClient();
+		_httpClient = httpClient ?? new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
 		_logger = logger;
 
 		string activeClientId = !string.IsNullOrWhiteSpace(clientId) ? clientId : DefaultClientId;

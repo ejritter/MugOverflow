@@ -1,48 +1,50 @@
 # Design System
 
-This document serves as the aesthetic anchor for `/maui-impeccable-xaml` commands in MugOverflow.
+This document serves as the aesthetic anchor for `/maui-impeccable-xaml` craft in MugOverflow on `.NET 11`.
 
 ## Core Vibe
-Refined, editorial, pharmacokinetic precision blended with conversational warmth. A clean developer-first aesthetic that feels like a premium native tool—confident, high-contrast, tactile, and strictly free of AI visual slop.
+Warm specialty coffeehouse craftsmanship blended with crisp pharmacokinetic precision. Rich roasted espresso dark mode by default (`"Espresso Crema Dark"`), expressive 60fps vector mascot personality, tactile one-tap chat chips, and high-contrast native surfaces free of generic AI dashboard clutter.
 
-## Color Palettes & Runtime Themes
-All colors are resolved dynamically through theme resource dictionaries (`RegalEarthTheme`, `WineDesertTheme`, `ForestLavenderTheme`, `PristineCleanTheme`) using `{DynamicResource}` bindings.
+## Color Palettes & Pure Coffeehouse Drink Themes
+All colors are resolved dynamically at Index 1 of `Application.Current.Resources.MergedDictionaries` using `{DynamicResource}` bindings exclusively. Legacy theme names remain supported as aliases in `ThemeManager`.
 
-### Standard Dynamic Keys
-- **PrimaryColor**: Main brand action and emphasis accent (`#4B1D6B` Regal, `#722F37` Wine, `#1B4332` Forest, `#004D40` Pristine).
-- **SecondaryColor**: Supporting accent and badge highlight (`#C89B3C` Gold, `#C28B5B` Tan, `#7E57C2` Lavender, `#00897B` Seafoam).
-- **PageBackgroundColor**: Base canvas layer (`#FBF8F2` Light / `#1C1510` Dark).
-- **SurfaceColor**: Primary card container background (`#FFFFFF` Light / `#251E17` Dark).
-- **SurfaceAltColor**: Secondary container and tab pill background (`#F2EBE1` Light / `#322920` Dark).
-- **BorderColor**: Subtle structural division border (`#E5DCB8` Light / `#44372B` Dark).
-- **PrimaryTextColor**: High-contrast text (`#1C1510` Light / `#FBF8F2` Dark).
-- **SecondaryTextColor**: Muted metadata and subtext (`#7A6A58` Light / `#C4B5A5` Dark).
-- **SuccessColor**: Positive / Compliance accent (`#2E7D32` Green).
-- **WarningColor**: Caution / Threshold line accent (`#D97706` Amber).
-- **ErrorColor**: Rebellious / Alert state accent (`#C62828` Red).
-- **InfoColor**: Oracle prompt badge / neutral info (`#0288D1` Blue).
+### 5 Coffeehouse Drink Flavor Pairs (10 Palettes)
+1. **Espresso & Oat Latte** (`CoffeeDarkTheme` / `CoffeeLightTheme`):
+   - `"Espresso Crema Dark"` (**Default** — `#1C1510` dark roast canvas, `#D4975A` crema primary, `#E8B878` golden foam accent)
+   - `"Steamed Oat Latte"` (`#FBF8F2` oat milk canvas, `#5C3818` espresso primary, `#C4823F` caramel crema accent)
+2. **Caramel Mocha** (`WineDesertTheme` / `WineDesertDarkTheme`):
+   - `"Caramel Macchiato"` & `"Mocha Velvet Dark"`
+3. **Ceremonial Matcha** (`ForestLavenderTheme` / `ForestLavenderDarkTheme`):
+   - `"Iced Matcha Latte"` & `"Dirty Matcha Dark"`
+4. **Lavender Cold Brew** (`RegalEarthTheme` / `RegalEarthDarkTheme`):
+   - `"Honey Lavender Latte"` & `"Midnight Cold Brew"`
+5. **Mint Cortado** (`PristineCleanTheme` / `PristineCleanDarkTheme`):
+   - `"Sweet Mint Cortado"` & `"Dark Mint Espresso"`
+
+### Standard Dynamic Keys (24 Validated WCAG AA/AAA Tokens)
+- **Brand & Surface**: `ThemeName`, `PageBackgroundColor`, `NavigationBarColor`, `PrimaryColor`, `SecondaryColor`, `AccentColor`, `SurfaceColor`, `SurfaceAltColor`, `BorderColor`
+- **Typography & Contrast**: `PrimaryTextColor`, `SecondaryTextColor`, `TertiaryTextColor`, `PrimaryButtonTextColor`, `AccentButtonTextColor`
+- **Semantic & Elevation**: `SuccessColor`, `WarningColor`, `ErrorColor`, `InfoColor`, `DecorativeColor`, `TransparentColor`, `PrimaryGradientStart`, `PrimaryGradientEnd`, `CardShadowColor`, `AppShadowColor`
+
+## Animated Coffee Mug Mascot (`CoffeeMascotView`)
+- **Vector Rendering**: Custom `IDrawable` (`CoffeeMascotDrawable`) rendered natively via `Microsoft.Maui.Graphics`.
+- **Hero Espresso Stage**: Full ceramic mug & saucer with dynamic espresso fill (`ActiveCaffeineMg`), sloshing sine-wave crema foam, Bezier rising steam wisps, natural eye blinks, and 7 expressive `MascotMood` states (`Sleepy`, `Happy`, `Wired`, `Brewing`, `CelebratingYes`, `SternNo`, `SplashSkip`).
+- **Mini-Avatar Mode**: High-contrast `38x38` compact mug avatar alongside Barista chat bubbles and brewing indicators.
 
 ## Typography Scale
-Pure native MAUI `Label` with strict semantic styles:
+Pure native MAUI `Label` with semantic styles:
 - **Display / App Header**: `FontSize="22"`, `FontAttributes="Bold"`, `LineBreakMode="TailTruncation"`
-- **Section Title / Large Header**: `FontSize="18"`, `FontAttributes="Bold"`
-- **Card Title / Metric Header**: `FontSize="14"`, `FontAttributes="Bold"`
-- **Metric Highlight Number**: `FontSize="28"`, `FontAttributes="Bold"`, high visual weight
+- **Section Title / Modal Header**: `FontSize="18"`, `FontAttributes="Bold"`
+- **Card Title /Mascot Mood Header**: `FontSize="17"`, `FontAttributes="Bold"`
+- **Metric Highlight Number**: `FontSize="26"`, `FontAttributes="Bold"`
 - **Body / Chat Message**: `FontSize="14"`, standard weight, high readability
 - **Subtitle / Small Label**: `FontSize="13"`, muted text color
-- **Micro / Caption**: `FontSize="11"`, uppercase tracking, metadata & timestamps
+- **Micro / Caption**: `FontSize="11"`, metadata, roast badges & timestamps
 
-## Structural & Responsive Rules
-- **Flat Over Nested**: Avoid deeply nested stack layouts; use single-level multi-row/multi-column `<Grid>` architectures.
-- **Strict 4dp/8dp Rhythm**: Margins, paddings, and row spacings strictly use values from the standard scale: `4`, `8`, `12`, `16`, `20`, `24`, `32`.
-- **Responsive Dual-Pane Architecture**:
-  - **Wide Screens & Desktop ($\ge 900\text{dp}$)**: Renders side-by-side 2-column grid (`50% / 50%` or `1* / 1*`), presenting the Oracle Stream and Metabolism Dashboard simultaneously.
-  - **Mobile & Compact Screens ($< 900\text{dp}$)**: Automatically collapses into the single-column tabbed switcher ("✨ Java Oracle" / "📊 Metabolism & Stats").
-- **Pure Native Controls**: Exclusively `<Border>` with `RoundRectangle` corner radii (8, 12, 16, 20). Zero legacy `<Frame>` elements.
-- **Minimum Touch Targets**: All interactive elements maintain a minimum target area of `44dp` (`HeightRequest="44"` or larger).
-- **Tactile Micro-Interactions**:
-  - Implement `VisualStateManager` on buttons and cards.
-  - Apply subtle scale down (`Scale="0.98"`) on `Pressed` state.
-  - Apply soft border highlight on `PointerOver` state.
-  - Reject all dated bounce or elastic animations in favor of smooth, instantaneous tactile responses.
-- **Zero Third-Party UI Kits**: Implement all component patterns using native .NET MAUI controls and `FluentIcons.Maui`.
+## Structural, Motion & Responsive Rules
+- **Side-by-Side Mascot & Chatbot Stage (`MainPage`)**:
+  - **Wide Screens & Desktop ($\ge 900\text{dp}$)**: 2-column workspace (`320, *`), pairing Mugsy's Espresso Stage & live buzz mini-grid on the left with the back-and-forth Chatbot Stream & Tap-Chip Dock on the right.
+  - **Compact Screens ($< 900\text{dp}$)**: Dynamically adapts into a 2-row (`Auto, *`) vertical flow without clipping.
+  - **Slide-Over Coffeehouse Drawer**: Smooth `CubicOut` backdrop + `TranslationX` overlay replacing rigid permanent sidebars.
+- **Unified Roast Kinetics Bento Stage (`MetabolismPage`)**: Single-column Coffeehouse header bar + scrollable KPI Bento stage, 24h Elimination Curve `GraphicsView`, 2x2 Alignment Matrix, and searchable/paginated Intake Ledger.
+- **Pure Native Controls & 44dp Touch Targets**: Exclusively `<Border>` with `RoundRectangle` shapes, `FluentIcons.Maui` (`Symbol="Settings"` gear on theme triggers), `VisualStateManager` hover/press feedback, and `"AI engineered by EJRitter Development"` attribution.

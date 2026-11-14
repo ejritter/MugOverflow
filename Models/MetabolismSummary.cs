@@ -21,6 +21,11 @@ public sealed class MetabolismSummary
 		{
 			int hours = (int)Math.Floor(HoursToFullClearance);
 			int minutes = (int)Math.Round((HoursToFullClearance - hours) * 60);
+			if (minutes >= 60)
+			{
+				hours++;
+				minutes = 0;
+			}
 			return $"{hours}h {minutes}m";
 		}
 	}
@@ -35,6 +40,11 @@ public sealed class MetabolismSummary
 			}
 			int hours = (int)Math.Floor(HoursToSleepReady);
 			int minutes = (int)Math.Round((HoursToSleepReady - hours) * 60);
+			if (minutes >= 60)
+			{
+				hours++;
+				minutes = 0;
+			}
 			return $"Sleep ready in: ~{hours}h {minutes}m";
 		}
 	}

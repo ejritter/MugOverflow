@@ -1,3 +1,4 @@
+using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Extensions;
 using CommunityToolkit.Maui.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,10 +10,16 @@ namespace MugOverflowProject.Services;
 
 public sealed class AppPopupService(IServiceProvider serviceProvider) : IAppPopupService
 {
+	private static readonly PopupOptions BorderlessPopupOptions = new()
+	{
+		Shape = null,
+		Shadow = null
+	};
+
 	private Page? GetActivePage()
 	{
-		return Application.Current?.Windows.FirstOrDefault()?.Page
-			?? Shell.Current?.CurrentPage;
+		return Shell.Current?.CurrentPage
+			?? Application.Current?.Windows.FirstOrDefault()?.Page;
 	}
 
 	public async Task<CoffeeType?> ShowCoffeeDictionaryAsync(string? targetCoffeeId = null)
@@ -25,7 +32,7 @@ public sealed class AppPopupService(IServiceProvider serviceProvider) : IAppPopu
 		var popup = new CoffeeDictionaryPopup(vm);
 		try
 		{
-			await page.ShowPopupAsync(popup);
+			await page.ShowPopupAsync(popup, BorderlessPopupOptions);
 			return vm.SelectedCoffee;
 		}
 		finally
@@ -45,7 +52,7 @@ public sealed class AppPopupService(IServiceProvider serviceProvider) : IAppPopu
 		var popup = new EditLogPopup(vm);
 		try
 		{
-			await page.ShowPopupAsync(popup);
+			await page.ShowPopupAsync(popup, BorderlessPopupOptions);
 
 			if (vm.WasDeleted)
 			{
@@ -58,6 +65,7 @@ public sealed class AppPopupService(IServiceProvider serviceProvider) : IAppPopu
 				return new OracleDecisionLog
 				{
 					Id = logToEdit.Id,
+					ServerId = logToEdit.ServerId,
 					Timestamp = logToEdit.Timestamp,
 					OracleSaidYes = logToEdit.OracleSaidYes,
 					UserDrank = vm.UserDrank,
@@ -85,7 +93,7 @@ public sealed class AppPopupService(IServiceProvider serviceProvider) : IAppPopu
 		var popup = new ThemeSelectorPopup(vm);
 		try
 		{
-			await page.ShowPopupAsync(popup);
+			await page.ShowPopupAsync(popup, BorderlessPopupOptions);
 			return vm.SelectedThemeName;
 		}
 		finally
@@ -99,12 +107,13 @@ public sealed class AppPopupService(IServiceProvider serviceProvider) : IAppPopu
 		var page = GetActivePage();
 		if (page is null) return false;
 
-		var vm = serviceProvider.GetRequiredService<StorageSelectionViewModel>();
+		using var scope = serviceProvider.CreateScope();
+		var vm = scope.ServiceProvider.GetRequiredService<StorageSelectionViewModel>();
 		await vm.InitializeAsync().ConfigureAwait(false);
 		var popup = new StorageSelectionPopup(vm);
 		try
 		{
-			await page.ShowPopupAsync(popup);
+			await page.ShowPopupAsync(popup, BorderlessPopupOptions);
 			return vm.HasMigratedData;
 		}
 		finally

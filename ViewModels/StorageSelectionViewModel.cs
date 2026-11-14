@@ -622,12 +622,18 @@ public sealed partial class StorageSelectionViewModel : ObservableObject, IDispo
 					GoogleCustomClientId,
 					GoogleCustomClientSecret).ConfigureAwait(false);
 
-				CurrentActiveClientIdDisplay = _googleDriveConfig.ActiveClientId;
-				HasCustomCredentials = !string.IsNullOrWhiteSpace(_googleDriveConfig.CustomClientId);
+				await SafeDispatchToMainThreadAsync(() =>
+				{
+					CurrentActiveClientIdDisplay = _googleDriveConfig.ActiveClientId;
+					HasCustomCredentials = !string.IsNullOrWhiteSpace(_googleDriveConfig.CustomClientId);
+				}).ConfigureAwait(false);
 			}
 
-			IsGoogleCredentialsVisible = false;
-			StatusMessage = "Credentials updated. Launching sign-in...";
+			await SafeDispatchToMainThreadAsync(() =>
+			{
+				IsGoogleCredentialsVisible = false;
+				StatusMessage = "Credentials updated. Launching sign-in...";
+			}).ConfigureAwait(false);
 
 			var provider = ResolveProvider(StorageProviderType.GoogleDrive);
 			bool authSuccess = await provider.AuthenticateAsync(cancellationToken).ConfigureAwait(false);
@@ -677,14 +683,21 @@ public sealed partial class StorageSelectionViewModel : ObservableObject, IDispo
 		if (_secureStorage != null && _googleDriveConfig != null)
 		{
 			await _googleDriveConfig.ResetToDefaultsAsync(_secureStorage).ConfigureAwait(false);
-			GoogleCustomClientId = string.Empty;
-			GoogleCustomClientSecret = string.Empty;
-			HasCustomCredentials = false;
-			CurrentActiveClientIdDisplay = _googleDriveConfig.ActiveClientId;
 		}
 
-		IsGoogleDriveAuthenticated = false;
-		StatusMessage = "Credentials reset to defaults. Stored tokens cleared. Click 'Sign In' to reconnect.";
+		await SafeDispatchToMainThreadAsync(() =>
+		{
+			if (_googleDriveConfig != null)
+			{
+				GoogleCustomClientId = string.Empty;
+				GoogleCustomClientSecret = string.Empty;
+				HasCustomCredentials = false;
+				CurrentActiveClientIdDisplay = _googleDriveConfig.ActiveClientId;
+			}
+
+			IsGoogleDriveAuthenticated = false;
+			StatusMessage = "Credentials reset to defaults. Stored tokens cleared. Click 'Sign In' to reconnect.";
+		}).ConfigureAwait(false);
 	}
 
 	[RelayCommand(AllowConcurrentExecutions = false)]
@@ -694,14 +707,20 @@ public sealed partial class StorageSelectionViewModel : ObservableObject, IDispo
 		{
 			var provider = ResolveProvider(StorageProviderType.GoogleDrive);
 			await provider.SignOutAsync(cancellationToken).ConfigureAwait(false);
-			IsGoogleDriveAuthenticated = false;
-			IsAuthRequired = true;
-			StatusMessage = "Signed out of Google Drive. Stored tokens cleared.";
-			UpdateSyncStatusDisplay(SyncEngineStatus.AuthRequired);
+			await SafeDispatchToMainThreadAsync(() =>
+			{
+				IsGoogleDriveAuthenticated = false;
+				IsAuthRequired = true;
+				StatusMessage = "Signed out of Google Drive. Stored tokens cleared.";
+				UpdateSyncStatusDisplay(SyncEngineStatus.AuthRequired);
+			}).ConfigureAwait(false);
 		}
 		catch (Exception ex)
 		{
-			StatusMessage = $"Sign out error: {ex.Message}";
+			await SafeDispatchToMainThreadAsync(() =>
+			{
+				StatusMessage = $"Sign out error: {ex.Message}";
+			}).ConfigureAwait(false);
 		}
 	}
 
@@ -738,8 +757,10 @@ public sealed partial class StorageSelectionViewModel : ObservableObject, IDispo
 		_ => type.ToString()
 	};
 
-	private static async Task SafeDispatchToMainThreadAsync(Action action)
+	private static async Task SafeDispatchToMainThreadAsync(Action action, TimeSpan? timeout = null)
 	{
+		if (action == null) return;
+
 		try
 		{
 			if (MainThread.IsMainThread)
@@ -748,11 +769,17 @@ public sealed partial class StorageSelectionViewModel : ObservableObject, IDispo
 				return;
 			}
 
-			await MainThread.InvokeOnMainThreadAsync(action).ConfigureAwait(false);
+			var effectiveTimeout = timeout ?? TimeSpan.FromSeconds(5);
+			await MainThread.InvokeOnMainThreadAsync(action).WaitAsync(effectiveTimeout).ConfigureAwait(false);
 		}
-		catch (Exception ex) when (ex.GetType().Name.Contains("NotImplemented") || ex is InvalidOperationException)
+		catch (Exception ex) when (ex.GetType().Name.Contains("NotImplemented"))
 		{
+			// Safe fallback exclusively for non-UI unit test runners where MAUI MainThread is not implemented
 			action();
+		}
+		catch (Exception)
+		{
+			// Eliminate background thread execution fallback on InvalidOperationException, timeouts, or window deactivation
 		}
 	}
 

@@ -119,6 +119,70 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 		Assert.InRange(ratio, 9.8, 10.1);
 	}
 
+	[Fact]
+	public void RegalEarthDark_PrimaryButton_ContrastRatio_ExceedsWcagAaa()
+	{
+		var theme = new RegalEarthDarkTheme();
+		var text = (Color)theme["PrimaryButtonTextColor"];
+		var bg = (Color)theme["PrimaryColor"];
+
+		Assert.Equal(Color.FromArgb("#140E1B"), text);
+		Assert.Equal(Color.FromArgb("#B388FF"), bg);
+
+		double ratio = CalculateContrastRatio(text, bg);
+
+		// WCAG AAA requires >= 7.0:1 for normal text
+		Assert.True(ratio >= 7.0, $"Expected ratio >= 7.0:1, got {ratio:F2}:1");
+	}
+
+	[Fact]
+	public void WineDesertDark_PrimaryButton_ContrastRatio_ExceedsWcagAaa()
+	{
+		var theme = new WineDesertDarkTheme();
+		var text = (Color)theme["PrimaryButtonTextColor"];
+		var bg = (Color)theme["PrimaryColor"];
+
+		Assert.Equal(Color.FromArgb("#1B1214"), text);
+		Assert.Equal(Color.FromArgb("#EA859B"), bg);
+
+		double ratio = CalculateContrastRatio(text, bg);
+
+		// WCAG AAA requires >= 7.0:1 for normal text
+		Assert.True(ratio >= 7.0, $"Expected ratio >= 7.0:1, got {ratio:F2}:1");
+	}
+
+	[Fact]
+	public void ForestLavenderDark_PrimaryButton_ContrastRatio_ExceedsWcagAaa()
+	{
+		var theme = new ForestLavenderDarkTheme();
+		var text = (Color)theme["PrimaryButtonTextColor"];
+		var bg = (Color)theme["PrimaryColor"];
+
+		Assert.Equal(Color.FromArgb("#111A15"), text);
+		Assert.Equal(Color.FromArgb("#57B88C"), bg);
+
+		double ratio = CalculateContrastRatio(text, bg);
+
+		// WCAG AAA requires >= 7.0:1 for normal text
+		Assert.True(ratio >= 7.0, $"Expected ratio >= 7.0:1, got {ratio:F2}:1");
+	}
+
+	[Fact]
+	public void PristineCleanDark_PrimaryButton_ContrastRatio_ExceedsWcagAaa()
+	{
+		var theme = new PristineCleanDarkTheme();
+		var text = (Color)theme["PrimaryButtonTextColor"];
+		var bg = (Color)theme["PrimaryColor"];
+
+		Assert.Equal(Color.FromArgb("#0E1816"), text);
+		Assert.Equal(Color.FromArgb("#52C5A8"), bg);
+
+		double ratio = CalculateContrastRatio(text, bg);
+
+		// WCAG AAA requires >= 7.0:1 for normal text
+		Assert.True(ratio >= 7.0, $"Expected ratio >= 7.0:1, got {ratio:F2}:1");
+	}
+
 	// =========================================================================
 	// 2. Adversarial Input Stress Testing (Null, Garbage, Injection, Large Inputs)
 	// =========================================================================
@@ -129,24 +193,24 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 	[InlineData("   ")]
 	[InlineData("\t\r\n")]
 	[InlineData("NonExistentThemeName!@#$%^&*()")]
-	[InlineData("Coffee Light'; DROP TABLE Themes; --")]
+	[InlineData("Steamed Oat Latte'; DROP TABLE Themes; --")]
 	[InlineData("null")]
 	[InlineData("undefined")]
 	[InlineData("0")]
-	public void ApplyTheme_AdversarialStrings_FallbacksGracefullyToRegalEarth(string? adversarialInput)
+	public void ApplyTheme_AdversarialStrings_FallbacksGracefullyToEspressoCremaDark(string? adversarialInput)
 	{
 		var merged = new ObservableCollection<ResourceDictionary>
 		{
 			new() { { "Colors", "stub" } },
-			new CoffeeDarkTheme(),
+			new CoffeeLightTheme(),
 			new() { { "Styles", "stub" } }
 		};
 
 		var exception = Record.Exception(() => ThemeManager.ApplyTheme(adversarialInput, merged));
 		Assert.Null(exception);
 
-		Assert.Equal("Regal Earth", ThemeManager.CurrentThemeName);
-		Assert.IsType<RegalEarthTheme>(merged[1]);
+		Assert.Equal("Espresso Crema Dark", ThemeManager.CurrentThemeName);
+		Assert.IsType<CoffeeDarkTheme>(merged[1]);
 		Assert.Equal(3, merged.Count);
 	}
 
@@ -164,20 +228,20 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 		var exception = Record.Exception(() => ThemeManager.ApplyTheme(massiveGarbage, merged));
 		Assert.Null(exception);
 
-		Assert.Equal("Regal Earth", ThemeManager.CurrentThemeName);
-		Assert.IsType<RegalEarthTheme>(merged[1]);
+		Assert.Equal("Espresso Crema Dark", ThemeManager.CurrentThemeName);
+		Assert.IsType<CoffeeDarkTheme>(merged[1]);
 	}
 
 	[Fact]
 	public void ApplyTheme_NullMergedDictionaries_HeadlessSafety_DoesNotThrow()
 	{
-		var exception = Record.Exception(() => ThemeManager.ApplyTheme("Coffee Light", null));
+		var exception = Record.Exception(() => ThemeManager.ApplyTheme("Steamed Oat Latte", null));
 		Assert.Null(exception);
-		Assert.Equal("Coffee Light", ThemeManager.CurrentThemeName);
+		Assert.Equal("Steamed Oat Latte", ThemeManager.CurrentThemeName);
 
 		exception = Record.Exception(() => ThemeManager.ApplyTheme(null, null));
 		Assert.Null(exception);
-		Assert.Equal("Regal Earth", ThemeManager.CurrentThemeName);
+		Assert.Equal("Espresso Crema Dark", ThemeManager.CurrentThemeName);
 	}
 
 	// =========================================================================
@@ -189,7 +253,7 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 	{
 		var colors = new ResourceDictionary { { "ColorsStub", true } };
 		var styles = new ResourceDictionary { { "StylesStub", true } };
-		var initialTheme = new RegalEarthTheme();
+		var initialTheme = new CoffeeDarkTheme();
 
 		var merged = new ObservableCollection<ResourceDictionary>
 		{
@@ -200,12 +264,16 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 
 		string[] allThemes =
 		[
-			"Regal Earth",
-			"Wine Desert",
-			"Forest Lavender",
-			"Pristine Clean",
-			"Coffee Light",
-			"Coffee Dark"
+			"Espresso Crema Dark",
+			"Steamed Oat Latte",
+			"Caramel Macchiato",
+			"Mocha Velvet Dark",
+			"Iced Matcha Latte",
+			"Dirty Matcha Dark",
+			"Honey Lavender Latte",
+			"Midnight Cold Brew",
+			"Sweet Mint Cortado",
+			"Dark Mint Espresso"
 		];
 
 		for (int i = 0; i < 1_000; i++)
@@ -231,12 +299,16 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 		// Test concurrent invocations of ApplyTheme to check static state stability under concurrent callers
 		string[] allThemes =
 		[
-			"Regal Earth",
-			"Wine Desert",
-			"Forest Lavender",
-			"Pristine Clean",
-			"Coffee Light",
-			"Coffee Dark"
+			"Espresso Crema Dark",
+			"Steamed Oat Latte",
+			"Caramel Macchiato",
+			"Mocha Velvet Dark",
+			"Iced Matcha Latte",
+			"Dirty Matcha Dark",
+			"Honey Lavender Latte",
+			"Midnight Cold Brew",
+			"Sweet Mint Cortado",
+			"Dark Mint Espresso"
 		];
 
 		var tasks = Enumerable.Range(0, 100).Select(i => Task.Run(() =>
@@ -261,18 +333,18 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 		var merged = new ObservableCollection<ResourceDictionary>();
 
 		// Initial application into empty list
-		ThemeManager.ApplyTheme("Coffee Light", merged);
+		ThemeManager.ApplyTheme("Steamed Oat Latte", merged);
 
 		Assert.Single(merged);
 		Assert.IsType<CoffeeLightTheme>(merged[0]);
-		Assert.Equal("Coffee Light", ThemeManager.CurrentThemeName);
+		Assert.Equal("Steamed Oat Latte", ThemeManager.CurrentThemeName);
 
 		// Subsequent application replaces existing theme at index 0
-		ThemeManager.ApplyTheme("Coffee Dark", merged);
+		ThemeManager.ApplyTheme("Espresso Crema Dark", merged);
 
 		Assert.Single(merged);
 		Assert.IsType<CoffeeDarkTheme>(merged[0]);
-		Assert.Equal("Coffee Dark", ThemeManager.CurrentThemeName);
+		Assert.Equal("Espresso Crema Dark", ThemeManager.CurrentThemeName);
 	}
 
 	[Fact]
@@ -282,14 +354,14 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 		var merged = new ObservableCollection<ResourceDictionary> { colors };
 
 		// Target index clamped to 1
-		ThemeManager.ApplyTheme("Coffee Light", merged);
+		ThemeManager.ApplyTheme("Steamed Oat Latte", merged);
 
 		Assert.Equal(2, merged.Count);
 		Assert.Same(colors, merged[0]);
 		Assert.IsType<CoffeeLightTheme>(merged[1]);
 
 		// Second call replaces index 1
-		ThemeManager.ApplyTheme("Coffee Dark", merged);
+		ThemeManager.ApplyTheme("Espresso Crema Dark", merged);
 
 		Assert.Equal(2, merged.Count);
 		Assert.Same(colors, merged[0]);
@@ -314,7 +386,7 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 			theme3  // Index 4 (extraneous)
 		};
 
-		ThemeManager.ApplyTheme("Coffee Dark", merged);
+		ThemeManager.ApplyTheme("Espresso Crema Dark", merged);
 
 		// The engine replaces at index 1 and purges all extraneous themes with index > existingIndex
 		Assert.Equal(3, merged.Count);
@@ -340,7 +412,7 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 			styles        // Index 2
 		};
 
-		ThemeManager.ApplyTheme("Coffee Light", merged);
+		ThemeManager.ApplyTheme("Steamed Oat Latte", merged);
 
 		Assert.Equal(3, merged.Count);
 		Assert.IsType<CoffeeLightTheme>(merged[0]);
@@ -360,7 +432,7 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 		var merged = new ObservableCollection<ResourceDictionary> { d0, d1, d2, d3, d4 };
 
 		// First call: inserts at clamped index 1
-		ThemeManager.ApplyTheme("Coffee Dark", merged);
+		ThemeManager.ApplyTheme("Espresso Crema Dark", merged);
 
 		Assert.Equal(6, merged.Count);
 		Assert.Same(d0, merged[0]);
@@ -368,7 +440,7 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 		Assert.Same(d1, merged[2]);
 
 		// Second call: finds theme at index 1 and swaps in-place
-		ThemeManager.ApplyTheme("Coffee Light", merged);
+		ThemeManager.ApplyTheme("Steamed Oat Latte", merged);
 
 		Assert.Equal(6, merged.Count);
 		Assert.Same(d0, merged[0]);
@@ -390,7 +462,7 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 			initialTheme  // Index 2
 		};
 
-		ThemeManager.ApplyTheme("Coffee Dark", merged);
+		ThemeManager.ApplyTheme("Espresso Crema Dark", merged);
 
 		Assert.Equal(3, merged.Count);
 		Assert.Same(colors, merged[0]);
@@ -414,7 +486,7 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 
 		for (int i = 0; i < 10_000; i++)
 		{
-			string target = (i % 2 == 0) ? "Coffee Light" : "Coffee Dark";
+			string target = (i % 2 == 0) ? "Steamed Oat Latte" : "Espresso Crema Dark";
 			ThemeManager.ApplyTheme(target, merged);
 		}
 
@@ -422,7 +494,7 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 		Assert.Same(colors, merged[0]);
 		Assert.IsType<CoffeeDarkTheme>(merged[1]);
 		Assert.Same(styles, merged[2]);
-		Assert.Equal("Coffee Dark", ThemeManager.CurrentThemeName);
+		Assert.Equal("Espresso Crema Dark", ThemeManager.CurrentThemeName);
 	}
 
 	[Fact]
@@ -440,7 +512,7 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 			styles
 		};
 
-		ThemeManager.ApplyTheme("Coffee Light", collection);
+		ThemeManager.ApplyTheme("Steamed Oat Latte", collection);
 
 		Assert.Equal(3, collection.Count);
 		Assert.Contains(colors, collection);
@@ -456,11 +528,11 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 	[Fact]
 	public void StaticPollution_DemonstratesWhyResetToDefaultIsMandatory()
 	{
-		// Set theme to Coffee Dark
-		ThemeManager.ApplyTheme("Coffee Dark");
-		Assert.Equal("Coffee Dark", ThemeManager.CurrentThemeName);
+		// Set theme to a non-default coffeehouse theme ("Honey Lavender Latte")
+		ThemeManager.ApplyTheme("Honey Lavender Latte");
+		Assert.Equal("Honey Lavender Latte", ThemeManager.CurrentThemeName);
 
-		// If MainViewModel is initialized while theme is Coffee Dark, it captures Coffee Dark
+		// If MainViewModel is initialized while theme is Honey Lavender Latte, it captures Honey Lavender Latte
 		var vmPolluted = new MainViewModel(
 			new FakeCoffeeDictionaryService(),
 			new FakeOracleEngineService(),
@@ -470,13 +542,13 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 			new Fixtures.FakeSqliteDatabaseService(),
 			new Fixtures.FakeStorageSyncService());
 
-		Assert.Equal("Coffee Dark", vmPolluted.CurrentThemeName);
+		Assert.Equal("Honey Lavender Latte", vmPolluted.CurrentThemeName);
 
-		// Now reset to default
+		// Now reset to default ("Espresso Crema Dark")
 		ThemeManager.ResetToDefault();
-		Assert.Equal("Regal Earth", ThemeManager.CurrentThemeName);
+		Assert.Equal("Espresso Crema Dark", ThemeManager.CurrentThemeName);
 
-		// Now a new MainViewModel correctly starts with Regal Earth
+		// Now a new MainViewModel correctly starts with Espresso Crema Dark
 		var vmClean = new MainViewModel(
 			new FakeCoffeeDictionaryService(),
 			new FakeOracleEngineService(),
@@ -486,7 +558,7 @@ public sealed class ThemeEngineAdversarialStressTests : IDisposable
 			new Fixtures.FakeSqliteDatabaseService(),
 			new Fixtures.FakeStorageSyncService());
 
-		Assert.Equal("Regal Earth", vmClean.CurrentThemeName);
+		Assert.Equal("Espresso Crema Dark", vmClean.CurrentThemeName);
 	}
 
 	private sealed class CustomDictionaryCollection : ICollection<ResourceDictionary>

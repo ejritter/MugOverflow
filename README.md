@@ -1,187 +1,140 @@
-# MugOverflow ☕
-### *Java Oracle & Real-Time Caffeine Kinetics Engine*
+# ☕ MugOverflow
 
-[![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
-[![.NET MAUI](https://img.shields.io/badge/.NET%20MAUI-Multi--platform-512BD4?style=flat-square&logo=dotnet)](https://learn.microsoft.com/dotnet/maui/)
-[![AI Coded with Gemini](https://img.shields.io/badge/AI%20Coded-Google%20Gemini-4285F4?style=flat-square&logo=google)](https://deepmind.google/technologies/gemini/)
-[![Persistence](https://img.shields.io/badge/Persistence-SQLite%20WAL-003B57?style=flat-square&logo=sqlite)](https://sqlite.org/)
-[![Cloud Sync](https://img.shields.io/badge/Cloud%20Sync-Google%20Drive%20%7C%20OneDrive-34A853?style=flat-square)](https://developers.google.com/drive)
-[![Tests](https://img.shields.io/badge/Tests-444%20Passing-brightgreen?style=flat-square)](tests/)
+[![.NET 11](https://img.shields.io/badge/.NET-11.0-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/download/dotnet/11.0)
+[![.NET MAUI](https://img.shields.io/badge/.NET%20MAUI-11.0-512BD4?style=flat-square&logo=dotnet)](https://learn.microsoft.com/en-us/dotnet/maui/)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Android%20%7C%20iOS%20%7C%20macOS-blue?style=flat-square)](https://learn.microsoft.com/en-us/dotnet/maui/supported-platforms)
+[![Tests](https://img.shields.io/badge/Tests-640%20Passing-2E7D32?style=flat-square&logo=xunit)](./tests/MugOverflowProject.Tests)
+[![License: MIT](https://img.shields.io/badge/License-MIT-D4975A?style=flat-square)](./LICENSE)
 
----
-
-## 🤖 Built with AI Engineering (Google Gemini)
-
-> **Fun Experimental Project Notice:**
-> **MugOverflow was 100% designed, coded, and architected with Google Gemini.** 
-> It was created as a fun, deep-dive project to explore the real-world capabilities of autonomous AI engineering, pair programming, and cross-platform native application development on **.NET 10**. From the zero-backend cloud synchronization engine down to the custom canvas-drawn metabolism curve, every line was generated and refined in collaboration with Gemini.
+**MugOverflow** is a cross-platform coffeehouse barista oracle chatbot and pharmacokinetic caffeine tracker built on **.NET 11** and **.NET MAUI**. Ask **Mugsy**—a live, 60fps animated coffee mug mascot—whether to pour your next cup with zero keyboard typing required, then track real-time caffeine absorption, active milligrams, barista alignment, and sleep readiness across a **24-hour elimination decay curve**.
 
 ---
 
-## 📸 Screenshots & How It Works
+## ✨ Visual Showcase & Features
 
-### 1. Metabolism & Kinetics Dashboard — Real-Time Decay & Sleep Risk
-The kinetics dashboard calculates your real-time blood caffeine concentration in milligrams using exponential decay modeling:
-$$\( N(t) = N_0 \cdot (0.5)^{t / t_{1/2}} \)$$
+### ☕ Mugsy Barista Chatbot & Hero Espresso Stage
 
-- **Live Metric Cards**:
-  - ⚡ **Active in Body**: Current systemic caffeine load (e.g., 44 mg calculated over active half-life kinetics).
-  - ☕ **Total Intake**: Cumulative daily consumption counter and cup count (e.g., 981 mg across 10 cups).
-  - ⚖️ **Compliance**: Percentage of adherence to Oracle verdicts (e.g., 58% — 7 Obeyed vs. 5 Rebelled).
-  - 🌙 **Sleep Ready Countdown**: Precise forecast of when systemic caffeine will fall below sleep interference thresholds (e.g., ~5h 42m until 20 mg threshold).
-- **24-Hour Elimination Decay Curve**: Smooth vector curve drawn on-device via `Microsoft.Maui.Graphics.IDrawable` showing decay trajectory, peak window (30–60 min), and bedtime threshold line.
+![MugOverflow Barista Chatbot & Hero Espresso Stage](docs/screenshots/java_oracle.png)
 
-![MugOverflow Metabolism & Kinetics Dashboard](docs/screenshots/metabolism_kinetics.png)
+*Captured on Windows (`.NET 11`) using the default **Espresso Crema Dark** roast theme.*
 
----
-
-### 2. Java Oracle — Conversational Caffeine Compliance
-The **Java Oracle** serves as your intelligent coffee counselor:
-- **Seek Caffeinated Truth**: Query the Oracle before brewing another cup. The Oracle analyzes current active blood levels, time of day, and past intake before issuing a verdict (**YES** or **NO**).
-- **Compliance Tracking**: Log whether you obeyed the Oracle's wisdom or rebelled to track behavioral compliance over time.
-- **Beverage Selector**: Select from standard brews (Drip Coffee, Pour Over, Cold Brew, Espresso, Matcha) with instant caffeine mg readouts.
-
-![MugOverflow Java Oracle View](docs/screenshots/java_oracle.png)
+- **60fps Animated Coffee Mascot (`CoffeeMascotView`)**: Rendered directly on a custom `Microsoft.Maui.Graphics` `IDrawable` canvas (`CoffeeMascotDrawable`), Mugsy reacts continuously across **7 dynamic moods** (`Sleepy`, `Happy`, `Wired`, `Brewing`, `CelebratingYes`, `SternNo`, `SplashSkip`) with animated liquid fill levels, crema foam, rising steam curls, and expressive eyes synced to your live caffeine state.
+- **100% Tap-Chip Conversational Chat**: Consult Mugsy effortlessly from the floating composer dock—no typing needed:
+  - **House Coffee & Caffeine Menu**: Pick from 10 calibrated coffeehouse drinks (`Drip Black Coffee (Standard)` 95 mg, `Single Shot Espresso` 63 mg, `Double Shot Espresso (Doppio)` 126 mg, `Cold Brew Coffee` 155 mg, `Nitro Cold Brew` 215 mg, `Caffè Latte` 75 mg, `Cappuccino` 75 mg, `Pour Over Coffee (Light/Medium)` 110 mg, `Caffè Americano` 126 mg, `Decaf Brewed Coffee` 4 mg).
+  - **Rotating Scenario Prompt Chips**: Choose from 10 rotating barista prompts (`☀️ Morning kickoff`, `🫠 3 PM slump rescue`, `💻 Deep-focus sprint`, `☕ One more cup?`, `🥐 Post-lunch coma`, `🌧️ Cozy café vibe`, `🔍 Code-review survival`, `🌙 Late-shift deploy`, `✨ Barista's blessing`, `🎙️ Pre-standup boost`) with a **🎲 More Prompts** shuffler plus a persistent **📈 Check my buzz** chip.
+  - **Stochastic Barista Verdict & Log Receipt**: 100 randomized oracle verdicts (`50` YES / `50` NO) followed by interactive quick-reply pills (`☕ Brewed & drank <Drink>!`, `🫗 Skipped this round`, `🔄 Swap drink`) and 20 4-quadrant Barista Log Receipt reactions tracking whether you **Complied** or **Rebelled**.
+- **Slide-Over Coffeehouse Drawer (`Mugsy's Roastery`)**: Open from the top-left `☰` button to start a **＋ New Brew Chat**, browse **📖 House Coffee Menu**, jump to **📈 Roast Kinetics & Ledger**, switch or delete **PAST BREW SESSIONS**, configure **Cloud Sync**, or change your **Roast Theme**.
 
 ---
 
-### 3. Bring Your Own Storage (BYOS) Cloud Synchronization
-MugOverflow is engineered with privacy and data ownership as first principles:
-- **Local SQLite Persistence**: Low-latency relational storage powered by `sqlite-net-pcl` and `SQLitePCLRaw.bundle_green` with Write-Ahead Logging (`PRAGMA journal_mode=WAL;`).
-- **Google Drive Cloud Sync**: Direct, client-side zero-backend synchronization using OAuth 2.0 PKCE directly into your isolated Google Drive `appDataFolder` (`caffeine_consumption.json`).
-- **Microsoft OneDrive Cloud Sync**: Cloud synchronization using MSAL.NET and Microsoft Graph API targeting the sandboxed `special/approot`.
-- **3-Way Data Migration Engine**: Upload local records to cloud, download cloud records to local, or perform automatic two-way union hydration with Last-Write-Wins (LWW) timestamp conflict resolution.
+### 📈 Roast Kinetics & Intake Ledger
+
+![MugOverflow Roast Kinetics & Intake Ledger](docs/screenshots/metabolism_kinetics.png)
+
+*Sidebar-free responsive Bento telemetry stage with 24-hour exponential caffeine elimination curve and outcome matrix.*
+
+- **Pharmacokinetic Decay Engine (`CaffeineMetabolismService`)**: Models active circulating caffeine with first-order exponential elimination over a **5.0-hour biological half-life**:
+  $$N(t) = N_0 \cdot (0.5)^{t / 5.0\text{h}}$$
+- **24-Hour Roast Elimination Curve**: Interactive `GraphicsView` plot (`CaffeineMetabolismDrawable`) displaying active caffeine decay over the next 24 hours against the **20 mg Sleep Threshold** reference line (`1.0 mg` full clearance estimate).
+- **Barista Alignment Matrix**: 2×2 outcome scorecard tracking your compliance across four quadrants:
+  - `☕ BREW IT • DRANK` *(Aligned Cup)*
+  - `🫗 HOLD UP • SKIPPED` *(Hydro Champion)*
+  - `☕ BREW IT • SKIPPED` *(Passed on the Shot)*
+  - `🫗 HOLD UP • DRANK` *(Espresso Outlaw)*
+- **Searchable, Filterable & Paginated Intake Ledger**: Browse full brew history with 5 filter pills (`All`, `Drank`, `Skipped`, `Complied`, `Rebelled`), live keyword search, `5 / 10 / 20` row pagination, and inline log editing or deletion (`EditLogPopup`).
 
 ---
 
-## 🔐 Google Drive OAuth 2.0 Setup Guide
+## 🎨 5 Coffeehouse Drink Flavor Theme Pairs (10 Palettes)
 
-> **Important Developer Requirement:**
-> MugOverflow connects directly from your device to Google Drive's REST API without intermediate relay servers. **If you want to run Google Drive synchronization, you must supply your own Google Cloud OAuth 2.0 Client ID** (just like we had to create for Google Drive authentication during development).
+Switch themes instantaneously at runtime without restarting the app via the **Roast Theme** pill (`ThemeSelectorPopup`), powered by `ThemeManager` with 24 semantic `DynamicResource` color tokens per palette and persisted in `Preferences`:
 
-Follow these simple steps to configure your own Google OAuth 2.0 credentials:
-
-### Step 1: Create a Google Cloud Project
-1. Open the [Google Cloud Console](https://console.cloud.google.com/).
-2. Click the project dropdown in the top bar and click **New Project**.
-3. Name your project (e.g., `MugOverflow-Dev`) and click **Create**.
-
-### Step 2: Enable the Google Drive API
-1. Navigate to **APIs & Services > Library**.
-2. Search for **Google Drive API**.
-3. Select it and click **Enable**.
-
-### Step 3: Configure the OAuth Consent Screen
-1. Navigate to **APIs & Services > OAuth consent screen**.
-2. Choose **External** user type and click **Create**.
-3. Enter the required app information:
-   - **App name**: `MugOverflow`
-   - **User support email**: Your email address
-   - **Developer contact information**: Your email address
-4. Click **Save and Continue**.
-5. Under **Scopes**, click **Add or Remove Scopes** and add:
-   - `https://www.googleapis.com/auth/drive.appdata` *(Allows MugOverflow to read and write only its own application data folder)*
-6. Under **Test users**, click **Add Users** and enter your Google account email address (this allows you to log in while your app is in testing mode).
-7. Save and finish.
-
-### Step 4: Create OAuth 2.0 Client Credentials
-1. Navigate to **APIs & Services > Credentials**.
-2. Click **Create Credentials > OAuth client ID**.
-3. Configure credentials based on your platform:
-
-#### For Windows Desktop:
-- **Application type**: `Desktop app` (or `Web application`)
-- **Name**: `MugOverflow Windows Desktop`
-- If using Web application redirect:
-  - **Authorized redirect URIs**: `mugoverflow://oauth2redirect` and `http://localhost:5000/oauth2redirect`
-- Click **Create** and copy your **Client ID** and **Client Secret**.
-
-#### For Android:
-- **Application type**: `Android`
-- **Name**: `MugOverflow Android`
-- **Package name**: `com.companyname.mugoverflowproject`
-- **SHA-1 certificate fingerprint**: Enter the SHA-1 of your debug keystore (`keytool -list -v -keystore ~/.android/debug.keystore`).
-
-### Step 5: Provide Credentials to MugOverflow
-You can configure your credentials in two convenient ways:
-
-1. **Option A (Runtime UI - Recommended)**:
-   - Launch MugOverflow.
-   - Click the **Sync Pill** in the top navigation bar to open **BYOS Sync Settings**.
-   - Select **Google Drive** and paste your Client ID and Client Secret into the custom credential fields.
-   - MugOverflow stores them securely in platform encrypted storage (`ISecureStorageService`).
-
-2. **Option B (Code Configuration)**:
-   - Open `Services/Storage/GoogleDriveConfig.cs`.
-   - Paste your Client ID and Secret into `WindowsClientId`, `WindowsClientSecret`, and `AndroidClientId`.
+| Coffeehouse Drink Flavor | Light Roast Palette | Dark Roast Palette |
+| :--- | :--- | :--- |
+| ☕ **Espresso & Oat Latte** *(House Signature)* | **Steamed Oat Latte** | **Espresso Crema Dark** *(Default)* |
+| 🍫 **Caramel Mocha** *(Velvet Cacao & Amber Drizzle)* | **Caramel Macchiato** | **Mocha Velvet Dark** |
+| 🍵 **Ceremonial Matcha** *(Whisked Botanical & Shot)* | **Iced Matcha Latte** | **Dirty Matcha Dark** |
+| 🪻 **Lavender Cold Brew** *(Wildflower Honey & Steep)* | **Honey Lavender Latte** | **Midnight Cold Brew** |
+| 🌿 **Mint Cortado** *(Garden Mint & Double Ristretto)* | **Sweet Mint Cortado** | **Dark Mint Espresso** |
 
 ---
 
-## 🏗️ Architecture & Technology Stack
+## ☁️ Local-First SQLite & Bring Your Own Storage (BYOS)
 
-| Component | Technology / Library | Details |
-|---|---|---|
-| **Framework** | .NET 10 / .NET MAUI | Multi-platform targeting Windows 10/11, Android, iOS, macOS Catalyst |
-| **Language** | C# 13 / preview | Modern records, partial properties, pattern matching |
-| **MVVM** | CommunityToolkit.Mvvm | Source-generated `[ObservableProperty]`, `[RelayCommand]` |
-| **Local Database** | SQLite (`sqlite-net-pcl` & `SQLitePCLRaw.bundle_green`) | High-performance relational storage with Write-Ahead Logging (WAL) |
-| **Cloud Sync** | Zero-Backend Google Drive & OneDrive | Google Drive v3 REST API (PKCE) & Microsoft Graph v1.0 (MSAL.NET) |
-| **Kinetics Visualization** | `Microsoft.Maui.Graphics` (`IDrawable`) | Direct GPU canvas rendering with anti-aliasing and responsive clipping |
-| **Icons & Design** | `FluentIcons.Maui` & Custom ResourceDictionaries | Runtime multi-theme engine (Coffee Dark, Coffee Light, Forest Lavender, Regal Earth, Wine Desert) |
-| **Testing** | xUnit & Moq | 444 automated unit, integration, and adversarial stress tests |
+MugOverflow is offline-first and gives you complete ownership of your caffeine logs and chat sessions:
+
+- **High-Concurrency Local SQLite**: Powered by **Dapper** (`2.1.89`), **Microsoft.Data.Sqlite** (`11.0.0`), and **SQLitePCLRaw.bundle_e_sqlite3** (`3.0.5`) backed by `MugOverflow.db3` in `FileSystem.AppDataDirectory` with Write-Ahead Logging (`PRAGMA journal_mode = WAL;`), `synchronous = NORMAL`, and a `5000ms` busy timeout (`DapperDatabaseService`).
+- **BYOS Storage & 3-Way Migration (`StorageSelectionPopup`)**: Open the **Cloud Sync** selector from the **Slide-Over Drawer (`☰`)** on `MainPage` or the **top navigation bar** on `MetabolismPage` to switch and cleanly migrate data across:
+  1. **Local SQLite & JSON Export**: Zero-config local backup at `<AppDataDirectory>/MugOverflow-Caffeine-consumption/caffeine_consumption.json`.
+  2. **Google Drive Cloud (`appDataFolder`)**: Zero-backend OAuth 2.0 PKCE + Google Drive v3 REST API storing `caffeine_consumption.json` privately in your hidden Drive App Data folder (`https://www.googleapis.com/auth/drive.appdata`).
+  3. **Microsoft OneDrive (`AppFolder`)**: MSAL.NET (`Microsoft.Identity.Client`) + Microsoft Graph v1.0 storing `caffeine_consumption.json` in `special/approot`.
+
+### Setting Up Your Own Google Drive OAuth Client
+
+To connect your own Google Cloud OAuth credentials for `GoogleDriveStorageProvider`:
+
+1. Open [Google Cloud Console](https://console.cloud.google.com/), create or select a project, and enable the **Google Drive API**.
+2. Under **APIs & Services -> OAuth consent screen**, add your Google account as a **Test User** and include the restricted scope:
+   ```
+   https://www.googleapis.com/auth/drive.appdata
+   ```
+3. Under **Credentials -> Create Credentials -> OAuth client ID**:
+   - **Windows Desktop**: Choose **Desktop app** (the app handles OAuth redirects automatically via a loopback `HttpListener`).
+   - **Android**: Choose **Android**, enter package name **`ejritterdevelopment.mugflow.app`** (`Platforms/Android/AndroidManifest.xml`), and supply your signing keystore SHA-1 (`WebAuthenticationCallbackActivity` listens on `mugoverflow://oauth2redirect`).
+4. Configure your Client ID(s) / Secret via a gitignored partial override `Services/Storage/GoogleDriveConfig.Local.cs` (implementing `partial void ApplyLocalSecrets()`), directly in `Services/Storage/GoogleDriveConfig.cs`, or at runtime via `ISecureStorageService` (`google_drive_custom_windows_client_id`, `google_drive_custom_windows_client_secret`, `google_drive_custom_android_client_id`, `google_drive_custom_android_client_secret`).
+5. Rebuild, open the **Cloud Sync** popup (via the `☰` Slide-Over Drawer or the `MetabolismPage` top bar), and click **Connect** on **Google Drive Cloud**.
+
+---
+
+## 🏗️ Architecture & Tech Stack
+
+| Layer | Technology | Version / Implementation |
+| :--- | :--- | :--- |
+| **Framework** | **.NET 11 / .NET MAUI** | `net11.0-windows10.0.19041.0`, `net11.0-android`, `net11.0-ios`, `net11.0-maccatalyst` (`global.json` pinned to `11.0.100`) |
+| **Language & Solution** | **C# 15 (`latest`) & `.slnx`** | Modern XML solution (`MugOverflowProject.slnx`) with `CommunityToolkit.Mvvm` partial properties |
+| **UI & Canvas** | **MAUI XAML, Toolkit & Graphics** | `Microsoft.Maui.Controls 11.0.10`, `CommunityToolkit.Maui 17.0.0`, `FluentIcons.Maui 2.1.345`, 60fps `IDrawable` controls |
+| **Local Database** | **SQLite + Dapper** | `Dapper 2.1.89`, `Microsoft.Data.Sqlite 11.0.0`, `SQLitePCLRaw.bundle_e_sqlite3 3.0.5` (`WAL` mode) |
+| **Cloud & Auth** | **Google Drive v3 & MSAL.NET** | OAuth 2.0 PKCE (`appDataFolder`) & `Microsoft.Identity.Client 4.92.0` (`AppFolder`) |
+| **Diagnostics** | **Serilog & DevFlow** | `Serilog 4.4.0`, `WinUiCrashPolicy`, `Microsoft.Maui.DevFlow.Agent` (`#if DEBUG`) |
+| **Testing** | **xUnit (`net11.0`)** | `xunit 2.9.3` headless test suite with custom service fixtures & fakes (**640 automated tests passing**) |
 
 ---
 
 ## 🚀 Getting Started & Building
 
 ### Prerequisites
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (pinned via `global.json`)
-- [.NET MAUI Workload](https://learn.microsoft.com/dotnet/maui/get-started/installation):
-  ```bash
-  dotnet workload install maui
-  ```
-- Visual Studio 2026 / Visual Studio Code with .NET MAUI extension (optional)
 
-### Build & Run
-Clone the repository:
-```bash
+- [.NET 11 SDK (`11.0.100`)](https://dotnet.microsoft.com/download/dotnet/11.0) with `.NET MAUI` workload installed (`dotnet workload install maui`)
+- Visual Studio 2026 (or VS Code with .NET MAUI extension) with Windows App SDK & Android SDK components (for target builds)
+
+### Clone & Run Tests
+
+```powershell
 git clone https://github.com/ejritter/MugOverflow.git
 cd MugOverflow
-```
 
-Build the project:
-```bash
-dotnet build MugOverflowProject.csproj
-```
-
-Run on Windows:
-```bash
-dotnet run --project MugOverflowProject.csproj -f net10.0-windows10.0.19041.0
-```
-
-Run on Android (with emulator or device connected):
-```bash
-dotnet run --project MugOverflowProject.csproj -f net10.0-android
-```
-
-Run Test Suite:
-```bash
+# Run the headless .NET 11 test suite (640 passing tests)
 dotnet test tests/MugOverflowProject.Tests/MugOverflowProject.Tests.csproj
 ```
 
----
+### Run on Windows & Android (Debug)
 
-## 🧪 Testing & Verification
-MugOverflow is backed by **444 automated xUnit tests** covering:
-- In-memory and disk-based SQLite transactional guarantees and WAL mode.
-- Google Drive PKCE authorization URL generation, code verification, and token exchange.
-- OneDrive MSAL authentication and approot payload serialization.
-- Cold-start two-way hydration with Last-Write-Wins (LWW) conflict resolution.
-- 5-minute background flush, network offline queueing, and lifecycle events (`OnSleep`/`Destroying`).
-- Stress tests under high concurrency and adversarial payload conditions.
+```powershell
+# Launch Windows Desktop (Debug)
+dotnet run -f net11.0-windows10.0.19041.0
+
+# Build and run on connected Android Emulator / Device (Debug)
+dotnet build -t:Run -f net11.0-android
+```
+
+### Publish Windows Desktop Release
+
+```powershell
+dotnet publish MugOverflowProject.csproj -f net11.0-windows10.0.19041.0 -c Release -o "$env:USERPROFILE\Desktop\MugOverflowApp"
+```
 
 ---
 
 ## 📄 License
-This project is open-source under the [MIT License](LICENSE).
-Feel free to fork, experiment, and brew your own extensions!
+
+This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for full details.

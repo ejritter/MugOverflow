@@ -6,160 +6,367 @@
     xmlns:fluent="clr-namespace:FluentIcons.Maui;assembly=FluentIcons.Maui"
     xmlns:vm="clr-namespace:MugOverflowProject.ViewModels"
     x:Class="MugOverflowProject.Views.Popups.ThemeSelectorPopup"
-    x:DataType="vm:ThemeSelectorPopupViewModel">
+    x:DataType="vm:ThemeSelectorPopupViewModel"
+    BackgroundColor="Transparent"
+    Padding="0"
+    Margin="0">
 
     <Border
         Style="{StaticResource CardBorderStyle}"
-        MaximumWidthRequest="420"
-        Margin="16"
-        Padding="20"
+        MaximumWidthRequest="460"
+        Padding="22,20"
         HorizontalOptions="Center"
         VerticalOptions="Center">
 
         <VerticalStackLayout Spacing="16">
             <!-- Header -->
-            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
+            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12" VerticalOptions="Center">
                 <Border
                     Grid.Column="0"
-                    BackgroundColor="{DynamicResource SurfaceAltColor}"
                     StrokeThickness="0"
-                    Padding="10"
-                    WidthRequest="42"
-                    HeightRequest="42">
+                    WidthRequest="44"
+                    HeightRequest="44">
                     <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="12" />
+                        <RoundRectangle CornerRadius="14" />
                     </Border.StrokeShape>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="{DynamicResource PrimaryGradientStart}" Offset="0.0" />
+                            <GradientStop Color="{DynamicResource PrimaryGradientEnd}" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Border.Background>
                     <fluent:SymbolIcon
                         Symbol="Settings"
                         FontSize="20"
-                        ForegroundColor="{DynamicResource PrimaryColor}" />
+                        ForegroundColor="{DynamicResource PrimaryButtonTextColor}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
                 </Border>
 
-                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
-                    <Label Text="Select Theme" Style="{StaticResource MediumLabelStyle}" FontSize="18" />
-                    <Label Text="Choose your preferred visual palette" Style="{StaticResource CaptionLabelStyle}" />
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                    <Label Text="Roastery Appearance" Style="{StaticResource MediumLabelStyle}" FontSize="18" />
+                    <Label Text="Pour a fresh coffeehouse drink palette across dark &amp; light roasts" Style="{StaticResource CaptionLabelStyle}" />
                 </VerticalStackLayout>
 
                 <Button
                     Grid.Column="2"
                     Text="✕"
                     Style="{StaticResource SecondaryButtonStyle}"
-                    WidthRequest="36"
-                    HeightRequest="36"
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    CornerRadius="12"
                     Padding="0"
                     Clicked="OnCloseClicked" />
             </Grid>
 
-            <!-- Theme Choices -->
-            <VerticalStackLayout Spacing="8">
-                <!-- 1. Regal Earth (Default) -->
-                <Button
-                    Text="👑 Regal Earth (Purple / Gold)"
-                    Style="{StaticResource SecondaryButtonStyle}"
-                    Command="{Binding SelectThemeCommand}"
-                    CommandParameter="Regal Earth">
-                    <Button.Triggers>
-                        <DataTrigger
-                            TargetType="Button"
-                            Binding="{Binding SelectedThemeName}"
-                            Value="Regal Earth">
-                            <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
-                        </DataTrigger>
-                    </Button.Triggers>
-                </Button>
+            <!-- 5 Coffeehouse Drink Flavor Pairs -->
+            <ScrollView MaximumHeightRequest="380">
+                <VerticalStackLayout Spacing="10">
+                    <!-- 1. Espresso & Oat Latte (Default House Pour) -->
+                    <Border
+                        BackgroundColor="{DynamicResource SurfaceAltColor}"
+                        Stroke="{DynamicResource BorderColor}"
+                        StrokeThickness="1"
+                        Padding="14,10">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="☕  Espresso &amp; Oat Latte  •  House Signature Roast" Style="{StaticResource MediumLabelStyle}" FontSize="13" />
+                            <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
+                                <Button
+                                    Grid.Column="0"
+                                    Text="🌙  Espresso Crema"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    FontSize="12"
+                                    Padding="0"
+                                    Command="{Binding SelectThemeCommand}"
+                                    CommandParameter="Espresso Crema Dark">
+                                    <Button.Triggers>
+                                        <DataTrigger
+                                            TargetType="Button"
+                                            Binding="{Binding SelectedThemeName}"
+                                            Value="Espresso Crema Dark">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                            <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                            <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button
+                                    Grid.Column="1"
+                                    Text="☀️  Steamed Oat"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    FontSize="12"
+                                    Padding="0"
+                                    Command="{Binding SelectThemeCommand}"
+                                    CommandParameter="Steamed Oat Latte">
+                                    <Button.Triggers>
+                                        <DataTrigger
+                                            TargetType="Button"
+                                            Binding="{Binding SelectedThemeName}"
+                                            Value="Steamed Oat Latte">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                            <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                            <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
 
-                <!-- 2. Wine Desert -->
-                <Button
-                    Text="🍷 Wine Desert (Wine / Tan)"
-                    Style="{StaticResource SecondaryButtonStyle}"
-                    Command="{Binding SelectThemeCommand}"
-                    CommandParameter="Wine Desert">
-                    <Button.Triggers>
-                        <DataTrigger
-                            TargetType="Button"
-                            Binding="{Binding SelectedThemeName}"
-                            Value="Wine Desert">
-                            <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
-                        </DataTrigger>
-                    </Button.Triggers>
-                </Button>
+                    <!-- 2. Caramel Mocha -->
+                    <Border
+                        BackgroundColor="{DynamicResource SurfaceAltColor}"
+                        Stroke="{DynamicResource BorderColor}"
+                        StrokeThickness="1"
+                        Padding="14,10">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="🍫  Caramel Mocha  •  Velvet Cacao &amp; Amber Drizzle" Style="{StaticResource MediumLabelStyle}" FontSize="13" />
+                            <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
+                                <Button
+                                    Grid.Column="0"
+                                    Text="☀️  Caramel Macchiato"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    FontSize="12"
+                                    Padding="0"
+                                    Command="{Binding SelectThemeCommand}"
+                                    CommandParameter="Caramel Macchiato">
+                                    <Button.Triggers>
+                                        <DataTrigger
+                                            TargetType="Button"
+                                            Binding="{Binding SelectedThemeName}"
+                                            Value="Caramel Macchiato">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                            <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                            <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button
+                                    Grid.Column="1"
+                                    Text="🌙  Mocha Velvet"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    FontSize="12"
+                                    Padding="0"
+                                    Command="{Binding SelectThemeCommand}"
+                                    CommandParameter="Mocha Velvet Dark">
+                                    <Button.Triggers>
+                                        <DataTrigger
+                                            TargetType="Button"
+                                            Binding="{Binding SelectedThemeName}"
+                                            Value="Mocha Velvet Dark">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                            <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                            <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
 
-                <!-- 3. Forest Lavender -->
-                <Button
-                    Text="🌲 Forest Lavender (Green / Lavender)"
-                    Style="{StaticResource SecondaryButtonStyle}"
-                    Command="{Binding SelectThemeCommand}"
-                    CommandParameter="Forest Lavender">
-                    <Button.Triggers>
-                        <DataTrigger
-                            TargetType="Button"
-                            Binding="{Binding SelectedThemeName}"
-                            Value="Forest Lavender">
-                            <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
-                        </DataTrigger>
-                    </Button.Triggers>
-                </Button>
+                    <!-- 3. Ceremonial Matcha -->
+                    <Border
+                        BackgroundColor="{DynamicResource SurfaceAltColor}"
+                        Stroke="{DynamicResource BorderColor}"
+                        StrokeThickness="1"
+                        Padding="14,10">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="🍵  Ceremonial Matcha  •  Whisked Botanical &amp; Shot" Style="{StaticResource MediumLabelStyle}" FontSize="13" />
+                            <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
+                                <Button
+                                    Grid.Column="0"
+                                    Text="☀️  Iced Matcha"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    FontSize="12"
+                                    Padding="0"
+                                    Command="{Binding SelectThemeCommand}"
+                                    CommandParameter="Iced Matcha Latte">
+                                    <Button.Triggers>
+                                        <DataTrigger
+                                            TargetType="Button"
+                                            Binding="{Binding SelectedThemeName}"
+                                            Value="Iced Matcha Latte">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                            <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                            <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button
+                                    Grid.Column="1"
+                                    Text="🌙  Dirty Matcha"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    FontSize="12"
+                                    Padding="0"
+                                    Command="{Binding SelectThemeCommand}"
+                                    CommandParameter="Dirty Matcha Dark">
+                                    <Button.Triggers>
+                                        <DataTrigger
+                                            TargetType="Button"
+                                            Binding="{Binding SelectedThemeName}"
+                                            Value="Dirty Matcha Dark">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                            <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                            <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
 
-                <!-- 4. Pristine Clean -->
-                <Button
-                    Text="🌊 Pristine Clean (Teal / Mint)"
-                    Style="{StaticResource SecondaryButtonStyle}"
-                    Command="{Binding SelectThemeCommand}"
-                    CommandParameter="Pristine Clean">
-                    <Button.Triggers>
-                        <DataTrigger
-                            TargetType="Button"
-                            Binding="{Binding SelectedThemeName}"
-                            Value="Pristine Clean">
-                            <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
-                        </DataTrigger>
-                    </Button.Triggers>
-                </Button>
+                    <!-- 4. Lavender Cold Brew -->
+                    <Border
+                        BackgroundColor="{DynamicResource SurfaceAltColor}"
+                        Stroke="{DynamicResource BorderColor}"
+                        StrokeThickness="1"
+                        Padding="14,10">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="🪻  Lavender Cold Brew  •  Wildflower Honey &amp; Steep" Style="{StaticResource MediumLabelStyle}" FontSize="13" />
+                            <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
+                                <Button
+                                    Grid.Column="0"
+                                    Text="☀️  Honey Lavender"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    FontSize="12"
+                                    Padding="0"
+                                    Command="{Binding SelectThemeCommand}"
+                                    CommandParameter="Honey Lavender Latte">
+                                    <Button.Triggers>
+                                        <DataTrigger
+                                            TargetType="Button"
+                                            Binding="{Binding SelectedThemeName}"
+                                            Value="Honey Lavender Latte">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                            <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                            <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button
+                                    Grid.Column="1"
+                                    Text="🌙  Midnight Cold Brew"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    FontSize="12"
+                                    Padding="0"
+                                    Command="{Binding SelectThemeCommand}"
+                                    CommandParameter="Midnight Cold Brew">
+                                    <Button.Triggers>
+                                        <DataTrigger
+                                            TargetType="Button"
+                                            Binding="{Binding SelectedThemeName}"
+                                            Value="Midnight Cold Brew">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                            <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                            <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
 
-                <!-- 5. Coffee Light (Latte / Caramel) -->
-                <Button
-                    Text="☕ Coffee Light (Latte / Caramel)"
-                    Style="{StaticResource SecondaryButtonStyle}"
-                    Command="{Binding SelectThemeCommand}"
-                    CommandParameter="Coffee Light">
-                    <Button.Triggers>
-                        <DataTrigger
-                            TargetType="Button"
-                            Binding="{Binding SelectedThemeName}"
-                            Value="Coffee Light">
-                            <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
-                        </DataTrigger>
-                    </Button.Triggers>
-                </Button>
+                    <!-- 5. Mint Cortado -->
+                    <Border
+                        BackgroundColor="{DynamicResource SurfaceAltColor}"
+                        Stroke="{DynamicResource BorderColor}"
+                        StrokeThickness="1"
+                        Padding="14,10">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="🌿  Mint Cortado  •  Garden Mint &amp; Double Ristretto" Style="{StaticResource MediumLabelStyle}" FontSize="13" />
+                            <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
+                                <Button
+                                    Grid.Column="0"
+                                    Text="☀️  Sweet Mint Cortado"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    FontSize="12"
+                                    Padding="0"
+                                    Command="{Binding SelectThemeCommand}"
+                                    CommandParameter="Sweet Mint Cortado">
+                                    <Button.Triggers>
+                                        <DataTrigger
+                                            TargetType="Button"
+                                            Binding="{Binding SelectedThemeName}"
+                                            Value="Sweet Mint Cortado">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                            <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                            <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button
+                                    Grid.Column="1"
+                                    Text="🌙  Dark Mint Espresso"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    FontSize="12"
+                                    Padding="0"
+                                    Command="{Binding SelectThemeCommand}"
+                                    CommandParameter="Dark Mint Espresso">
+                                    <Button.Triggers>
+                                        <DataTrigger
+                                            TargetType="Button"
+                                            Binding="{Binding SelectedThemeName}"
+                                            Value="Dark Mint Espresso">
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                            <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                            <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </ScrollView>
 
-                <!-- 6. Coffee Dark (Espresso / Mocha) -->
+            <!-- Footer with Attribution -->
+            <VerticalStackLayout Spacing="8" Margin="0,4,0,0">
                 <Button
-                    Text="🌙 Coffee Dark (Espresso / Mocha)"
-                    Style="{StaticResource SecondaryButtonStyle}"
-                    Command="{Binding SelectThemeCommand}"
-                    CommandParameter="Coffee Dark">
-                    <Button.Triggers>
-                        <DataTrigger
-                            TargetType="Button"
-                            Binding="{Binding SelectedThemeName}"
-                            Value="Coffee Dark">
-                            <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
-                        </DataTrigger>
-                    </Button.Triggers>
-                </Button>
-            </VerticalStackLayout>
-
-            <!-- Footer -->
-            <VerticalStackLayout Spacing="8" Margin="0,8,0,0">
-                <Button
-                    Text="Done"
+                    Text="Apply Roast &amp; Close"
                     Style="{StaticResource PrimaryButtonStyle}"
+                    HeightRequest="44"
+                    CornerRadius="14"
                     Clicked="OnCloseClicked" />
                 <Label
                     Text="AI engineered by EJRitter Development"
                     Style="{StaticResource CaptionLabelStyle}"
-                    HorizontalTextAlignment="Center"
-                    FontSize="11" />
+                    FontSize="10"
+                    HorizontalTextAlignment="Center" />
             </VerticalStackLayout>
         </VerticalStackLayout>
     </Border>

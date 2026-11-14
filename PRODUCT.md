@@ -2,25 +2,26 @@
 
 This document grounds the AI and the design system in the core goals of the product.
 
-**Brand / Product Name**: MugOverflow - Java Oracle & Caffeine Tracker  
-**Surface Type**: Product (Interactive Decision Oracle & Pharmacokinetic Metabolism Dashboard)  
-**Target Audience**: Developers, software engineers, night-shift coders, and caffeine enthusiasts seeking unbiased coffee intake counsel, pharmacokinetic half-life clearance modeling, and safe sleep window protection.
+**Brand / Product Name**: MugOverflow - Specialty Barista Chatbot & Caffeine Tracker  
+**Platform**: Native `.NET 11` MAUI (`net11.0-windows10.0.19041.0`, `net11.0-android`, `net11.0-ios`, `net11.0-maccatalyst`)  
+**Surface Type**: Product (Interactive Coffeehouse Barista Chatbot, Animated Coffee Mug Mascot & Pharmacokinetic Roast Ledger)  
+**Target Audience**: Developers, software engineers, night-shift coders, and specialty coffee enthusiasts seeking unbiased coffee intake counsel, warm coffeehouse character, pharmacokinetic half-life clearance modeling, and safe sleep window protection.
 
 ## Core Workflows
-1. **Consult the Pure Stochastic Java Oracle**: Ask whether to drink coffee; receive an impartial 50/50 coin-flip decision drawn from 100 crafted responses (50 nuanced YES / 50 strategic NO) and record compliance (Drank vs Skipped).
-2. **Session Lifecycle & Daily Auto-Archival**: Each new day starts with a clean, focused Oracle chat stream, while all previous questions, drinks, and verdicts are preserved indefinitely in the Metabolism & Intake History ledger.
-3. **Track Pharmacokinetic Caffeine Elimination**: Monitor active caffeine in the body using the clinical standard 5-hour exponential half-life model ($N(t) = \sum N_i \cdot (0.5)^{(t - t_i)/5}$), total daily consumption, and countdowns to the $<20\text{mg}$ safe sleep threshold and $<1\text{mg}$ full clearance.
-4. **24-Hour Elimination Curve Visualization**: Render interactive decay curves with active point indicators and safe sleep threshold lines on a native MAUI `GraphicsView`.
-5. **Coffee Reference & Intake Log Management**: Access 10 USDA/Mayo Clinic reference coffees, log intake with exact mg caffeine, edit or delete past logs, and review the 2x2 compliance matrix (Yes•Drank, No•Skipped, Yes•Skipped, No•Drank).
-6. **Responsive Dual-Pane Experience**: Automatically present a simultaneous side-by-side view (Oracle Chat on the left, Metabolism Dashboard on the right) on wide screens and desktop viewports ($\ge 900\text{dp}$), collapsing smoothly into a seamless top-tab switcher on mobile.
-7. **Instant Runtime Theming**: Switch between Regal Earth, Wine Desert, Forest Lavender, and Pristine Clean themes without restarting the app.
+1. **Tap-Chip Consultation with Mugsy the Barista**: Pick any drink from the House Coffee & Caffeine Menu, tap a one-touch coffeehouse prompt chip (zero keyboard typing required), watch Mugsy pull a fresh shot at 60fps, receive an impartial 50/50 Barista verdict drawn from 100 crafted responses, and reply via tactile quick-reply chat bubbles (`Brewed & drank` vs `Skipped this round`).
+2. **Playful Animated Coffee Mug Mascot (`CoffeeMascotView`)**: Native `Microsoft.Maui.Graphics` vector mascot with sloshing espresso fill driven by active bloodstream caffeine (mg), rising Bezier steam wisps, eye blinks, micro-jitter when over-caffeinated, and celebratory/protective reaction bursts—rendered both on the Hero Espresso Stage and as compact mini-avatars beside Barista chat bubbles.
+3. **Session Lifecycle, Slide-Over Drawer & Daily Auto-Archival**: Browse or switch past brew sessions in the slide-over Coffeehouse Drawer while keeping all logged drinks and verdicts preserved indefinitely in local SQLite storage (with optional cloud sync).
+4. **Track Pharmacokinetic Caffeine Elimination**: Monitor active caffeine in the body using the clinical standard 5-hour exponential half-life model ($N(t) = \sum N_i \cdot (0.5)^{(t - t_i)/5}$), total daily consumption, and countdowns to the $<20\text{mg}$ safe sleep threshold and $<1\text{mg}$ full clearance.
+5. **24-Hour Elimination Curve & Intake Ledger**: Render interactive 24-hour decay curves with safe sleep threshold lines on a native MAUI `GraphicsView`, alongside a searchable, filterable, paginated Intake Ledger and 2x2 Barista Alignment Matrix.
+6. **Pure Coffeehouse Drink Runtime Theming**: Defaults to `"Espresso Crema Dark"` on launch and switches instantaneously across 5 specialty coffeehouse drink pairs (10 WCAG AA/AAA light & dark palettes) without restarting the app:
+   - **Espresso & Oat Latte**: `"Espresso Crema Dark"` (Default) & `"Steamed Oat Latte"`
+   - **Caramel Mocha**: `"Caramel Macchiato"` & `"Mocha Velvet Dark"`
+   - **Ceremonial Matcha**: `"Iced Matcha Latte"` & `"Dirty Matcha Dark"`
+   - **Lavender Cold Brew**: `"Honey Lavender Latte"` & `"Midnight Cold Brew"`
+   - **Mint Cortado**: `"Sweet Mint Cortado"` & `"Dark Mint Espresso"`
 
 ## Non-Goals
-- **No Web Views, JavaScript, or Tailwind**: Pure native MAUI XAML components exclusively.
-- **No Mandatory Cloud Account or Tracking**: 100% offline-first local data persistence with zero external telemetry.
-- **No Invasive Biometric Overrides**: Adheres strictly to standard clinical baseline kinetics (5.0-hour half-life) without confusing multi-slider friction.
-- **No Cluttered E-commerce Slop**: Laser-focused on coffee decision-making and pharmacokinetic tracking.
-
-## Competitors & Anti-References
-- **Generic Habit Trackers**: Flat checklists that treat a 215mg Nitro Cold Brew the same as a 63mg Single Espresso. MugOverflow incorporates precise dosage and elimination curves.
-- **Overly Complex Medical Tools**: Cluttered data-entry forms with high cognitive load. MugOverflow keeps the primary workflow conversational, fast, and visually rewarding.
+- **No Web Views, JavaScript, or Tailwind**: Pure native `.NET 11` MAUI XAML and `Microsoft.Maui.Graphics` vector components exclusively.
+- **No Mandatory Cloud Account or External Telemetry**: 100% offline-first local SQLite & preference persistence with optional user-initiated cloud sync.
+- **No Keyboard Form Friction in Chat**: Tap-chip prompt dock and one-tap conversational reply pills keep every Barista interaction effortless.
+- **No Invasive Biometric Overrides**: Adheres strictly to clinical baseline kinetics (5.0-hour half-life) without multi-slider clutter.

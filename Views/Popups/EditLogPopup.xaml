@@ -6,39 +6,48 @@
     xmlns:fluent="clr-namespace:FluentIcons.Maui;assembly=FluentIcons.Maui"
     xmlns:vm="clr-namespace:MugOverflowProject.ViewModels"
     xmlns:models="clr-namespace:MugOverflowProject.Models"
+    xmlns:popups="clr-namespace:MugOverflowProject.Views.Popups"
     x:Class="MugOverflowProject.Views.Popups.EditLogPopup"
-    x:DataType="vm:EditLogPopupViewModel">
+    x:DataType="vm:EditLogPopupViewModel"
+    BackgroundColor="Transparent"
+    Padding="0"
+    Margin="0">
 
     <Border
         Style="{StaticResource CardBorderStyle}"
-        MaximumWidthRequest="520"
-        Margin="16"
-        Padding="18"
+        MaximumWidthRequest="540"
+        Padding="22,20"
         HorizontalOptions="Center"
         VerticalOptions="Center">
 
         <VerticalStackLayout Spacing="14">
             <!-- Modal Header -->
-            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
+            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12" VerticalOptions="Center">
                 <Border
                     Grid.Column="0"
-                    BackgroundColor="{DynamicResource SurfaceAltColor}"
                     StrokeThickness="0"
-                    Padding="10"
-                    WidthRequest="40"
-                    HeightRequest="40">
+                    WidthRequest="42"
+                    HeightRequest="42">
                     <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="12" />
+                        <RoundRectangle CornerRadius="14" />
                     </Border.StrokeShape>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="{DynamicResource PrimaryGradientStart}" Offset="0.0" />
+                            <GradientStop Color="{DynamicResource PrimaryGradientEnd}" Offset="1.0" />
+                        </LinearGradientBrush>
+                    </Border.Background>
                     <fluent:SymbolIcon
                         Symbol="Edit"
                         FontSize="20"
-                        ForegroundColor="{DynamicResource PrimaryColor}" />
+                        ForegroundColor="White"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
                 </Border>
 
-                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
-                    <Label Text="Edit Choice / Outcome" Style="{StaticResource MediumLabelStyle}" FontSize="18" />
-                    <Label Text="Correct your logged coffee drink or decision" Style="{StaticResource CaptionLabelStyle}" />
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                    <Label Text="Update Coffee Log" Style="{StaticResource MediumLabelStyle}" FontSize="18" />
+                    <Label Text="Adjust your brewed drink or Barista consultation outcome" Style="{StaticResource CaptionLabelStyle}" />
                 </VerticalStackLayout>
 
                 <Button
@@ -47,6 +56,7 @@
                     Style="{StaticResource SecondaryButtonStyle}"
                     WidthRequest="36"
                     HeightRequest="36"
+                    CornerRadius="12"
                     Padding="0"
                     Clicked="OnCancelClicked" />
             </Grid>
@@ -56,13 +66,13 @@
                 BackgroundColor="{DynamicResource SurfaceAltColor}"
                 Stroke="{DynamicResource BorderColor}"
                 StrokeThickness="1"
-                Padding="12">
+                Padding="14,10">
                 <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="12" />
+                    <RoundRectangle CornerRadius="14" />
                 </Border.StrokeShape>
                 <Grid ColumnDefinitions="*, Auto">
                     <VerticalStackLayout Grid.Column="0" Spacing="2">
-                        <Label Text="Oracle's Suggestion:" Style="{StaticResource CaptionLabelStyle}" />
+                        <Label Text="BARISTA VERDICT" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" CharacterSpacing="0.8" />
                         <Label
                             Text="{Binding OracleVerdictText}"
                             FontAttributes="Bold"
@@ -70,7 +80,7 @@
                             TextColor="{DynamicResource PrimaryColor}" />
                     </VerticalStackLayout>
                     <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" Spacing="2">
-                        <Label Text="Logged Time:" Style="{StaticResource CaptionLabelStyle}" HorizontalTextAlignment="End" />
+                        <Label Text="TIMESTAMP" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" CharacterSpacing="0.8" HorizontalTextAlignment="End" />
                         <Label
                             Text="{Binding TimeString}"
                             FontAttributes="Bold"
@@ -83,33 +93,39 @@
 
             <!-- Drank vs Skipped Toggle Buttons -->
             <VerticalStackLayout Spacing="6">
-                <Label Text="Did you drink coffee?" Style="{StaticResource SmallLabelStyle}" FontAttributes="Bold" />
+                <Label Text="Outcome Action" Style="{StaticResource SmallLabelStyle}" FontAttributes="Bold" />
                 <Grid ColumnDefinitions="*, *" ColumnSpacing="10">
                     <Button
                         Grid.Column="0"
-                        Text="☕ Drank Coffee"
-                        HeightRequest="36"
+                        Text="☕  Brewed &amp; Drank"
+                        HeightRequest="38"
+                        CornerRadius="12"
                         FontSize="12"
                         Command="{Binding SetDrankCommand}"
                         CommandParameter="{x:Boolean True}"
                         Style="{StaticResource SecondaryButtonStyle}">
                         <Button.Triggers>
                             <DataTrigger TargetType="Button" Binding="{Binding UserDrank}" Value="True">
-                                <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
+                                <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
                             </DataTrigger>
                         </Button.Triggers>
                     </Button>
                     <Button
                         Grid.Column="1"
-                        Text="🚫 Skipped Coffee"
-                        HeightRequest="36"
+                        Text="🚫  Skipped Cup"
+                        HeightRequest="38"
+                        CornerRadius="12"
                         FontSize="12"
                         Command="{Binding SetDrankCommand}"
                         CommandParameter="{x:Boolean False}"
                         Style="{StaticResource SecondaryButtonStyle}">
                         <Button.Triggers>
                             <DataTrigger TargetType="Button" Binding="{Binding UserDrank}" Value="False">
-                                <Setter Property="Style" Value="{StaticResource PrimaryButtonStyle}" />
+                                <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
                             </DataTrigger>
                         </Button.Triggers>
                     </Button>
@@ -117,34 +133,34 @@
             </VerticalStackLayout>
 
             <!-- Coffee Type Selection (Visible when Drank is True) -->
-            <VerticalStackLayout Spacing="6" IsVisible="{Binding UserDrank}">
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding UserDrank}">
                 <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
-                    <Label Grid.Column="0" Text="Select Coffee Drink:" Style="{StaticResource SmallLabelStyle}" FontAttributes="Bold" />
-                    <Label Grid.Column="1" Text="{Binding SelectedCoffeeType.CaffeineDisplay, FallbackValue='0 mg'}" Style="{StaticResource CaptionLabelStyle}" FontAttributes="Bold" TextColor="{DynamicResource AccentColor}" />
+                    <Label Grid.Column="0" Text="Beverage Profile" Style="{StaticResource SmallLabelStyle}" FontAttributes="Bold" />
+                    <Label Grid.Column="1" Text="{Binding SelectedCoffeeType.CaffeineDisplay, FallbackValue='0 mg'}" Style="{StaticResource CaptionLabelStyle}" FontAttributes="Bold" TextColor="{DynamicResource SecondaryColor}" />
                 </Grid>
 
-                <!-- 2-Column Grid of All Coffee Types (Including Decaf) -->
+                <!-- 2-Column Grid of All Coffee Types -->
                 <CollectionView
                     ItemsSource="{Binding AvailableCoffeeTypes}"
-                    HeightRequest="150"
+                    HeightRequest="156"
                     VerticalScrollBarVisibility="Always"
                     SelectionMode="None">
                     <CollectionView.ItemsLayout>
-                        <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="6" VerticalItemSpacing="6" />
+                        <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="8" VerticalItemSpacing="8" />
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:CoffeeType">
                             <Border
-                                BackgroundColor="{DynamicResource SurfaceColor}"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
                                 Stroke="{DynamicResource BorderColor}"
                                 StrokeThickness="1"
-                                Padding="8,6">
+                                Padding="10,7">
                                 <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="8" />
+                                    <RoundRectangle CornerRadius="10" />
                                 </Border.StrokeShape>
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:EditLogPopupViewModel}}, Path=SelectCoffeeCommand}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type popups:EditLogPopup}}, Path=BindingContext.SelectCoffeeCommand}"
                                         CommandParameter="{Binding .}" />
                                 </Border.GestureRecognizers>
 
@@ -163,18 +179,18 @@
                                     </VerticalStackLayout>
                                     <Border
                                         Grid.Column="1"
-                                        BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                        BackgroundColor="{DynamicResource SurfaceColor}"
                                         StrokeThickness="0"
-                                        Padding="5,2"
+                                        Padding="6,2"
                                         VerticalOptions="Center">
                                         <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="4" />
+                                            <RoundRectangle CornerRadius="6" />
                                         </Border.StrokeShape>
                                         <Label
                                             Text="{Binding CaffeineDisplay}"
                                             FontSize="10"
                                             FontAttributes="Bold"
-                                            TextColor="{DynamicResource AccentColor}" />
+                                            TextColor="{DynamicResource SecondaryColor}" />
                                     </Border>
                                 </Grid>
                             </Border>
@@ -187,9 +203,9 @@
                     BackgroundColor="{DynamicResource SurfaceAltColor}"
                     Stroke="{DynamicResource BorderColor}"
                     StrokeThickness="1"
-                    Padding="10,6">
+                    Padding="12,8">
                     <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8" />
+                        <RoundRectangle CornerRadius="10" />
                     </Border.StrokeShape>
                     <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
                         <Label
@@ -201,7 +217,7 @@
                             VerticalOptions="Center" />
                         <Label
                             Grid.Column="1"
-                            Text="✓ Selected"
+                            Text="✓ Active"
                             FontSize="11"
                             FontAttributes="Bold"
                             TextColor="{DynamicResource SuccessColor}"
@@ -216,8 +232,9 @@
                     Grid.Column="0"
                     Text="🗑 Delete"
                     Style="{StaticResource DestructiveButtonStyle}"
-                    HeightRequest="34"
-                    Padding="12,0"
+                    HeightRequest="36"
+                    CornerRadius="12"
+                    Padding="14,0"
                     FontSize="12"
                     Clicked="OnDeleteClicked" />
 
@@ -225,8 +242,9 @@
                     Grid.Column="2"
                     Text="Cancel"
                     Style="{StaticResource SecondaryButtonStyle}"
-                    HeightRequest="34"
-                    Padding="14,0"
+                    HeightRequest="36"
+                    CornerRadius="12"
+                    Padding="16,0"
                     FontSize="12"
                     Clicked="OnCancelClicked" />
 
@@ -234,8 +252,9 @@
                     Grid.Column="3"
                     Text="Save Changes"
                     Style="{StaticResource PrimaryButtonStyle}"
-                    HeightRequest="34"
-                    Padding="14,0"
+                    HeightRequest="36"
+                    CornerRadius="12"
+                    Padding="16,0"
                     FontSize="12"
                     Clicked="OnSaveClicked" />
             </Grid>

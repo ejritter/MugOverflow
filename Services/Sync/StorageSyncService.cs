@@ -23,6 +23,8 @@ public sealed class StorageSyncService : IStorageSyncService
 	private SyncEngineStatus _status = SyncEngineStatus.Idle;
 	private DateTime? _lastSuccessfulSyncUtc;
 	private CancellationTokenSource? _timerCts;
+	private CancellationTokenSource? _connectivitySyncCts;
+	private readonly object _connectivityLock = new();
 	private Task? _periodicTimerTask;
 	private bool _isInitialized;
 	private bool _disposed;
@@ -138,7 +140,13 @@ public sealed class StorageSyncService : IStorageSyncService
 		}
 		finally
 		{
-			_syncLock.Release();
+			try
+			{
+				_syncLock.Release();
+			}
+			catch (ObjectDisposedException)
+			{
+			}
 		}
 	}
 
@@ -159,7 +167,11 @@ public sealed class StorageSyncService : IStorageSyncService
 			return false;
 		}
 
-		await _syncLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+		using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		timeoutCts.CancelAfter(TimeSpan.FromSeconds(30));
+		var effectiveToken = timeoutCts.Token;
+
+		await _syncLock.WaitAsync(effectiveToken).ConfigureAwait(false);
 		try
 		{
 			Status = SyncEngineStatus.Syncing;
@@ -167,7 +179,7 @@ public sealed class StorageSyncService : IStorageSyncService
 			// 1. Ensure provider is authenticated if required (silent only in background sync)
 			if (_currentProvider.RequiresAuthentication)
 			{
-				var isAuth = await _currentProvider.IsAuthenticatedAsync(cancellationToken).ConfigureAwait(false);
+				var isAuth = await _currentProvider.IsAuthenticatedAsync(effectiveToken).ConfigureAwait(false);
 				if (!isAuth)
 				{
 					Status = SyncEngineStatus.AuthRequired;
@@ -176,10 +188,10 @@ public sealed class StorageSyncService : IStorageSyncService
 			}
 
 			// 2. Read remote payload from active provider
-			var remotePayload = await _currentProvider.ReadPayloadAsync(cancellationToken).ConfigureAwait(false);
+			var remotePayload = await _currentProvider.ReadPayloadAsync(effectiveToken).ConfigureAwait(false);
 
 			// 3. Fetch all local SQLite logs
-			var localLogs = await _databaseService.GetAllLogsAsync(cancellationToken).ConfigureAwait(false);
+			var localLogs = await _databaseService.GetAllLogsAsync(effectiveToken).ConfigureAwait(false);
 
 			// 4. Execute Two-Way Union Hydration & LWW Conflict Resolution
 			var localMap = localLogs.ToDictionary(x => x.Id, x => x);
@@ -247,7 +259,7 @@ public sealed class StorageSyncService : IStorageSyncService
 			// 5. Apply local SQLite batch upserts inside transaction
 			if (localUpserts.Count > 0)
 			{
-				await _databaseService.UpsertBatchAsync(localUpserts, cancellationToken).ConfigureAwait(false);
+				await _databaseService.UpsertBatchAsync(localUpserts, effectiveToken).ConfigureAwait(false);
 			}
 
 			// 6. Write back merged payload to cloud if remote was missing records or had older records
@@ -261,20 +273,22 @@ public sealed class StorageSyncService : IStorageSyncService
 					DecisionLogs = mergedUnion.Values.OrderByDescending(x => x.Timestamp).ToList()
 				};
 
-				var writeOk = await _currentProvider.WritePayloadAsync(newPayload, cancellationToken).ConfigureAwait(false);
+				var writeOk = await _currentProvider.WritePayloadAsync(newPayload, effectiveToken).ConfigureAwait(false);
 				if (!writeOk)
 				{
 					Status = SyncEngineStatus.Error;
 					return false;
 				}
 
-				// Mark all local records as Synced after successful write
-				await _databaseService.MarkAllLogsSyncedAsync(cancellationToken).ConfigureAwait(false);
+				// Mark pushed records as Synced after successful write
+				var pushedIds = newPayload.DecisionLogs.Select(x => x.Id).ToList();
+				await _databaseService.MarkLogsSyncedAsync(pushedIds, effectiveToken).ConfigureAwait(false);
 			}
 			else
 			{
-				// Mark all local records as Synced
-				await _databaseService.MarkAllLogsSyncedAsync(cancellationToken).ConfigureAwait(false);
+				// Mark local records as Synced
+				var pushedIds = localLogs.Select(x => x.Id).ToList();
+				await _databaseService.MarkLogsSyncedAsync(pushedIds, effectiveToken).ConfigureAwait(false);
 			}
 
 			// 7. Update sync metadata timestamps
@@ -283,19 +297,24 @@ public sealed class StorageSyncService : IStorageSyncService
 			await _databaseService.SetMetadataAsync(
 				SyncMetadataKeys.LastSuccessfulSyncUtc,
 				nowUtc.ToString("o"),
-				cancellationToken).ConfigureAwait(false);
+				effectiveToken).ConfigureAwait(false);
 			await _databaseService.SetMetadataAsync(
 				SyncMetadataKeys.LastHydrationUtc,
 				nowUtc.ToString("o"),
-				cancellationToken).ConfigureAwait(false);
+				effectiveToken).ConfigureAwait(false);
 
 			Status = SyncEngineStatus.Success;
 			Status = SyncEngineStatus.Idle;
 			return true;
 		}
-		catch (OperationCanceledException)
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 		{
 			throw;
+		}
+		catch (OperationCanceledException)
+		{
+			Status = SyncEngineStatus.Error;
+			return false;
 		}
 		catch
 		{
@@ -304,7 +323,13 @@ public sealed class StorageSyncService : IStorageSyncService
 		}
 		finally
 		{
-			_syncLock.Release();
+			try
+			{
+				_syncLock.Release();
+			}
+			catch (ObjectDisposedException)
+			{
+			}
 		}
 	}
 
@@ -318,11 +343,15 @@ public sealed class StorageSyncService : IStorageSyncService
 			return false;
 		}
 
-		await _syncLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+		using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		timeoutCts.CancelAfter(TimeSpan.FromSeconds(15));
+		var effectiveToken = timeoutCts.Token;
+
+		await _syncLock.WaitAsync(effectiveToken).ConfigureAwait(false);
 		try
 		{
 			// 1. Check for pending dirty records
-			var pendingLogs = await _databaseService.GetPendingSyncLogsAsync(cancellationToken).ConfigureAwait(false);
+			var pendingLogs = await _databaseService.GetPendingSyncLogsAsync(effectiveToken).ConfigureAwait(false);
 			if (pendingLogs.Count == 0)
 			{
 				return true;
@@ -333,7 +362,7 @@ public sealed class StorageSyncService : IStorageSyncService
 			// 2. Ensure provider authentication (silent only in background sync)
 			if (_currentProvider.RequiresAuthentication)
 			{
-				var isAuth = await _currentProvider.IsAuthenticatedAsync(cancellationToken).ConfigureAwait(false);
+				var isAuth = await _currentProvider.IsAuthenticatedAsync(effectiveToken).ConfigureAwait(false);
 				if (!isAuth)
 				{
 					Status = SyncEngineStatus.AuthRequired;
@@ -342,7 +371,7 @@ public sealed class StorageSyncService : IStorageSyncService
 			}
 
 			// 3. Read current remote payload
-			var remotePayload = await _currentProvider.ReadPayloadAsync(cancellationToken).ConfigureAwait(false);
+			var remotePayload = await _currentProvider.ReadPayloadAsync(effectiveToken).ConfigureAwait(false);
 			var remoteLogs = (remotePayload?.DecisionLogs ?? [])
 				.Where(r => !string.IsNullOrWhiteSpace(r.Id))
 				.GroupBy(r => r.Id, StringComparer.Ordinal)
@@ -374,7 +403,7 @@ public sealed class StorageSyncService : IStorageSyncService
 			};
 
 			// 5. Write updated payload to active provider
-			var writeOk = await _currentProvider.WritePayloadAsync(updatedPayload, cancellationToken).ConfigureAwait(false);
+			var writeOk = await _currentProvider.WritePayloadAsync(updatedPayload, effectiveToken).ConfigureAwait(false);
 			if (!writeOk)
 			{
 				Status = SyncEngineStatus.Error;
@@ -383,7 +412,7 @@ public sealed class StorageSyncService : IStorageSyncService
 
 			// 6. Atomically mark flushed logs as Synced in SQLite
 			var flushedIds = pendingLogs.Select(x => x.Id);
-			await _databaseService.MarkLogsSyncedAsync(flushedIds, cancellationToken).ConfigureAwait(false);
+			await _databaseService.MarkLogsSyncedAsync(flushedIds, effectiveToken).ConfigureAwait(false);
 
 			// 7. Update sync metadata
 			var nowUtc = DateTime.UtcNow;
@@ -391,15 +420,20 @@ public sealed class StorageSyncService : IStorageSyncService
 			await _databaseService.SetMetadataAsync(
 				SyncMetadataKeys.LastSuccessfulSyncUtc,
 				nowUtc.ToString("o"),
-				cancellationToken).ConfigureAwait(false);
+				effectiveToken).ConfigureAwait(false);
 
 			Status = SyncEngineStatus.Success;
 			Status = SyncEngineStatus.Idle;
 			return true;
 		}
-		catch (OperationCanceledException)
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 		{
 			throw;
+		}
+		catch (OperationCanceledException)
+		{
+			Status = SyncEngineStatus.Idle;
+			return false;
 		}
 		catch
 		{
@@ -408,7 +442,13 @@ public sealed class StorageSyncService : IStorageSyncService
 		}
 		finally
 		{
-			_syncLock.Release();
+			try
+			{
+				_syncLock.Release();
+			}
+			catch (ObjectDisposedException)
+			{
+			}
 		}
 	}
 
@@ -471,7 +511,7 @@ public sealed class StorageSyncService : IStorageSyncService
 						return false;
 					}
 
-					await _databaseService.MarkAllLogsSyncedAsync(cancellationToken).ConfigureAwait(false);
+					await _databaseService.MarkLogsSyncedAsync(localLogs.Select(x => x.Id), cancellationToken).ConfigureAwait(false);
 					break;
 				}
 
@@ -562,7 +602,7 @@ public sealed class StorageSyncService : IStorageSyncService
 						return false;
 					}
 
-					await _databaseService.MarkAllLogsSyncedAsync(cancellationToken).ConfigureAwait(false);
+					await _databaseService.MarkLogsSyncedAsync(consolidatedPayload.DecisionLogs.Select(x => x.Id), cancellationToken).ConfigureAwait(false);
 					break;
 				}
 
@@ -605,7 +645,13 @@ public sealed class StorageSyncService : IStorageSyncService
 		}
 		finally
 		{
-			_syncLock.Release();
+			try
+			{
+				_syncLock.Release();
+			}
+			catch (ObjectDisposedException)
+			{
+			}
 		}
 	}
 
@@ -660,7 +706,13 @@ public sealed class StorageSyncService : IStorageSyncService
 				{
 					try
 					{
-						await FlushPendingChangesAsync(cancellationToken).ConfigureAwait(false);
+						using var flushCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+						flushCts.CancelAfter(TimeSpan.FromSeconds(15));
+						await FlushPendingChangesAsync(flushCts.Token).ConfigureAwait(false);
+					}
+					catch (OperationCanceledException)
+					{
+						// Catch expected cancellation / timeout
 					}
 					catch
 					{
@@ -669,7 +721,7 @@ public sealed class StorageSyncService : IStorageSyncService
 				}
 			}
 		}
-		catch (OperationCanceledException)
+		catch (Exception ex) when (ex is OperationCanceledException or ObjectDisposedException)
 		{
 			// Normal loop cancellation on shutdown
 		}
@@ -686,16 +738,48 @@ public sealed class StorageSyncService : IStorageSyncService
 				Status = SyncEngineStatus.Idle;
 			}
 
+			CancellationTokenSource cts;
+			CancellationToken token;
+
+			lock (_connectivityLock)
+			{
+				if (_disposed)
+				{
+					return;
+				}
+
+				_connectivitySyncCts?.Cancel();
+				cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+				_connectivitySyncCts = cts;
+				token = cts.Token;
+			}
+
 			// Automatically trigger flush of pending offline mutations
 			_ = Task.Run(async () =>
 			{
 				try
 				{
-					await FlushPendingChangesAsync(CancellationToken.None).ConfigureAwait(false);
+					await FlushPendingChangesAsync(token).ConfigureAwait(false);
+				}
+				catch (OperationCanceledException)
+				{
+					// Safe background cancellation
 				}
 				catch
 				{
 					// Safe background completion
+				}
+				finally
+				{
+					lock (_connectivityLock)
+					{
+						if (_connectivitySyncCts == cts)
+						{
+							_connectivitySyncCts = null;
+						}
+					}
+
+					cts.Dispose();
 				}
 			});
 		}
@@ -757,6 +841,13 @@ public sealed class StorageSyncService : IStorageSyncService
 		_disposed = true;
 
 		_connectivity.ConnectivityChanged -= OnConnectivityChanged;
+
+		lock (_connectivityLock)
+		{
+			_connectivitySyncCts?.Cancel();
+			_connectivitySyncCts = null;
+		}
+
 		_timerCts?.Cancel();
 		_timerCts?.Dispose();
 		_syncLock.Dispose();
@@ -768,6 +859,13 @@ public sealed class StorageSyncService : IStorageSyncService
 		_disposed = true;
 
 		_connectivity.ConnectivityChanged -= OnConnectivityChanged;
+
+		lock (_connectivityLock)
+		{
+			_connectivitySyncCts?.Cancel();
+			_connectivitySyncCts = null;
+		}
+
 		if (_timerCts != null)
 		{
 			_timerCts.Cancel();

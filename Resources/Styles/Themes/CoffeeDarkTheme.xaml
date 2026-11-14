@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="MugOverflowProject.Resources.Styles.Themes.CoffeeDarkTheme">
 
-    <x:String x:Key="ThemeName">Coffee Dark</x:String>
+    <x:String x:Key="ThemeName">Espresso Crema Dark</x:String>
 
     <Color x:Key="PageBackgroundColor">#1C1510</Color>
     <Color x:Key="NavigationBarColor">#140F0B</Color>

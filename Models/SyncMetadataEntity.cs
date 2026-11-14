@@ -1,5 +1,3 @@
-using SQLite;
-
 namespace MugOverflowProject.Models;
 
 /// <summary>
@@ -15,13 +13,11 @@ public static class SyncMetadataKeys
 }
 
 /// <summary>
-/// SQLite ORM entity representing key-value metadata for sync orchestration and provider state.
+/// Persistence entity representing key-value metadata for sync orchestration and provider state.
 /// Stored in table 'sync_metadata'.
 /// </summary>
-[Table("sync_metadata")]
 public sealed class SyncMetadataEntity
 {
-	[PrimaryKey]
 	public string Key { get; set; } = string.Empty;
 
 	public string Value { get; set; } = string.Empty;

@@ -1,3 +1,5 @@
+using System.Net.Http;
+using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Networking;
 using MugOverflowProject.Models;
@@ -229,7 +231,7 @@ public sealed class MemoryAndResourceSafetyTests : IAsyncLifetime
 			{
 				for (int i = 0; i < 20; i++)
 				{
-					_ = await directConn.Table<DecisionLogEntity>().ToListAsync();
+					_ = (await directConn.QueryAsync<DecisionLogEntity>("SELECT * FROM decision_logs;")).AsList();
 				}
 			});
 
@@ -242,5 +244,76 @@ public sealed class MemoryAndResourceSafetyTests : IAsyncLifetime
 		{
 			await directConn.CloseAsync();
 		}
+	}
+
+	[Fact]
+	public void StorageProviders_DiRegistration_ResolvesSingletonsAndKeyedSingletonsCleanlyWithoutCaptiveLeak()
+	{
+		var services = new ServiceCollection();
+		services.AddHttpClient("StorageClient");
+		services.AddSingleton<ISecureStorageService, FakeSecureStorage>();
+		services.AddSingleton<GoogleDriveConfig>();
+		services.AddSingleton<LocalStorageProvider>(_ => new LocalStorageProvider(Path.GetTempPath()));
+		services.AddSingleton<GoogleDriveStorageProvider>(sp =>
+			new GoogleDriveStorageProvider(
+				sp.GetRequiredService<IHttpClientFactory>().CreateClient("StorageClient"),
+				sp.GetRequiredService<ISecureStorageService>(),
+				sp.GetService<IGoogleAuthService>(),
+				sp.GetService<IWebAuthenticator>(),
+				sp.GetService<GoogleDriveConfig>(),
+				sp.GetService<Microsoft.Extensions.Logging.ILogger<GoogleDriveStorageProvider>>()));
+		services.AddSingleton<OneDriveStorageProvider>(sp =>
+			new OneDriveStorageProvider(
+				sp.GetRequiredService<ISecureStorageService>(),
+				sp.GetRequiredService<IHttpClientFactory>().CreateClient("StorageClient"),
+				logger: sp.GetService<Microsoft.Extensions.Logging.ILogger<OneDriveStorageProvider>>()));
+
+		// Keyed Storage Provider Resolution for Dynamic Switching
+		services.AddKeyedSingleton<IStorageProvider>(StorageProviderType.LocalStorage, (sp, _) => sp.GetRequiredService<LocalStorageProvider>());
+		services.AddKeyedSingleton<IStorageProvider>(StorageProviderType.GoogleDrive, (sp, _) => sp.GetRequiredService<GoogleDriveStorageProvider>());
+		services.AddKeyedSingleton<IStorageProvider>(StorageProviderType.OneDrive, (sp, _) => sp.GetRequiredService<OneDriveStorageProvider>());
+
+		services.AddSingleton<IStorageSyncService>(_syncService);
+		services.AddSingleton<IConnectivity>(new FakeConnectivity());
+		services.AddTransient<StorageSelectionViewModel>();
+
+		using var rootProvider = services.BuildServiceProvider();
+
+		// Verify Singletons
+		var gDrive1 = rootProvider.GetRequiredService<GoogleDriveStorageProvider>();
+		var gDrive2 = rootProvider.GetRequiredService<GoogleDriveStorageProvider>();
+		Assert.Same(gDrive1, gDrive2);
+
+		var oneDrive1 = rootProvider.GetRequiredService<OneDriveStorageProvider>();
+		var oneDrive2 = rootProvider.GetRequiredService<OneDriveStorageProvider>();
+		Assert.Same(oneDrive1, oneDrive2);
+
+		// Verify Keyed Singletons match explicit Singletons
+		var keyedGDrive = rootProvider.GetRequiredKeyedService<IStorageProvider>(StorageProviderType.GoogleDrive);
+		Assert.Same(gDrive1, keyedGDrive);
+
+		var keyedOneDrive = rootProvider.GetRequiredKeyedService<IStorageProvider>(StorageProviderType.OneDrive);
+		Assert.Same(oneDrive1, keyedOneDrive);
+
+		var keyedLocal = rootProvider.GetRequiredKeyedService<IStorageProvider>(StorageProviderType.LocalStorage);
+		var local1 = rootProvider.GetRequiredService<LocalStorageProvider>();
+		Assert.Same(local1, keyedLocal);
+
+		// Verify Scoped resolution eliminates captive transient disposable on root
+		WeakReference weakVmRef = ResolveTransientVmInScope(rootProvider);
+
+		GC.Collect();
+		GC.WaitForPendingFinalizers();
+		GC.Collect();
+
+		Assert.False(weakVmRef.IsAlive, "Transient IDisposable resolved via IServiceScope must be garbage collected once scope is disposed.");
+	}
+
+	[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+	private static WeakReference ResolveTransientVmInScope(IServiceProvider rootProvider)
+	{
+		using var scope = rootProvider.CreateScope();
+		var vm = scope.ServiceProvider.GetRequiredService<StorageSelectionViewModel>();
+		return new WeakReference(vm);
 	}
 }

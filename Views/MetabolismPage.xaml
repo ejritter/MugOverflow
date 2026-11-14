@@ -1,0 +1,1057 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:fluent="clr-namespace:FluentIcons.Maui;assembly=FluentIcons.Maui"
+    xmlns:models="clr-namespace:MugOverflowProject.Models"
+    xmlns:viewmodels="clr-namespace:MugOverflowProject.ViewModels"
+    xmlns:views="clr-namespace:MugOverflowProject.Views"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:Class="MugOverflowProject.Views.MetabolismPage"
+    x:DataType="viewmodels:MetabolismViewModel"
+    Shell.NavBarIsVisible="False"
+    NavigationPage.HasNavigationBar="False"
+    Style="{StaticResource PageStyle}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+
+            <!-- Tactile Coffeehouse Header Pill Style (44dp Touch Target) -->
+            <Style x:Key="TactileHeaderPillStyle" TargetType="Border">
+                <Setter Property="BackgroundColor" Value="{DynamicResource SurfaceAltColor}" />
+                <Setter Property="Stroke" Value="{DynamicResource BorderColor}" />
+                <Setter Property="StrokeThickness" Value="1" />
+                <Setter Property="HeightRequest" Value="44" />
+                <Setter Property="Padding" Value="14,0" />
+                <Setter Property="StrokeShape">
+                    <RoundRectangle CornerRadius="14" />
+                </Setter>
+                <Setter Property="VisualStateManager.VisualStateGroups">
+                    <VisualStateGroupList>
+                        <VisualStateGroup Name="CommonStates">
+                            <VisualState Name="Normal" />
+                            <VisualState Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter Property="Stroke" Value="{DynamicResource PrimaryColor}" />
+                                    <Setter Property="StrokeThickness" Value="1.5" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Property="Scale" Value="0.98" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <!-- ===================================================================== -->
+    <!-- UNIFIED COFFEEHOUSE HEADER + FULL-WIDTH BENTO TELEMETRY STAGE         -->
+    <!-- ===================================================================== -->
+    <Grid RowDefinitions="Auto, *">
+
+        <!-- ================================================================= -->
+        <!-- ROW 0: TOP COFFEEHOUSE BAR                                        -->
+        <!-- ================================================================= -->
+        <Border
+            Grid.Row="0"
+            BackgroundColor="{DynamicResource SurfaceColor}"
+            Stroke="{DynamicResource BorderColor}"
+            StrokeThickness="0,0,0,1"
+            Padding="20,10">
+            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="14" VerticalOptions="Center">
+
+                <!-- Left: Back to Barista Chat + Page Title -->
+                <Grid Grid.Column="0" ColumnDefinitions="Auto, Auto" ColumnSpacing="14" VerticalOptions="Center">
+                    <Button
+                        Grid.Column="0"
+                        Text="←  Back to Barista Chat"
+                        Command="{Binding NavigateToMainPageCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        HeightRequest="44"
+                        CornerRadius="14"
+                        Padding="18,0"
+                        FontSize="12.5"
+                        VerticalOptions="Center" />
+
+                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                        <Label
+                            Text="☕ Roast Kinetics &amp; Intake Ledger"
+                            FontSize="17"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{DynamicResource PrimaryTextColor}"
+                            LineBreakMode="TailTruncation" />
+                        <Label
+                            x:Name="MetabolismHeaderSubtitle"
+                            Text="5.0h caffeine half-life • 20 mg sleep window • Barista history"
+                            Style="{StaticResource CaptionLabelStyle}"
+                            FontSize="11"
+                            LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Right: House Menu + Cloud Sync Pill + Roast Theme Pill -->
+                <Grid Grid.Column="2" ColumnDefinitions="Auto, Auto, Auto" ColumnSpacing="10" VerticalOptions="Center">
+
+                    <!-- House Menu Button (44dp) -->
+                    <Button
+                        Grid.Column="0"
+                        Text="📖  House Menu"
+                        Command="{Binding OpenCoffeeDictionaryCommand}"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        HeightRequest="44"
+                        CornerRadius="14"
+                        Padding="14,0"
+                        FontSize="12"
+                        VerticalOptions="Center" />
+
+                    <!-- Cloud Sync Status Pill (44dp) -->
+                    <Border
+                        Grid.Column="1"
+                        Style="{StaticResource TactileHeaderPillStyle}"
+                        VerticalOptions="Center"
+                        SemanticProperties.Description="Configure cloud sync storage">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenStorageSettingsCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto, Auto, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                            <fluent:SymbolIcon
+                                Grid.Column="0"
+                                Symbol="CloudSync"
+                                FontSize="15"
+                                ForegroundColor="{Binding SyncStatusColor}"
+                                VerticalOptions="Center" />
+                            <Label
+                                Grid.Column="1"
+                                x:Name="MetabolismSyncLabel"
+                                Text="{Binding SyncStatusText}"
+                                FontSize="12"
+                                FontAttributes="Bold"
+                                TextColor="{Binding SyncStatusColor}"
+                                LineBreakMode="TailTruncation"
+                                VerticalOptions="Center" />
+                            <ActivityIndicator
+                                Grid.Column="2"
+                                IsRunning="{Binding IsSyncing}"
+                                IsVisible="{Binding IsSyncing}"
+                                WidthRequest="14"
+                                HeightRequest="14"
+                                Color="{Binding SyncStatusColor}"
+                                VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Roast Theme Pill (44dp, Fluent Icons Settings Gear) -->
+                    <Border
+                        Grid.Column="2"
+                        Style="{StaticResource TactileHeaderPillStyle}"
+                        VerticalOptions="Center"
+                        SemanticProperties.Description="Select coffeehouse roast theme">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenThemeSelectorCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto, Auto, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                            <fluent:SymbolIcon
+                                Grid.Column="0"
+                                Symbol="Settings"
+                                FontSize="16"
+                                ForegroundColor="{DynamicResource PrimaryColor}"
+                                VerticalOptions="Center"
+                                SemanticProperties.Description="Roast Theme Settings" />
+                            <Label
+                                Grid.Column="1"
+                                x:Name="MetabolismThemeLabel"
+                                Text="{Binding CurrentThemeName}"
+                                FontSize="12"
+                                FontAttributes="Bold"
+                                TextColor="{DynamicResource PrimaryTextColor}"
+                                MaximumWidthRequest="145"
+                                LineBreakMode="TailTruncation"
+                                VerticalOptions="Center" />
+                            <Label
+                                Grid.Column="2"
+                                Text="▾"
+                                FontSize="11"
+                                FontAttributes="Bold"
+                                TextColor="{DynamicResource SecondaryTextColor}"
+                                VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- ================================================================= -->
+        <!-- ROW 1: SCROLLABLE COFFEEHOUSE BENTO TELEMETRY & LEDGER STAGE      -->
+        <!-- ================================================================= -->
+        <ScrollView Grid.Row="1" HorizontalOptions="Fill">
+            <Grid
+                RowDefinitions="Auto, Auto, Auto, Auto, Auto"
+                RowSpacing="16"
+                Padding="24,18,24,28"
+                MaximumWidthRequest="1360"
+                HorizontalOptions="Fill">
+
+                <!-- ========================================================= -->
+                <!-- BENTO ROW 0: RESPONSIVE KPI STRIP                         -->
+                <!-- ========================================================= -->
+                <Grid
+                    Grid.Row="0"
+                    x:Name="BentoKpiGrid"
+                    ColumnDefinitions="*, *, *, *"
+                    RowDefinitions="Auto"
+                    RowSpacing="12"
+                    ColumnSpacing="12">
+
+                    <!-- Tile 1: Active Bloodstream Buzz -->
+                    <Border
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        x:Name="KpiTileActive"
+                        Style="{StaticResource BentoStatTileStyle}">
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                <Label Grid.Column="0" Text="ACTIVE ROAST BUZZ" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" CharacterSpacing="0.8" />
+                                <Label Grid.Column="1" Text="⚡" FontSize="13" />
+                            </Grid>
+                            <Label
+                                Text="{Binding ActiveCaffeineMg, StringFormat='{0:F0} mg'}"
+                                FontSize="26"
+                                FontAttributes="Bold"
+                                TextColor="{DynamicResource PrimaryColor}" />
+                            <Label Text="5.0h half-life exponential decay" Style="{StaticResource CaptionLabelStyle}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Tile 2: Today's Brews -->
+                    <Border
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        x:Name="KpiTileToday"
+                        Style="{StaticResource BentoStatTileStyle}">
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                <Label Grid.Column="0" Text="TODAY'S BREWS" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" CharacterSpacing="0.8" />
+                                <Label Grid.Column="1" Text="☕" FontSize="13" />
+                            </Grid>
+                            <Label
+                                Text="{Binding TotalCaffeineTodayMg, StringFormat='{0} mg'}"
+                                FontSize="26"
+                                FontAttributes="Bold"
+                                TextColor="{DynamicResource PrimaryTextColor}" />
+                            <Label Text="{Binding CupsCountDisplay}" Style="{StaticResource CaptionLabelStyle}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Tile 3: Barista Alignment -->
+                    <Border
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        x:Name="KpiTileAligned"
+                        Style="{StaticResource BentoStatTileStyle}">
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                <Label Grid.Column="0" Text="BARISTA ALIGNMENT" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" CharacterSpacing="0.8" />
+                                <Label Grid.Column="1" Text="⚖️" FontSize="13" />
+                            </Grid>
+                            <Label
+                                Text="{Binding CompliancePercentage, StringFormat='{0}%'}"
+                                FontSize="26"
+                                FontAttributes="Bold"
+                                TextColor="{DynamicResource SuccessColor}" />
+                            <Label Text="{Binding ComplianceBreakdownText}" Style="{StaticResource CaptionLabelStyle}" LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Tile 4: Sleep Window -->
+                    <Border
+                        Grid.Row="0"
+                        Grid.Column="3"
+                        x:Name="KpiTileSleep"
+                        Style="{StaticResource BentoStatTileStyle}">
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                <Label Grid.Column="0" Text="SLEEP READINESS" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" CharacterSpacing="0.8" />
+                                <Label Grid.Column="1" Text="🌙" FontSize="13" />
+                            </Grid>
+                            <Label
+                                Text="{Binding SleepWindowDisplay}"
+                                FontSize="24"
+                                FontAttributes="Bold"
+                                LineBreakMode="TailTruncation"
+                                TextColor="{DynamicResource SecondaryColor}" />
+                            <Label Text="{Binding ClearanceDisplay, StringFormat='Clearance: {0}'}" Style="{StaticResource CaptionLabelStyle}" LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- ========================================================= -->
+                <!-- BENTO ROW 1: 24-HOUR ROAST ELIMINATION DECAY CURVE        -->
+                <!-- ========================================================= -->
+                <Border Grid.Row="1" Style="{StaticResource BentoStatTileStyle}" Padding="18,16">
+                    <Grid RowDefinitions="Auto, Auto" RowSpacing="12">
+                        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" ColumnSpacing="12" VerticalOptions="Center">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label
+                                    Text="24-Hour Roast Elimination Curve"
+                                    Style="{StaticResource MediumLabelStyle}"
+                                    FontSize="16" />
+                                <Label
+                                    Text="First-order caffeine elimination: N(t) = N₀ · (0.5)^(t / 5.0h) • Peak absorption 30–60 min"
+                                    Style="{StaticResource CaptionLabelStyle}" />
+                            </VerticalStackLayout>
+
+                            <HorizontalStackLayout Grid.Column="1" Spacing="14" VerticalOptions="Center">
+                                <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                    <BoxView WidthRequest="12" HeightRequest="3" CornerRadius="1.5" Color="{DynamicResource PrimaryColor}" VerticalOptions="Center" />
+                                    <Label Text="Active Roast Curve" Style="{StaticResource CaptionLabelStyle}" />
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                    <BoxView WidthRequest="12" HeightRequest="2" CornerRadius="1" Color="{DynamicResource SuccessColor}" VerticalOptions="Center" />
+                                    <Label Text="20 mg Sleep Line" Style="{StaticResource CaptionLabelStyle}" />
+                                </HorizontalStackLayout>
+                            </HorizontalStackLayout>
+                        </Grid>
+
+                        <Border
+                            Grid.Row="1"
+                            BackgroundColor="{DynamicResource SurfaceAltColor}"
+                            Stroke="{DynamicResource BorderColor}"
+                            StrokeThickness="1"
+                            HeightRequest="228"
+                            Padding="6">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="14" />
+                            </Border.StrokeShape>
+                            <GraphicsView
+                                x:Name="MetabolismChartView"
+                                Drawable="{Binding MetabolismDrawable}"
+                                HeightRequest="214" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- ========================================================= -->
+                <!-- BENTO ROW 2: 2x2 BARISTA ALIGNMENT MATRIX                 -->
+                <!-- ========================================================= -->
+                <Border Grid.Row="2" Style="{StaticResource BentoStatTileStyle}" Padding="18,16">
+                    <Grid RowDefinitions="Auto, Auto" RowSpacing="12">
+                        <VerticalStackLayout Grid.Row="0" Spacing="2">
+                            <Label
+                                Text="Barista Alignment Matrix"
+                                Style="{StaticResource MediumLabelStyle}"
+                                FontSize="16" />
+                            <Label
+                                Text="Mugsy's espresso verdict vs. what you actually brewed"
+                                Style="{StaticResource CaptionLabelStyle}" />
+                        </VerticalStackLayout>
+
+                        <Grid Grid.Row="1" RowDefinitions="Auto, Auto" ColumnDefinitions="*, *" RowSpacing="10" ColumnSpacing="10">
+
+                            <!-- Quadrant 1: YES • DRANK -->
+                            <Border
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                Stroke="{DynamicResource SuccessColor}"
+                                StrokeThickness="1.5"
+                                Padding="14,10">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="14" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="3">
+                                    <Label Text="☕ BREW IT • DRANK" FontSize="10" FontAttributes="Bold" TextColor="{DynamicResource SuccessColor}" />
+                                    <Label Text="{Binding ComplianceStats.YesYes}" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                    <Label Text="😇 Aligned Cup" Style="{StaticResource CaptionLabelStyle}" FontSize="11" />
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <!-- Quadrant 2: NO • SKIPPED -->
+                            <Border
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                Stroke="{DynamicResource SuccessColor}"
+                                StrokeThickness="1.5"
+                                Padding="14,10">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="14" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="3">
+                                    <Label Text="🫗 HOLD UP • SKIPPED" FontSize="10" FontAttributes="Bold" TextColor="{DynamicResource SuccessColor}" />
+                                    <Label Text="{Binding ComplianceStats.NoNo}" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                    <Label Text="😇 Hydro Champion" Style="{StaticResource CaptionLabelStyle}" FontSize="11" />
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <!-- Quadrant 3: YES • SKIPPED -->
+                            <Border
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                Stroke="{DynamicResource WarningColor}"
+                                StrokeThickness="1.5"
+                                Padding="14,10">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="14" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="3">
+                                    <Label Text="☕ BREW IT • SKIPPED" FontSize="10" FontAttributes="Bold" TextColor="{DynamicResource WarningColor}" />
+                                    <Label Text="{Binding ComplianceStats.YesNo}" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                    <Label Text="😈 Passed on the Shot" Style="{StaticResource CaptionLabelStyle}" FontSize="11" />
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <!-- Quadrant 4: NO • DRANK -->
+                            <Border
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                Stroke="{DynamicResource ErrorColor}"
+                                StrokeThickness="1.5"
+                                Padding="14,10">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="14" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="3">
+                                    <Label Text="🫗 HOLD UP • DRANK" FontSize="10" FontAttributes="Bold" TextColor="{DynamicResource ErrorColor}" />
+                                    <Label Text="{Binding ComplianceStats.NoYes}" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                    <Label Text="😈 Espresso Outlaw" Style="{StaticResource CaptionLabelStyle}" FontSize="11" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- ========================================================= -->
+                <!-- BENTO ROW 3: 5-FILTER SEARCHABLE & PAGINATED BREW LEDGER  -->
+                <!-- ========================================================= -->
+                <Border Grid.Row="3" Style="{StaticResource BentoStatTileStyle}" Padding="18,16">
+                    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto" RowSpacing="12">
+
+                        <!-- 1. Ledger Header & Count Pill -->
+                        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                            <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
+                                <Label
+                                    Text="Coffeehouse Intake Ledger"
+                                    Style="{StaticResource MediumLabelStyle}"
+                                    FontSize="16"
+                                    VerticalOptions="Center" />
+                                <Border
+                                    BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                    Stroke="{DynamicResource BorderColor}"
+                                    StrokeThickness="1"
+                                    Padding="9,3"
+                                    VerticalOptions="Center">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10" />
+                                    </Border.StrokeShape>
+                                    <Label
+                                        Text="{Binding HistoryLogs.Count, StringFormat='{0} brews'}"
+                                        FontSize="11"
+                                        FontAttributes="Bold"
+                                        TextColor="{DynamicResource PrimaryColor}"
+                                        VerticalOptions="Center" />
+                                </Border>
+                            </HorizontalStackLayout>
+
+                            <Label
+                                Grid.Column="1"
+                                Text="{Binding LedgerPageSummaryText}"
+                                Style="{StaticResource CaptionLabelStyle}"
+                                VerticalOptions="Center" />
+                        </Grid>
+
+                        <!-- 2A. 5-Column Equal-Width Filter Pills (44dp Accessible Touch Targets) -->
+                        <Grid Grid.Row="1" ColumnDefinitions="*, *, *, *, *" ColumnSpacing="8">
+                            <Button
+                                Grid.Column="0"
+                                Text="{Binding LedgerFilterAllText}"
+                                Command="{Binding SetLedgerFilterCommand}"
+                                CommandParameter="All"
+                                HeightRequest="44"
+                                Padding="8,0"
+                                FontSize="11.5"
+                                CornerRadius="12">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource SegmentedTabButtonStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger TargetType="Button" Binding="{Binding IsFilterAllActive}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                                <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                                <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+                            <Button
+                                Grid.Column="1"
+                                Text="{Binding LedgerFilterDrankText}"
+                                Command="{Binding SetLedgerFilterCommand}"
+                                CommandParameter="Drank"
+                                HeightRequest="44"
+                                Padding="8,0"
+                                FontSize="11.5"
+                                CornerRadius="12">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource SegmentedTabButtonStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger TargetType="Button" Binding="{Binding IsFilterDrankActive}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                                <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                                <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+                            <Button
+                                Grid.Column="2"
+                                Text="{Binding LedgerFilterSkippedText}"
+                                Command="{Binding SetLedgerFilterCommand}"
+                                CommandParameter="Skipped"
+                                HeightRequest="44"
+                                Padding="8,0"
+                                FontSize="11.5"
+                                CornerRadius="12">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource SegmentedTabButtonStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger TargetType="Button" Binding="{Binding IsFilterSkippedActive}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                                <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                                <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+                            <Button
+                                Grid.Column="3"
+                                Text="{Binding LedgerFilterCompliedText}"
+                                Command="{Binding SetLedgerFilterCommand}"
+                                CommandParameter="Complied"
+                                HeightRequest="44"
+                                Padding="8,0"
+                                FontSize="11.5"
+                                CornerRadius="12">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource SegmentedTabButtonStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger TargetType="Button" Binding="{Binding IsFilterCompliedActive}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                                <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                                <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+                            <Button
+                                Grid.Column="4"
+                                Text="{Binding LedgerFilterRebelledText}"
+                                Command="{Binding SetLedgerFilterCommand}"
+                                CommandParameter="Rebelled"
+                                HeightRequest="44"
+                                Padding="8,0"
+                                FontSize="11.5"
+                                CornerRadius="12">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource SegmentedTabButtonStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger TargetType="Button" Binding="{Binding IsFilterRebelledActive}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                                <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                                <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </Grid>
+
+                        <!-- 2B. Search Input Box & Sort Pills -->
+                        <Grid Grid.Row="2" ColumnDefinitions="*, Auto" ColumnSpacing="10" VerticalOptions="Center">
+                            <Border
+                                Grid.Column="0"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                Stroke="{DynamicResource BorderColor}"
+                                StrokeThickness="1"
+                                Padding="12,0"
+                                HeightRequest="44"
+                                VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                                    <fluent:SymbolIcon
+                                        Grid.Column="0"
+                                        Symbol="Search"
+                                        FontSize="15"
+                                        ForegroundColor="{DynamicResource SecondaryTextColor}"
+                                        VerticalOptions="Center" />
+                                    <Entry
+                                        Grid.Column="1"
+                                        Text="{Binding LedgerSearchText}"
+                                        Placeholder="Search by drink name, time, or verdict..."
+                                        PlaceholderColor="{DynamicResource SecondaryTextColor}"
+                                        TextColor="{DynamicResource PrimaryTextColor}"
+                                        FontSize="12.5"
+                                        VerticalOptions="Center"
+                                        BackgroundColor="Transparent" />
+                                    <Button
+                                        Grid.Column="2"
+                                        Text="✕"
+                                        IsVisible="{Binding HasLedgerSearchText}"
+                                        Command="{Binding ClearLedgerSearchCommand}"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        WidthRequest="30"
+                                        HeightRequest="30"
+                                        Padding="0"
+                                        FontSize="11"
+                                        CornerRadius="15"
+                                        VerticalOptions="Center" />
+                                </Grid>
+                            </Border>
+
+                            <!-- Sort Pills -->
+                            <Border
+                                Grid.Column="1"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                Stroke="{DynamicResource BorderColor}"
+                                StrokeThickness="1"
+                                Padding="4"
+                                HeightRequest="44"
+                                VerticalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <Grid ColumnDefinitions="Auto, Auto, Auto" ColumnSpacing="4" VerticalOptions="Center">
+                                    <Button
+                                        Grid.Column="0"
+                                        Text="Newest"
+                                        Command="{Binding SetLedgerSortOrderCommand}"
+                                        CommandParameter="Newest"
+                                        HeightRequest="34"
+                                        Padding="12,0"
+                                        FontSize="11"
+                                        CornerRadius="9">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource SegmentedTabButtonStyle}">
+                                                <Style.Triggers>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsSortNewestActive}" Value="True">
+                                                        <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                                        <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                                        <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsSortNewestActive}" Value="False">
+                                                        <Setter Property="BackgroundColor" Value="Transparent" />
+                                                        <Setter Property="TextColor" Value="{DynamicResource SecondaryTextColor}" />
+                                                        <Setter Property="BorderColor" Value="Transparent" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+
+                                    <Button
+                                        Grid.Column="1"
+                                        Text="Oldest"
+                                        Command="{Binding SetLedgerSortOrderCommand}"
+                                        CommandParameter="Oldest"
+                                        HeightRequest="34"
+                                        Padding="12,0"
+                                        FontSize="11"
+                                        CornerRadius="9">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource SegmentedTabButtonStyle}">
+                                                <Style.Triggers>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsSortOldestActive}" Value="True">
+                                                        <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                                        <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                                        <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsSortOldestActive}" Value="False">
+                                                        <Setter Property="BackgroundColor" Value="Transparent" />
+                                                        <Setter Property="TextColor" Value="{DynamicResource SecondaryTextColor}" />
+                                                        <Setter Property="BorderColor" Value="Transparent" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+
+                                    <Button
+                                        Grid.Column="2"
+                                        Text="Dose"
+                                        Command="{Binding SetLedgerSortOrderCommand}"
+                                        CommandParameter="Caffeine"
+                                        HeightRequest="34"
+                                        Padding="12,0"
+                                        FontSize="11"
+                                        CornerRadius="9">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource SegmentedTabButtonStyle}">
+                                                <Style.Triggers>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsSortCaffeineActive}" Value="True">
+                                                        <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                                        <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                                        <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Button" Binding="{Binding IsSortCaffeineActive}" Value="False">
+                                                        <Setter Property="BackgroundColor" Value="Transparent" />
+                                                        <Setter Property="TextColor" Value="{DynamicResource SecondaryTextColor}" />
+                                                        <Setter Property="BorderColor" Value="Transparent" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </Grid>
+
+                        <!-- 3. Table Column Header -->
+                        <Border
+                            Grid.Row="3"
+                            IsVisible="{Binding HasFilteredLedgerLogs}"
+                            BackgroundColor="{DynamicResource SurfaceAltColor}"
+                            Stroke="{DynamicResource BorderColor}"
+                            StrokeThickness="0,0,0,1"
+                            Padding="12,6"
+                            Margin="0,2,0,0">
+                            <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="10" VerticalOptions="Center">
+                                <Label Grid.Column="0" Text="TIME" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" WidthRequest="78" />
+                                <Label Grid.Column="1" Text="DRINK &amp; CAFFEINE DOSE" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" />
+                                <Label Grid.Column="2" Text="BARISTA VERDICT" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" HorizontalTextAlignment="Center" WidthRequest="104" />
+                                <Label Grid.Column="3" Text="EDIT" Style="{StaticResource CaptionLabelStyle}" FontSize="10" FontAttributes="Bold" HorizontalTextAlignment="Center" WidthRequest="44" />
+                            </Grid>
+                        </Border>
+
+                        <!-- 4. Warm Coffeehouse Empty States -->
+                        <Grid Grid.Row="4">
+                            <Border
+                                IsVisible="{Binding HasHistoryLogs, Converter={StaticResource InvertedBoolConverter}}"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                Stroke="{DynamicResource BorderColor}"
+                                StrokeThickness="1"
+                                Padding="24,20"
+                                Margin="0,6">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="14" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                                    <Label Text="☕" FontSize="24" TextColor="{DynamicResource PrimaryColor}" HorizontalTextAlignment="Center" />
+                                    <Label
+                                        Text="No brews logged at the espresso bar yet."
+                                        FontSize="13.5"
+                                        FontAttributes="Bold"
+                                        TextColor="{DynamicResource PrimaryTextColor}"
+                                        HorizontalTextAlignment="Center" />
+                                    <Label
+                                        Text="Head back to Barista Chat and tap any prompt chip to pull your first verdict."
+                                        Style="{StaticResource CaptionLabelStyle}"
+                                        HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <Border
+                                IsVisible="{Binding IsLedgerFilteredEmpty}"
+                                BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                Stroke="{DynamicResource BorderColor}"
+                                StrokeThickness="1"
+                                Padding="20,16"
+                                Margin="0,4">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="14" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                                    <Label
+                                        Text="No coffee logs match the active filter."
+                                        FontSize="13"
+                                        FontAttributes="Bold"
+                                        TextColor="{DynamicResource PrimaryTextColor}"
+                                        HorizontalTextAlignment="Center" />
+                                    <Button
+                                        Text="Reset Filters"
+                                        Style="{StaticResource SecondaryButtonStyle}"
+                                        HeightRequest="44"
+                                        Padding="18,0"
+                                        FontSize="12"
+                                        CornerRadius="14"
+                                        HorizontalOptions="Center"
+                                        Command="{Binding ClearFilterAndSearchCommand}" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </Grid>
+
+                        <!-- 5. Paginated Ledger Rows -->
+                        <VerticalStackLayout
+                            Grid.Row="5"
+                            Spacing="6"
+                            BindableLayout.ItemsSource="{Binding PagedHistoryLogs}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:OracleDecisionLog">
+                                    <Border
+                                        BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                        Stroke="{DynamicResource BorderColor}"
+                                        StrokeThickness="1"
+                                        Padding="12,8"
+                                        Margin="0,1">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="12" />
+                                        </Border.StrokeShape>
+                                        <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="10" VerticalOptions="Center">
+                                            <!-- Timestamp -->
+                                            <HorizontalStackLayout Grid.Column="0" Spacing="6" WidthRequest="78" VerticalOptions="Center">
+                                                <Label Text="{Binding ComplianceEmoji}" FontSize="13" VerticalOptions="Center" />
+                                                <Label Text="{Binding FormattedTime}" Style="{StaticResource CaptionLabelStyle}" FontAttributes="Bold" VerticalOptions="Center" />
+                                            </HorizontalStackLayout>
+
+                                            <!-- Beverage & Dose Pill -->
+                                            <Grid Grid.Column="1" ColumnDefinitions="*, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                                                <Label
+                                                    Grid.Column="0"
+                                                    Text="{Binding FormattedCoffeeName}"
+                                                    FontSize="13"
+                                                    FontAttributes="Bold"
+                                                    TextColor="{DynamicResource PrimaryTextColor}"
+                                                    LineBreakMode="TailTruncation"
+                                                    VerticalOptions="Center" />
+                                                <Border
+                                                    Grid.Column="1"
+                                                    BackgroundColor="{DynamicResource SurfaceColor}"
+                                                    Stroke="{DynamicResource BorderColor}"
+                                                    StrokeThickness="0.75"
+                                                    Padding="8,3"
+                                                    VerticalOptions="Center">
+                                                    <Border.StrokeShape>
+                                                        <RoundRectangle CornerRadius="7" />
+                                                    </Border.StrokeShape>
+                                                    <Label
+                                                        Text="{Binding CaffeineDisplayText}"
+                                                        FontSize="10.5"
+                                                        FontAttributes="Bold"
+                                                        TextColor="{DynamicResource PrimaryColor}" />
+                                                </Border>
+                                            </Grid>
+
+                                            <!-- Verdict & Outcome Badge -->
+                                            <Border
+                                                Grid.Column="2"
+                                                BackgroundColor="{Binding StatusBadgeBgColor}"
+                                                Stroke="{Binding StatusBadgeBorderColor}"
+                                                StrokeThickness="1"
+                                                Padding="8,4"
+                                                WidthRequest="104"
+                                                VerticalOptions="Center">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="8" />
+                                                </Border.StrokeShape>
+                                                <Label
+                                                    Text="{Binding StatusBadgeText}"
+                                                    FontSize="11"
+                                                    FontAttributes="Bold"
+                                                    TextColor="{Binding StatusBadgeTextColor}"
+                                                    HorizontalTextAlignment="Center" />
+                                            </Border>
+
+                                            <!-- Accessible 44x44 Edit Button -->
+                                            <Button
+                                                Grid.Column="3"
+                                                Text="✎"
+                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                WidthRequest="44"
+                                                HeightRequest="44"
+                                                CornerRadius="12"
+                                                Padding="0"
+                                                FontSize="14"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type views:MetabolismPage}}, Path=BindingContext.EditLogCommand}"
+                                                CommandParameter="{Binding .}"
+                                                VerticalOptions="Center" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <!-- 6. Pagination Footer -->
+                        <Grid
+                            Grid.Row="6"
+                            ColumnDefinitions="Auto, *, Auto"
+                            ColumnSpacing="10"
+                            VerticalOptions="Center"
+                            Margin="0,4,0,0"
+                            IsVisible="{Binding HasFilteredLedgerLogs}">
+                            <Label
+                                Grid.Column="0"
+                                Text="{Binding LedgerPageSummaryText}"
+                                Style="{StaticResource CaptionLabelStyle}"
+                                VerticalOptions="Center" />
+
+                            <HorizontalStackLayout Grid.Column="1" Spacing="6" HorizontalOptions="Center" VerticalOptions="Center">
+                                <Label Text="Rows:" Style="{StaticResource CaptionLabelStyle}" VerticalOptions="Center" Margin="0,0,2,0" />
+                                <Button
+                                    Text="5"
+                                    Command="{Binding SetLedgerPageSizeCommand}"
+                                    CommandParameter="{x:Int32 5}"
+                                    WidthRequest="38"
+                                    HeightRequest="36"
+                                    Padding="0"
+                                    FontSize="11"
+                                    CornerRadius="9">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource SegmentedTabButtonStyle}">
+                                            <Style.Triggers>
+                                                <DataTrigger TargetType="Button" Binding="{Binding IsPageSize5Active}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                                    <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                                    <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <Button
+                                    Text="10"
+                                    Command="{Binding SetLedgerPageSizeCommand}"
+                                    CommandParameter="{x:Int32 10}"
+                                    WidthRequest="38"
+                                    HeightRequest="36"
+                                    Padding="0"
+                                    FontSize="11"
+                                    CornerRadius="9">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource SegmentedTabButtonStyle}">
+                                            <Style.Triggers>
+                                                <DataTrigger TargetType="Button" Binding="{Binding IsPageSize10Active}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                                    <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                                    <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <Button
+                                    Text="20"
+                                    Command="{Binding SetLedgerPageSizeCommand}"
+                                    CommandParameter="{x:Int32 20}"
+                                    WidthRequest="38"
+                                    HeightRequest="36"
+                                    Padding="0"
+                                    FontSize="11"
+                                    CornerRadius="9">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource SegmentedTabButtonStyle}">
+                                            <Style.Triggers>
+                                                <DataTrigger TargetType="Button" Binding="{Binding IsPageSize20Active}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{DynamicResource PrimaryColor}" />
+                                                    <Setter Property="TextColor" Value="{DynamicResource PrimaryButtonTextColor}" />
+                                                    <Setter Property="BorderColor" Value="{DynamicResource PrimaryColor}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </HorizontalStackLayout>
+
+                            <HorizontalStackLayout Grid.Column="2" Spacing="5" VerticalOptions="Center">
+                                <Button
+                                    Text="«"
+                                    Command="{Binding FirstLedgerPageCommand}"
+                                    IsEnabled="{Binding CanGoToPreviousLedgerPage}"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    WidthRequest="38"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    Padding="0"
+                                    FontSize="12" />
+                                <Button
+                                    Text="‹"
+                                    Command="{Binding PreviousLedgerPageCommand}"
+                                    IsEnabled="{Binding CanGoToPreviousLedgerPage}"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    WidthRequest="38"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    Padding="0"
+                                    FontSize="14" />
+                                <Border
+                                    BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                    Stroke="{DynamicResource BorderColor}"
+                                    StrokeThickness="1"
+                                    Padding="12,0"
+                                    HeightRequest="38"
+                                    VerticalOptions="Center">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10" />
+                                    </Border.StrokeShape>
+                                    <Label
+                                        Text="{Binding LedgerCurrentPageDisplay}"
+                                        FontSize="11.5"
+                                        FontAttributes="Bold"
+                                        TextColor="{DynamicResource PrimaryTextColor}"
+                                        VerticalOptions="Center" />
+                                </Border>
+                                <Button
+                                    Text="›"
+                                    Command="{Binding NextLedgerPageCommand}"
+                                    IsEnabled="{Binding CanGoToNextLedgerPage}"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    WidthRequest="38"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    Padding="0"
+                                    FontSize="14" />
+                                <Button
+                                    Text="»"
+                                    Command="{Binding LastLedgerPageCommand}"
+                                    IsEnabled="{Binding CanGoToNextLedgerPage}"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    WidthRequest="38"
+                                    HeightRequest="38"
+                                    CornerRadius="10"
+                                    Padding="0"
+                                    FontSize="12" />
+                            </HorizontalStackLayout>
+                        </Grid>
+
+                    </Grid>
+                </Border>
+
+                <!-- ========================================================= -->
+                <!-- BENTO ROW 4: COFFEEHOUSE ATTRIBUTION FOOTER               -->
+                <!-- ========================================================= -->
+                <VerticalStackLayout Grid.Row="4" Spacing="3" HorizontalOptions="Center" Margin="0,4,0,0">
+                    <Label
+                        Text="☕  Elimination t½ = 5.0h  •  Peak absorption 30–60 min  •  24h retention ~3.12%"
+                        Style="{StaticResource CaptionLabelStyle}"
+                        FontSize="10.5"
+                        HorizontalTextAlignment="Center" />
+                    <Label
+                        Text="AI engineered by EJRitter Development"
+                        Style="{StaticResource CaptionLabelStyle}"
+                        FontSize="10.5"
+                        FontAttributes="Bold"
+                        HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+            </Grid>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="MugOverflowProject.Resources.Styles.Themes.PristineCleanTheme">
 
-    <x:String x:Key="ThemeName">Pristine Clean</x:String>
+    <x:String x:Key="ThemeName">Sweet Mint Cortado</x:String>
 
     <Color x:Key="PageBackgroundColor">#F2FAF8</Color>
     <Color x:Key="NavigationBarColor">#5B9E8A</Color>
@@ -30,4 +30,7 @@
     <Color x:Key="PrimaryGradientEnd">#7DBBAA</Color>
     <Color x:Key="CardShadowColor">#1A1A2421</Color>
     <Color x:Key="AppShadowColor">#261A2421</Color>
+
+    <Color x:Key="PrimaryButtonTextColor">#1A2421</Color>
+    <Color x:Key="AccentButtonTextColor">#1A2421</Color>
 </ResourceDictionary>

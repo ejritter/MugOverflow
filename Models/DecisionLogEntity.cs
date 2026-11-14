@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using SQLite;
 
 namespace MugOverflowProject.Models;
 
@@ -14,17 +13,14 @@ public enum SyncStatus
 }
 
 /// <summary>
-/// SQLite ORM entity representing a single coffee decision and consumption log.
+/// Persistence entity representing a single coffee decision and consumption log.
 /// Stored in table 'decision_logs' with indexes on Timestamp and SyncStatus.
 /// </summary>
-[Table("decision_logs")]
 public sealed class DecisionLogEntity
 {
-	[PrimaryKey]
 	[JsonPropertyName("id")]
 	public string Id { get; set; } = Guid.NewGuid().ToString();
 
-	[Indexed]
 	[JsonPropertyName("timestamp")]
 	public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
@@ -49,7 +45,6 @@ public sealed class DecisionLogEntity
 	[JsonPropertyName("isComplianceOverride")]
 	public bool IsComplianceOverride { get; set; }
 
-	[Indexed]
 	[JsonPropertyName("syncStatus")]
 	public int SyncStatus { get; set; } = (int)Models.SyncStatus.Pending;
 

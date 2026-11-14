@@ -1,7 +1,8 @@
+using Dapper;
+using Microsoft.Data.Sqlite;
 using MugOverflowProject.Models;
 using MugOverflowProject.Services.Database;
 using MugOverflowProject.Tests.Fixtures;
-using SQLite;
 using System.Text.Json;
 using Xunit;
 
@@ -68,7 +69,7 @@ public sealed class SqliteDatabaseAdversarialTests : IAsyncLifetime
 
 			var readTask = Task.Run(async () =>
 			{
-				var logs = await directConn.Table<DecisionLogEntity>().ToListAsync();
+				var logs = (await directConn.QueryAsync<DecisionLogEntity>("SELECT * FROM decision_logs;")).AsList();
 				return logs.Count;
 			});
 

@@ -59,7 +59,8 @@ public sealed class MainViewModelEmpiricalChallengeTests : IAsyncLifetime
 		// Assert
 		Assert.Equal(50, vm.HistoryLogs.Count);
 		Assert.True(vm.HasHistoryLogs);
-		Assert.Equal(50, vm.CupsLoggedCount);
+		int expectedTodayCups = entities.Count(e => e.Timestamp.ToLocalTime().Date == DateTime.Today);
+		Assert.Equal(expectedTodayCups, vm.CupsLoggedCount);
 		Assert.True(vm.TotalCaffeineTodayMg >= 0);
 		Assert.True(vm.ActiveCaffeineMg >= 0);
 		Assert.Equal(50, vm.ObeyedCount + vm.RebelledCount);
@@ -107,7 +108,8 @@ public sealed class MainViewModelEmpiricalChallengeTests : IAsyncLifetime
 		// Assert
 		Assert.Equal(1000, vm.HistoryLogs.Count);
 		Assert.True(vm.HasHistoryLogs);
-		Assert.Equal(1000, vm.CupsLoggedCount);
+		int expectedTodayCups = entities.Count(e => e.Timestamp.ToLocalTime().Date == DateTime.Today);
+		Assert.Equal(expectedTodayCups, vm.CupsLoggedCount);
 		Assert.True(sw.ElapsedMilliseconds < 5000, $"Initialization took too long: {sw.ElapsedMilliseconds}ms");
 	}
 
@@ -404,6 +406,285 @@ public sealed class MainViewModelEmpiricalChallengeTests : IAsyncLifetime
 		Assert.Equal(155, vm.HistoryLogs[0].CaffeineMg);
 		Assert.Equal("Synced", vm.SyncStatusText);
 		Assert.Equal(Color.FromArgb("#10B981"), vm.SyncStatusColor);
+	}
+
+	#endregion
+
+	#region 5. Conversational Tap-Chip & Back-and-Forth Barista Chat Tests
+
+	[Fact]
+	public async Task SendPromptChipCommand_CoffeeConsultation_AddsFormattedUserBubbleAndPendingVerdict()
+	{
+		using var vm = CreateViewModel();
+		await vm.InitializeAsync();
+
+		_oracleService.VerdictToReturn = (true, "YES! Pull that golden espresso shot!");
+		var coffeeChip = vm.PromptChips.First(c => !c.IsBuzzCheck);
+
+		Assert.True(vm.ShowPromptChipsDock);
+		Assert.False(vm.HasPendingVerdict);
+
+		await vm.SendPromptChipCommand.ExecuteAsync(coffeeChip);
+
+		// Welcome + User query + Barista verdict (zero leftover typing indicators)
+		Assert.DoesNotContain(vm.ChatMessages, m => m.IsTypingIndicator);
+		Assert.Equal(3, vm.ChatMessages.Count);
+
+		var userBubble = vm.ChatMessages[1];
+		Assert.True(userBubble.IsUserMessage);
+		Assert.Contains("Drip Coffee", userBubble.VisibleMessageText);
+		Assert.Contains("95 mg", userBubble.VisibleMessageText);
+
+		var verdictBubble = vm.ChatMessages[2];
+		Assert.True(verdictBubble.IsOracleVerdictCard);
+		Assert.True(verdictBubble.IsActionPending);
+		Assert.Equal("Yes", verdictBubble.MascotAvatarReaction);
+		Assert.Equal("YES! Pull that golden espresso shot!", verdictBubble.VisibleMessageText);
+
+		Assert.Same(verdictBubble, vm.PendingVerdictMessage);
+		Assert.True(vm.HasPendingVerdict);
+		Assert.False(vm.ShowPromptChipsDock);
+		Assert.Equal("Yes", vm.MascotReactionState);
+		Assert.Equal("☕ Brewed & drank Drip Coffee!", vm.PendingDrinkButtonText);
+	}
+
+	[Fact]
+	public async Task SendPromptChipCommand_BuzzCheck_AddsRoastBuzzCheckCardWithoutPendingVerdict()
+	{
+		using var vm = CreateViewModel();
+		await vm.InitializeAsync();
+
+		var buzzChip = vm.PromptChips.Single(c => c.IsBuzzCheck);
+		await vm.SendPromptChipCommand.ExecuteAsync(buzzChip);
+
+		Assert.DoesNotContain(vm.ChatMessages, m => m.IsTypingIndicator);
+		Assert.Equal(3, vm.ChatMessages.Count);
+
+		var userBubble = vm.ChatMessages[1];
+		Assert.True(userBubble.IsUserMessage);
+		Assert.Equal("📈 How's my caffeine buzz & sleep timer looking?", userBubble.VisibleMessageText);
+
+		var buzzBubble = vm.ChatMessages[2];
+		Assert.True(buzzBubble.IsOracleMessage);
+		Assert.True(buzzBubble.IsBuzzCheckCard);
+		Assert.False(buzzBubble.IsActionPending);
+		Assert.False(buzzBubble.ShowVerdictBadge);
+		Assert.Equal("Roast Buzz Check", buzzBubble.OracleHeaderTitle);
+		Assert.Equal("Happy", buzzBubble.MascotAvatarReaction);
+		Assert.Contains("Active buzz:", buzzBubble.VisibleMessageText);
+		Assert.Contains("Sleep window (<20 mg):", buzzBubble.VisibleMessageText);
+
+		Assert.False(vm.HasPendingVerdict);
+		Assert.True(vm.ShowPromptChipsDock);
+	}
+
+	[Fact]
+	public async Task ReplyDrankCommand_AppendsUserReplyAndBotReactionBubbles_AndPersistsToSqlite()
+	{
+		using var vm = CreateViewModel();
+		await vm.InitializeAsync();
+
+		_oracleService.VerdictToReturn = (false, "Hold up on another cup!");
+		await vm.SendPromptChipCommand.ExecuteAsync(vm.PromptChips[0]);
+		Assert.True(vm.HasPendingVerdict);
+
+		await vm.ReplyDrankCommand.ExecuteAsync(null);
+
+		// Welcome + User ask + Verdict + User reply + Barista reaction
+		Assert.Equal(5, vm.ChatMessages.Count);
+		Assert.False(vm.HasPendingVerdict);
+		Assert.True(vm.ShowPromptChipsDock);
+		Assert.Equal("Drank", vm.MascotReactionState);
+
+		var userReply = vm.ChatMessages[3];
+		Assert.True(userReply.IsUserMessage);
+		Assert.Equal("☕ Brewed & drank a Drip Coffee (+95 mg)!", userReply.VisibleMessageText);
+
+		var botReaction = vm.ChatMessages[4];
+		Assert.True(botReaction.IsOracleMessage);
+		Assert.True(botReaction.IsOutcomeReactionCard);
+		Assert.True(botReaction.IsConfirmed);
+		Assert.False(botReaction.IsComplied); // Oracle said No, user drank -> rebelled
+		Assert.Equal("Drank", botReaction.MascotAvatarReaction);
+		Assert.Equal("Barista Log Receipt", botReaction.OracleHeaderTitle);
+		Assert.False(string.IsNullOrWhiteSpace(botReaction.VisibleMessageText));
+		Assert.Contains("Drip Coffee", botReaction.VisibleMessageText);
+
+		// Verify SQLite persistence
+		var persisted = await _dbFixture.DatabaseService.GetAllLogsAsync();
+		Assert.Single(persisted);
+		Assert.Equal("Drip Coffee", persisted[0].ItemName);
+		Assert.Equal(95.0, persisted[0].CaffeineAmountMg);
+		Assert.Equal((int)SyncStatus.Pending, persisted[0].SyncStatus);
+		Assert.Equal(95, vm.TotalCaffeineTodayMg);
+	}
+
+	[Fact]
+	public async Task ReplySkippedCommand_AppendsUserSkipAndBotReactionBubbles_AndPersistsToSqlite()
+	{
+		using var vm = CreateViewModel();
+		await vm.InitializeAsync();
+
+		_oracleService.VerdictToReturn = (false, "Hold up on another cup!");
+		await vm.SendPromptChipCommand.ExecuteAsync(vm.PromptChips[0]);
+		Assert.True(vm.HasPendingVerdict);
+
+		await vm.ReplySkippedCommand.ExecuteAsync(null);
+
+		Assert.Equal(5, vm.ChatMessages.Count);
+		Assert.False(vm.HasPendingVerdict);
+		Assert.True(vm.ShowPromptChipsDock);
+		Assert.Equal("Skipped", vm.MascotReactionState);
+
+		var userReply = vm.ChatMessages[3];
+		Assert.True(userReply.IsUserMessage);
+		Assert.Equal("🫗 Skipped this cup—holding the line for now.", userReply.VisibleMessageText);
+
+		var botReaction = vm.ChatMessages[4];
+		Assert.True(botReaction.IsOracleMessage);
+		Assert.True(botReaction.IsOutcomeReactionCard);
+		Assert.True(botReaction.IsConfirmed);
+		Assert.True(botReaction.IsComplied); // Oracle said No, user skipped -> complied
+		Assert.Equal("Skipped", botReaction.MascotAvatarReaction);
+		Assert.False(string.IsNullOrWhiteSpace(botReaction.VisibleMessageText));
+
+		var persisted = await _dbFixture.DatabaseService.GetAllLogsAsync();
+		Assert.Single(persisted);
+		Assert.Equal(0.0, persisted[0].CaffeineAmountMg);
+		Assert.Equal((int)SyncStatus.Pending, persisted[0].SyncStatus);
+	}
+
+	[Fact]
+	public async Task SwapPendingDrinkCommand_UpdatesPendingVerdictCoffeeAndButtonText()
+	{
+		using var vm = CreateViewModel();
+		await vm.InitializeAsync();
+
+		await vm.SendPromptChipCommand.ExecuteAsync(vm.PromptChips[0]);
+		Assert.Equal("☕ Brewed & drank Drip Coffee!", vm.PendingDrinkButtonText);
+
+		_popupService.SelectedCoffeeToReturn = vm.AvailableCoffeeTypes.First(c => c.Id == "espresso");
+		await vm.SwapPendingDrinkCommand.ExecuteAsync(null);
+
+		Assert.Equal("Espresso", vm.PendingVerdictMessage?.SelectedCoffeeName);
+		Assert.Equal("☕ Brewed & drank Espresso!", vm.PendingDrinkButtonText);
+	}
+
+	[Fact]
+	public void ShufflePromptChipsCommand_RotatesFourCoffeePromptsAndPreservesBuzzChipAtEnd()
+	{
+		using var vm = CreateViewModel();
+
+		Assert.Equal(5, vm.PromptChips.Count);
+		Assert.True(vm.PromptChips[4].IsBuzzCheck);
+		Assert.Equal("📈 Check my buzz", vm.PromptChips[4].DisplayText);
+
+		var initialCoffeeIds = vm.PromptChips.Take(4).Select(c => c.Id).ToArray();
+
+		vm.ShufflePromptChipsCommand.Execute(null);
+
+		Assert.Equal(5, vm.PromptChips.Count);
+		Assert.True(vm.PromptChips[4].IsBuzzCheck);
+		Assert.Equal("📈 Check my buzz", vm.PromptChips[4].DisplayText);
+
+		var rotatedCoffeeIds = vm.PromptChips.Take(4).Select(c => c.Id).ToArray();
+		Assert.All(vm.PromptChips.Take(4), chip => Assert.False(chip.IsBuzzCheck));
+		Assert.NotEqual(initialCoffeeIds, rotatedCoffeeIds);
+	}
+
+	[Fact]
+	public async Task ToggleDrawerAndCloseDrawerCommands_ManageDrawerStateAndAutoCloseOnActions()
+	{
+		using var vm = CreateViewModel();
+		await vm.InitializeAsync();
+
+		Assert.False(vm.IsDrawerOpen);
+
+		vm.ToggleDrawerCommand.Execute(null);
+		Assert.True(vm.IsDrawerOpen);
+
+		vm.CloseDrawerCommand.Execute(null);
+		Assert.False(vm.IsDrawerOpen);
+
+		// Auto-closes on ResetConversation
+		await vm.SendPromptChipCommand.ExecuteAsync(vm.PromptChips[0]);
+		vm.ToggleDrawerCommand.Execute(null);
+		Assert.True(vm.IsDrawerOpen);
+		vm.ResetConversationCommand.Execute(null);
+		Assert.False(vm.IsDrawerOpen);
+		Assert.False(vm.HasPendingVerdict);
+
+		// Auto-closes on SelectConsultation and restores PendingVerdictMessage when last turn is pending
+		var savedSession = vm.ConsultationHistory[0];
+		vm.ToggleDrawerCommand.Execute(null);
+		Assert.True(vm.IsDrawerOpen);
+		vm.SelectConsultationCommand.Execute(savedSession);
+		Assert.False(vm.IsDrawerOpen);
+		Assert.True(vm.HasPendingVerdict);
+
+		// Auto-closes on SwitchToStatsTab
+		vm.ToggleDrawerCommand.Execute(null);
+		Assert.True(vm.IsDrawerOpen);
+		await vm.SwitchToStatsTabCommand.ExecuteAsync(null);
+		Assert.False(vm.IsDrawerOpen);
+	}
+
+	[Fact]
+	public async Task MascotMoodTitle_ReflectsThinkingSleepySweetSpotAndOverdriveStates()
+	{
+		using var vm = CreateViewModel();
+		await vm.InitializeAsync();
+
+		int moodTitleNotifications = 0;
+		vm.PropertyChanged += (_, e) =>
+		{
+			if (e.PropertyName == nameof(MainViewModel.MascotMoodTitle))
+			{
+				moodTitleNotifications++;
+			}
+		};
+
+		// 0 mg -> Running on Fumes
+		Assert.Equal("Running on Fumes 😴", vm.MascotMoodTitle);
+
+		// Thinking -> Pulling Your Shot
+		vm.IsOracleThinking = true;
+		Assert.Equal("Pulling Your Shot... ☕", vm.MascotMoodTitle);
+		vm.IsOracleThinking = false;
+		Assert.Equal("Running on Fumes 😴", vm.MascotMoodTitle);
+
+		// Log 95 mg -> Sweet Spot Buzz (15..200 mg)
+		await vm.SendPromptChipCommand.ExecuteAsync(vm.PromptChips[0]);
+		await vm.ReplyDrankCommand.ExecuteAsync(null);
+		Assert.Equal("Sweet Spot Buzz ☕", vm.MascotMoodTitle);
+
+		// Log two more 95 mg cups (~285 mg active > 200 mg) -> Maximum Overdrive
+		for (int i = 0; i < 2; i++)
+		{
+			await vm.SendPromptChipCommand.ExecuteAsync(vm.PromptChips[0]);
+			await vm.ReplyDrankCommand.ExecuteAsync(null);
+		}
+		Assert.True(vm.ActiveCaffeineMg > 200.0);
+		Assert.Equal("Maximum Overdrive ⚡", vm.MascotMoodTitle);
+		Assert.True(moodTitleNotifications >= 4);
+	}
+
+	[Fact]
+	public void OracleEngineService_GetOutcomeReaction_ReturnsWittyBaristaQuipsForAllQuadrants()
+	{
+		var engine = new OracleEngineService();
+
+		string alignedBrew = engine.GetOutcomeReaction(oracleSaidYes: true, userDrank: true, coffeeName: "Flat White", caffeineMg: 130);
+		string rebelBrew = engine.GetOutcomeReaction(oracleSaidYes: false, userDrank: true, coffeeName: "Cold Brew", caffeineMg: 155);
+		string alignedSkip = engine.GetOutcomeReaction(oracleSaidYes: false, userDrank: false, coffeeName: null, caffeineMg: 0);
+		string plotTwistSkip = engine.GetOutcomeReaction(oracleSaidYes: true, userDrank: false, coffeeName: null, caffeineMg: 0);
+
+		Assert.Contains("Flat White", alignedBrew);
+		Assert.Contains("130", alignedBrew);
+		Assert.Contains("Cold Brew", rebelBrew);
+		Assert.Contains("155", rebelBrew);
+		Assert.False(string.IsNullOrWhiteSpace(alignedSkip));
+		Assert.False(string.IsNullOrWhiteSpace(plotTwistSkip));
 	}
 
 	#endregion

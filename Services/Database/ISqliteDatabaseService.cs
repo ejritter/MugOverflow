@@ -6,7 +6,7 @@ namespace MugOverflowProject.Services.Database;
 /// Defines the asynchronous SQLite database service operations for local persistence,
 /// batch transactional upserts, dirty-state synchronization tracking, and metadata management.
 /// </summary>
-public interface ISqliteDatabaseService
+public interface ISqliteDatabaseService : IDisposable
 {
 	/// <summary>
 	/// Asynchronously initializes the SQLite connection, enables WAL mode, and verifies table schemas.
@@ -82,6 +82,12 @@ public interface ISqliteDatabaseService
 	/// Retrieves the current SQLite journal mode (e.g. "wal").
 	/// </summary>
 	Task<string> GetJournalModeAsync(CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Performs a passive WAL checkpoint (PRAGMA wal_checkpoint(PASSIVE)) to flush committed frames
+	/// to the main database file without blocking readers or writers.
+	/// </summary>
+	Task CheckpointWalAsync(CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Closes the database connection cleanly to allow file operations (migration, backup, deletion).

@@ -734,14 +734,14 @@ internal sealed class Tier5FakeAppPopupService : IAppPopupService
 {
 	public Task<CoffeeType?> ShowCoffeeDictionaryAsync(string? targetCoffeeId = null) => Task.FromResult<CoffeeType?>(null);
 	public Task<OracleDecisionLog?> ShowEditLogAsync(OracleDecisionLog logToEdit) => Task.FromResult<OracleDecisionLog?>(logToEdit);
-	public Task<string?> ShowThemeSelectorAsync() => Task.FromResult<string?>("Regal Earth");
+	public Task<string?> ShowThemeSelectorAsync() => Task.FromResult<string?>("Espresso Crema Dark");
 	public Task<bool> ShowStorageSelectionPopupAsync() => Task.FromResult(false);
 }
 
 internal sealed class Tier5FakeDataPersistenceService : IDataPersistenceService
 {
 	public List<OracleDecisionLog> StoredLogs { get; } = [];
-	public string StoredTheme { get; set; } = "Regal Earth";
+	public string StoredTheme { get; set; } = "Espresso Crema Dark";
 
 	public Task<List<OracleDecisionLog>> LoadLogsAsync(CancellationToken cancellationToken = default) => Task.FromResult(StoredLogs.ToList());
 	public Task SaveLogsAsync(IEnumerable<OracleDecisionLog> logs, CancellationToken cancellationToken = default)

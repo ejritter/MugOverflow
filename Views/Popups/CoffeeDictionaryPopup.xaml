@@ -6,40 +6,49 @@
     xmlns:fluent="clr-namespace:FluentIcons.Maui;assembly=FluentIcons.Maui"
     xmlns:vm="clr-namespace:MugOverflowProject.ViewModels"
     xmlns:models="clr-namespace:MugOverflowProject.Models"
+    xmlns:popups="clr-namespace:MugOverflowProject.Views.Popups"
     x:Class="MugOverflowProject.Views.Popups.CoffeeDictionaryPopup"
-    x:DataType="vm:CoffeeDictionaryPopupViewModel">
+    x:DataType="vm:CoffeeDictionaryPopupViewModel"
+    BackgroundColor="Transparent"
+    Padding="0"
+    Margin="0">
 
     <Border
         Style="{StaticResource CardBorderStyle}"
-        MaximumWidthRequest="640"
-        Margin="16"
-        Padding="18"
+        MaximumWidthRequest="680"
+        Padding="22,20"
         HorizontalOptions="Center"
         VerticalOptions="Center">
 
-        <Grid RowDefinitions="Auto, *, Auto" RowSpacing="12">
+        <Grid RowDefinitions="Auto, *, Auto" RowSpacing="14">
             <!-- Modal Header (Row 0) -->
-            <VerticalStackLayout Grid.Row="0" Spacing="8">
-                <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
+            <VerticalStackLayout Grid.Row="0" Spacing="10">
+                <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12" VerticalOptions="Center">
                     <Border
                         Grid.Column="0"
-                        BackgroundColor="{DynamicResource SurfaceAltColor}"
                         StrokeThickness="0"
-                        Padding="10"
-                        WidthRequest="40"
-                        HeightRequest="40">
+                        WidthRequest="42"
+                        HeightRequest="42">
                         <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="12" />
+                            <RoundRectangle CornerRadius="14" />
                         </Border.StrokeShape>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="{DynamicResource PrimaryGradientStart}" Offset="0.0" />
+                                <GradientStop Color="{DynamicResource PrimaryGradientEnd}" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Border.Background>
                         <fluent:SymbolIcon
                             Symbol="BookOpen"
                             FontSize="20"
-                            ForegroundColor="{DynamicResource PrimaryColor}" />
+                            ForegroundColor="White"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
                     </Border>
 
-                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
-                        <Label Text="Coffee Type Guide" Style="{StaticResource MediumLabelStyle}" FontSize="18" />
-                        <Label Text="Standard caffeine ratings sourced from USDA FoodData Central &amp; Mayo Clinic" Style="{StaticResource CaptionLabelStyle}" />
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                        <Label Text="House Coffee &amp; Caffeine Menu" Style="{StaticResource MediumLabelStyle}" FontSize="18" />
+                        <Label Text="Crafted coffeehouse pours &amp; caffeine doses • USDA &amp; Mayo Clinic" Style="{StaticResource CaptionLabelStyle}" />
                     </VerticalStackLayout>
 
                     <Button
@@ -48,31 +57,32 @@
                         Style="{StaticResource SecondaryButtonStyle}"
                         WidthRequest="36"
                         HeightRequest="36"
+                        CornerRadius="12"
                         Padding="0"
                         Clicked="OnCloseClicked" />
                 </Grid>
 
-                <!-- Helpful Tip Banner -->
+                <!-- Context Tip Pill -->
                 <Border
                     BackgroundColor="{DynamicResource SurfaceAltColor}"
                     Stroke="{DynamicResource BorderColor}"
                     StrokeThickness="1"
-                    Padding="10,5">
+                    Padding="12,6">
                     <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8" />
+                        <RoundRectangle CornerRadius="10" />
                     </Border.StrokeShape>
                     <Label
-                        Text="💡 Tap any coffee card or click 'Select' to pick your drink (including Decaf)"
+                        Text="☕  Tap any drink below to pair its caffeine dose with your Barista chat"
                         FontSize="11"
                         FontAttributes="Bold"
                         TextColor="{DynamicResource PrimaryColor}" />
                 </Border>
             </VerticalStackLayout>
 
-            <!-- 2-Column Responsive Grid with Guaranteed Height and Scrollability -->
+            <!-- 2-Column Bento Beverage Grid -->
             <CollectionView
                 Grid.Row="1"
-                HeightRequest="410"
+                HeightRequest="420"
                 VerticalScrollBarVisibility="Always"
                 SelectionMode="None"
                 ItemsSource="{Binding Items}">
@@ -80,44 +90,45 @@
                     <GridItemsLayout
                         Orientation="Vertical"
                         Span="2"
-                        HorizontalItemSpacing="8"
-                        VerticalItemSpacing="8" />
+                        HorizontalItemSpacing="10"
+                        VerticalItemSpacing="10" />
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:CoffeeType">
                         <Border
-                            BackgroundColor="{DynamicResource SurfaceColor}"
+                            BackgroundColor="{DynamicResource SurfaceAltColor}"
                             Stroke="{DynamicResource BorderColor}"
                             StrokeThickness="1"
-                            Padding="10,8">
+                            Padding="12,10">
                             <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="12" />
+                                <RoundRectangle CornerRadius="14" />
                             </Border.StrokeShape>
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CoffeeDictionaryPopupViewModel}}, Path=SelectCoffeeCommand}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type popups:CoffeeDictionaryPopup}}, Path=BindingContext.SelectCoffeeCommand}"
                                     CommandParameter="{Binding .}" />
                             </Border.GestureRecognizers>
 
-                            <Grid RowDefinitions="Auto, Auto, Auto" RowSpacing="4">
+                            <Grid RowDefinitions="Auto, Auto, Auto" RowSpacing="6">
                                 <!-- Row 0: Name & Volume -->
-                                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" ColumnSpacing="4" VerticalOptions="Center">
+                                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" ColumnSpacing="6" VerticalOptions="Center">
                                     <Label
                                         Grid.Column="0"
                                         Text="{Binding Name}"
                                         FontAttributes="Bold"
-                                        FontSize="12"
+                                        FontSize="13"
                                         TextColor="{DynamicResource PrimaryTextColor}"
                                         LineBreakMode="TailTruncation"
                                         VerticalOptions="Center" />
                                     <Border
                                         Grid.Column="1"
-                                        BackgroundColor="{DynamicResource SurfaceAltColor}"
-                                        StrokeThickness="0"
-                                        Padding="5,1"
+                                        BackgroundColor="{DynamicResource SurfaceColor}"
+                                        Stroke="{DynamicResource BorderColor}"
+                                        StrokeThickness="0.5"
+                                        Padding="6,2"
                                         VerticalOptions="Center">
                                         <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="4" />
+                                            <RoundRectangle CornerRadius="6" />
                                         </Border.StrokeShape>
                                         <Label
                                             Text="{Binding Volume}"
@@ -140,30 +151,31 @@
                                 <Grid Grid.Row="2" ColumnDefinitions="*, Auto" ColumnSpacing="6" VerticalOptions="Center" Margin="0,2,0,0">
                                     <Border
                                         Grid.Column="0"
-                                        BackgroundColor="{DynamicResource SurfaceAltColor}"
+                                        BackgroundColor="{DynamicResource SurfaceColor}"
                                         Stroke="{DynamicResource BorderColor}"
                                         StrokeThickness="0.5"
-                                        Padding="6,2"
+                                        Padding="8,3"
                                         HorizontalOptions="Start"
                                         VerticalOptions="Center">
                                         <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="6" />
+                                            <RoundRectangle CornerRadius="8" />
                                         </Border.StrokeShape>
                                         <Label
                                             Text="{Binding CaffeineDisplay}"
                                             FontAttributes="Bold"
                                             FontSize="11"
-                                            TextColor="{DynamicResource AccentColor}" />
+                                            TextColor="{DynamicResource SecondaryColor}" />
                                     </Border>
 
                                     <Button
                                         Grid.Column="1"
-                                        Text="Select"
+                                        Text="Pair"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         HeightRequest="28"
-                                        Padding="10,0"
+                                        CornerRadius="10"
+                                        Padding="12,0"
                                         FontSize="11"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CoffeeDictionaryPopupViewModel}}, Path=SelectCoffeeCommand}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type popups:CoffeeDictionaryPopup}}, Path=BindingContext.SelectCoffeeCommand}"
                                         CommandParameter="{Binding .}"
                                         VerticalOptions="Center" />
                                 </Grid>
@@ -174,20 +186,21 @@
             </CollectionView>
 
             <!-- Modal Footer -->
-            <Grid Grid.Row="2" ColumnDefinitions="*, Auto" Margin="0,2,0,0">
+            <Grid Grid.Row="2" ColumnDefinitions="*, Auto" Margin="0,2,0,0" VerticalOptions="Center">
                 <Label
                     Grid.Column="0"
-                    Text="All 10 standard coffee types available • 8 oz standard serving."
+                    Text="10 house coffeehouse pours • 8 oz standard cup reference"
                     Style="{StaticResource CaptionLabelStyle}"
-                    FontSize="10"
+                    FontSize="11"
                     VerticalOptions="Center" />
                 <Button
                     Grid.Column="1"
                     Text="Close"
                     Style="{StaticResource SecondaryButtonStyle}"
-                    HeightRequest="32"
-                    Padding="14,0"
-                    FontSize="11"
+                    HeightRequest="34"
+                    CornerRadius="12"
+                    Padding="16,0"
+                    FontSize="12"
                     Clicked="OnCloseClicked" />
             </Grid>
         </Grid>

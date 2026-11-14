@@ -8,16 +8,24 @@ public sealed class CaffeineMetabolismService : ICaffeineMetabolismService
 	public const double FullClearanceThresholdMg = 1.0;
 	public const double SleepThresholdMg = 20.0;
 
+	public int CalculateDailyTotalCaffeineMg(IEnumerable<OracleDecisionLog> logs)
+	{
+		return logs.Where(l => l.UserDrank && l.Timestamp.ToLocalTime().Date == DateTime.Today).Sum(l => l.CaffeineMg);
+	}
+
 	public double CalculateActiveCaffeine(IEnumerable<OracleDecisionLog> logs, DateTime asOfUtc)
 	{
 		double totalActive = 0.0;
+		DateTime asOfUtcNormalized = asOfUtc.Kind == DateTimeKind.Utc ? asOfUtc : asOfUtc.ToUniversalTime();
 
 		foreach (var log in logs)
 		{
 			if (log.UserDrank && log.CaffeineMg > 0)
 			{
-				double hoursElapsed = (asOfUtc - log.Timestamp).TotalHours;
-				if (hoursElapsed >= 0)
+				DateTime logTimestampUtc = log.Timestamp.Kind == DateTimeKind.Utc ? log.Timestamp : log.Timestamp.ToUniversalTime();
+				double hoursElapsed = (asOfUtcNormalized - logTimestampUtc).TotalHours;
+				if (hoursElapsed < 0 && hoursElapsed >= -0.5) hoursElapsed = 0.0;
+				if (hoursElapsed >= 0 && hoursElapsed <= 48.0)
 				{
 					// Exponential decay formula: N(t) = N0 * (0.5)^(t / 5)
 					double remaining = log.CaffeineMg * Math.Pow(0.5, hoursElapsed / HalfLifeHours);
@@ -45,8 +53,8 @@ public sealed class CaffeineMetabolismService : ICaffeineMetabolismService
 	{
 		DateTime now = DateTime.UtcNow;
 		double activeMg = CalculateActiveCaffeine(logs, now);
-		int totalTodayMg = logs.Where(l => l.UserDrank).Sum(l => l.CaffeineMg);
-		int drankCount = logs.Count(l => l.UserDrank);
+		int totalTodayMg = CalculateDailyTotalCaffeineMg(logs);
+		int drankCount = logs.Count(l => l.UserDrank && l.Timestamp.ToLocalTime().Date == DateTime.Today);
 
 		double hoursToClear = CalculateHoursToThreshold(activeMg, FullClearanceThresholdMg);
 		double hoursToSleep = CalculateHoursToThreshold(activeMg, SleepThresholdMg);

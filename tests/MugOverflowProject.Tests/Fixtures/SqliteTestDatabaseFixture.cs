@@ -1,6 +1,7 @@
+using Dapper;
+using Microsoft.Data.Sqlite;
 using MugOverflowProject.Models;
 using MugOverflowProject.Services.Database;
-using SQLite;
 using Xunit;
 
 namespace MugOverflowProject.Tests.Fixtures;
@@ -9,6 +10,7 @@ namespace MugOverflowProject.Tests.Fixtures;
 /// Manages an isolated, temporary SQLite database instance for xUnit tests.
 /// Ensures WAL mode is verified and connections are safely closed before file deletion
 /// to prevent Windows file locking violations.
+/// Standardized 100% on Microsoft.Data.Sqlite and Dapper.
 /// </summary>
 public sealed class SqliteTestDatabaseFixture : IAsyncLifetime, IDisposable
 {
@@ -19,11 +21,21 @@ public sealed class SqliteTestDatabaseFixture : IAsyncLifetime, IDisposable
 	}
 
 	public string DatabasePath { get; }
+	public string ConnectionString { get; }
 	public SqliteDatabaseService DatabaseService { get; private set; } = null!;
 
 	public SqliteTestDatabaseFixture()
 	{
 		DatabasePath = Path.Combine(Path.GetTempPath(), $"MugOverflow_Test_{Guid.NewGuid():N}.db3");
+		ConnectionString = new SqliteConnectionStringBuilder
+		{
+			DataSource = DatabasePath,
+			Mode = SqliteOpenMode.ReadWriteCreate,
+			Cache = SqliteCacheMode.Private,
+			DefaultTimeout = 5,
+			ForeignKeys = true,
+			Pooling = true
+		}.ToString();
 	}
 
 	public async Task InitializeAsync()
@@ -32,17 +44,22 @@ public sealed class SqliteTestDatabaseFixture : IAsyncLifetime, IDisposable
 		await DatabaseService.InitializeAsync();
 	}
 
-	private readonly List<SQLiteAsyncConnection> _directConnections = [];
+	private readonly List<SqliteConnection> _directConnections = [];
 	private readonly object _directConnectionsLock = new();
 
 	/// <summary>
 	/// Creates a raw direct connection for low-level PRAGMA and table state validation.
 	/// </summary>
-	public SQLiteAsyncConnection CreateDirectConnection()
+	public SqliteConnection CreateDirectConnection()
 	{
-		var conn = new SQLiteAsyncConnection(
-			DatabasePath,
-			SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create);
+		var conn = new SqliteConnection(ConnectionString);
+		conn.Open();
+		using (var cmd = conn.CreateCommand())
+		{
+			cmd.CommandText = "PRAGMA synchronous = NORMAL; PRAGMA busy_timeout = 5000;";
+			cmd.ExecuteNonQuery();
+		}
+
 		lock (_directConnectionsLock)
 		{
 			_directConnections.Add(conn);
@@ -115,7 +132,7 @@ public sealed class SqliteTestDatabaseFixture : IAsyncLifetime, IDisposable
 			await DatabaseService.CloseConnectionAsync();
 		}
 
-		List<SQLiteAsyncConnection> conns;
+		List<SqliteConnection> conns;
 		lock (_directConnectionsLock)
 		{
 			conns = [.. _directConnections];
@@ -127,12 +144,15 @@ public sealed class SqliteTestDatabaseFixture : IAsyncLifetime, IDisposable
 			try
 			{
 				await conn.CloseAsync();
+				await conn.DisposeAsync();
 			}
 			catch
 			{
 				// Ignore if already closed
 			}
 		}
+
+		SqliteConnection.ClearAllPools();
 
 		// Ensure garbage collector releases any unmanaged SQLite handles on Windows
 		GC.Collect();

@@ -1,25 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
+		<TargetFramework>net11.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
-		<LangVersion>preview</LangVersion>
+		<LangVersion>latest</LangVersion>
 		<UseMaui>true</UseMaui>
-		<NoWarn>$(NoWarn);NU1903</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.90" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="11.0.10" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="17.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-		<PackageReference Include="coverlet.collector" Version="6.0.4" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+		<PackageReference Include="coverlet.collector" Version="10.1.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
 		<PackageReference Include="xunit" Version="2.9.3" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="3.0.2" />
-		<PackageReference Include="sqlite-net-pcl" Version="1.11.285" />
-		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.10" />
-		<PackageReference Include="Microsoft.Identity.Client" Version="4.68.0" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="4.0.1" />
+		<PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.92.0" />
+		<PackageReference Include="Dapper" Version="2.1.89" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="11.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="11.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -32,6 +34,7 @@
 		<Compile Include="..\..\Models\**\*.cs" Link="Models\%(RecursiveDir)%(Filename)%(Extension)" />
 		<Compile Include="..\..\Services\**\*.cs" Exclude="..\..\Services\AppPopupService.cs" Link="Services\%(RecursiveDir)%(Filename)%(Extension)" />
 		<Compile Include="..\..\Controls\**\*.cs" Link="Controls\%(RecursiveDir)%(Filename)%(Extension)" />
+		<Compile Include="..\..\Messages\**\*.cs" Link="Messages\%(RecursiveDir)%(Filename)%(Extension)" />
 		<MauiXaml Include="..\..\Resources\Styles\Themes\*.xaml" Link="Resources\Styles\Themes\%(Filename)%(Extension)" />
 		<Compile Include="..\..\Resources\Styles\Themes\*.cs" Link="Resources\Styles\Themes\%(Filename)%(Extension)" />
 		<Compile Include="..\..\ViewModels\**\*.cs" Link="ViewModels\%(RecursiveDir)%(Filename)%(Extension)" />

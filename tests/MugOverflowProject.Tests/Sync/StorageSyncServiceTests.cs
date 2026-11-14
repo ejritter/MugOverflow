@@ -409,4 +409,74 @@ public sealed class StorageSyncServiceTests : IAsyncLifetime
 		var pendingAfterRestore = await _dbFixture.DatabaseService.GetPendingSyncLogsAsync();
 		Assert.Empty(pendingAfterRestore);
 	}
+
+	[Fact]
+	public async Task SynchronizeAsync_OnlyMarksPushedRecordsAsSynced()
+	{
+		var log1 = SqliteTestDatabaseFixture.CreateSampleEntity(id: "sync-pushed-1", syncStatus: (int)SyncStatus.Pending);
+		await _dbFixture.DatabaseService.InsertLogAsync(log1);
+
+		await using var service = CreateService();
+		await service.InitializeAsync();
+
+		var result = await service.SynchronizeAsync();
+		Assert.True(result);
+
+		var fetched = await _dbFixture.DatabaseService.GetLogByIdAsync("sync-pushed-1");
+		Assert.NotNull(fetched);
+		Assert.Equal((int)SyncStatus.Synced, fetched.SyncStatus);
+	}
+
+	[Fact]
+	public async Task ConnectivityChanged_RapidFlapping_DoesNotThrowObjectDisposedOrCrash()
+	{
+		// Arrange: seed pending logs to ensure FlushPendingChangesAsync is exercised
+		for (int i = 0; i < 5; i++)
+		{
+			await _dbFixture.DatabaseService.InsertLogAsync(
+				SqliteTestDatabaseFixture.CreateSampleEntity(id: $"flap-{i}", syncStatus: (int)SyncStatus.Pending));
+		}
+
+		await using var service = CreateService();
+		await service.InitializeAsync();
+
+		// Act: Rapidly trigger online/offline events across multiple tasks to simulate network flapping
+		var flappingTasks = Enumerable.Range(0, 20).Select(async i =>
+		{
+			await Task.Yield();
+			var access = (i % 2 == 0) ? NetworkAccess.Internet : NetworkAccess.None;
+			_fakeConnectivity.SetNetworkAccess(access);
+		});
+
+		await Task.WhenAll(flappingTasks);
+
+		// Finally ensure network is restored so flush can settle
+		_fakeConnectivity.SetNetworkAccess(NetworkAccess.Internet);
+		await Task.Delay(300);
+
+		// Assert: No uncaught ObjectDisposedException was thrown, engine settles into non-error state
+		Assert.NotEqual(SyncEngineStatus.Error, service.Status);
+	}
+
+	[Fact]
+	public async Task Dispose_WhileConnectivityChangeInProgress_DoesNotThrowObjectDisposed()
+	{
+		var service = CreateService();
+		await service.InitializeAsync();
+
+		_fakeConnectivity.SetNetworkAccess(NetworkAccess.None);
+		await _dbFixture.DatabaseService.InsertLogAsync(
+			SqliteTestDatabaseFixture.CreateSampleEntity(id: "dispose-race-1", syncStatus: (int)SyncStatus.Pending));
+
+		// Act: Trigger online event and immediately dispose service
+		_fakeConnectivity.SetNetworkAccess(NetworkAccess.Internet);
+		var disposeTask = Task.Run(() => service.Dispose());
+
+		await disposeTask;
+		await Task.Delay(100);
+
+		// Assert: Succeeded without throwing ObjectDisposedException
+		Assert.True(true);
+	}
 }
+

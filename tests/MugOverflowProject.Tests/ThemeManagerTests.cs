@@ -39,12 +39,14 @@ public sealed class ThemeManagerTests : IDisposable
 		"PrimaryGradientStart",
 		"PrimaryGradientEnd",
 		"CardShadowColor",
-		"AppShadowColor"
+		"AppShadowColor",
+		"PrimaryButtonTextColor",
+		"AccentButtonTextColor"
 	];
 
 	public ThemeManagerTests()
 	{
-		// Ensure starting from baseline
+		// Ensure starting from baseline ("Espresso Crema Dark")
 		ThemeManager.ResetToDefault();
 	}
 
@@ -55,17 +57,28 @@ public sealed class ThemeManagerTests : IDisposable
 	}
 
 	// ==========================================
-	// 1. Theme Instantiation & 22 Token Presence
+	// 1. Theme Instantiation & 24 Token Presence
 	// ==========================================
 
+	[Fact]
+	public void DefaultTheme_IsEspressoCremaDark()
+	{
+		Assert.Equal("Espresso Crema Dark", ThemeManager.DefaultTheme);
+		Assert.Equal("Espresso Crema Dark", ThemeManager.CurrentThemeName);
+	}
+
 	[Theory]
-	[InlineData("Regal Earth", typeof(RegalEarthTheme))]
-	[InlineData("Wine Desert", typeof(WineDesertTheme))]
-	[InlineData("Forest Lavender", typeof(ForestLavenderTheme))]
-	[InlineData("Pristine Clean", typeof(PristineCleanTheme))]
-	[InlineData("Coffee Light", typeof(CoffeeLightTheme))]
-	[InlineData("Coffee Dark", typeof(CoffeeDarkTheme))]
-	public void ThemeDictionary_InstantiatesAndContainsAll22StandardTokens(string themeName, Type themeType)
+	[InlineData("Espresso Crema Dark", typeof(CoffeeDarkTheme))]
+	[InlineData("Steamed Oat Latte", typeof(CoffeeLightTheme))]
+	[InlineData("Caramel Macchiato", typeof(WineDesertTheme))]
+	[InlineData("Mocha Velvet Dark", typeof(WineDesertDarkTheme))]
+	[InlineData("Iced Matcha Latte", typeof(ForestLavenderTheme))]
+	[InlineData("Dirty Matcha Dark", typeof(ForestLavenderDarkTheme))]
+	[InlineData("Honey Lavender Latte", typeof(RegalEarthTheme))]
+	[InlineData("Midnight Cold Brew", typeof(RegalEarthDarkTheme))]
+	[InlineData("Sweet Mint Cortado", typeof(PristineCleanTheme))]
+	[InlineData("Dark Mint Espresso", typeof(PristineCleanDarkTheme))]
+	public void ThemeDictionary_InstantiatesAndContainsAll24StandardTokens(string themeName, Type themeType)
 	{
 		var dict = (ResourceDictionary)Activator.CreateInstance(themeType)!;
 		Assert.NotNull(dict);
@@ -77,6 +90,35 @@ public sealed class ThemeManagerTests : IDisposable
 		}
 
 		Assert.Equal(themeName, dict["ThemeName"]);
+	}
+
+	[Theory]
+	[InlineData("Coffee Dark", typeof(CoffeeDarkTheme), "Espresso Crema Dark")]
+	[InlineData("Coffee Light", typeof(CoffeeLightTheme), "Steamed Oat Latte")]
+	[InlineData("Wine Desert", typeof(WineDesertTheme), "Caramel Macchiato")]
+	[InlineData("Wine Desert Light", typeof(WineDesertTheme), "Caramel Macchiato")]
+	[InlineData("Wine Desert Dark", typeof(WineDesertDarkTheme), "Mocha Velvet Dark")]
+	[InlineData("Forest Lavender", typeof(ForestLavenderTheme), "Iced Matcha Latte")]
+	[InlineData("Forest Lavender Light", typeof(ForestLavenderTheme), "Iced Matcha Latte")]
+	[InlineData("Forest Lavender Dark", typeof(ForestLavenderDarkTheme), "Dirty Matcha Dark")]
+	[InlineData("Regal Earth", typeof(RegalEarthTheme), "Honey Lavender Latte")]
+	[InlineData("Regal Earth Light", typeof(RegalEarthTheme), "Honey Lavender Latte")]
+	[InlineData("Regal Earth Dark", typeof(RegalEarthDarkTheme), "Midnight Cold Brew")]
+	[InlineData("Pristine Clean", typeof(PristineCleanTheme), "Sweet Mint Cortado")]
+	[InlineData("Pristine Clean Light", typeof(PristineCleanTheme), "Sweet Mint Cortado")]
+	[InlineData("Pristine Clean Dark", typeof(PristineCleanDarkTheme), "Dark Mint Espresso")]
+	[InlineData("  regal earth  ", typeof(RegalEarthTheme), "Honey Lavender Latte")]
+	[InlineData("PRISTINE CLEAN DARK", typeof(PristineCleanDarkTheme), "Dark Mint Espresso")]
+	public void ThemeManager_LegacyThemeAliases_ResolveCleanlyToCoffeehouseThemes(
+		string legacyAlias,
+		Type expectedDictionaryType,
+		string expectedResolvedName)
+	{
+		var dict = ThemeManager.CreateThemeDictionary(legacyAlias);
+		Assert.IsType(expectedDictionaryType, dict);
+
+		ThemeManager.ApplyTheme(legacyAlias);
+		Assert.Equal(expectedResolvedName, ThemeManager.CurrentThemeName);
 	}
 
 	// ==========================================
@@ -147,32 +189,138 @@ public sealed class ThemeManagerTests : IDisposable
 		Assert.Equal(Color.FromArgb("#1C1510"), (Color)dark["AccentButtonTextColor"]);
 	}
 
+	[Fact]
+	public void RegalEarthDarkTheme_DefinesPaletteAndContrastTokens()
+	{
+		var dark = new RegalEarthDarkTheme();
+		Assert.Equal(Color.FromArgb("#140E1B"), (Color)dark["PageBackgroundColor"]);
+		Assert.Equal(Color.FromArgb("#0D0912"), (Color)dark["NavigationBarColor"]);
+		Assert.Equal(Color.FromArgb("#B388FF"), (Color)dark["PrimaryColor"]);
+		Assert.Equal(Color.FromArgb("#E5BE65"), (Color)dark["SecondaryColor"]);
+		Assert.Equal(Color.FromArgb("#E5BE65"), (Color)dark["AccentColor"]);
+		Assert.Equal(Color.FromArgb("#1E1528"), (Color)dark["SurfaceColor"]);
+		Assert.Equal(Color.FromArgb("#2C1E3C"), (Color)dark["SurfaceAltColor"]);
+		Assert.Equal(Color.FromArgb("#443258"), (Color)dark["BorderColor"]);
+		Assert.Equal(Color.FromArgb("#F5EEF8"), (Color)dark["PrimaryTextColor"]);
+		Assert.Equal(Color.FromArgb("#C4B5D0"), (Color)dark["SecondaryTextColor"]);
+		Assert.Equal(Color.FromArgb("#8E7E9C"), (Color)dark["TertiaryTextColor"]);
+
+		// Contrast tokens
+		Assert.True(dark.ContainsKey("PrimaryButtonTextColor"));
+		Assert.Equal(Color.FromArgb("#140E1B"), (Color)dark["PrimaryButtonTextColor"]);
+
+		Assert.True(dark.ContainsKey("AccentButtonTextColor"));
+		Assert.Equal(Color.FromArgb("#140E1B"), (Color)dark["AccentButtonTextColor"]);
+	}
+
+	[Fact]
+	public void WineDesertDarkTheme_DefinesPaletteAndContrastTokens()
+	{
+		var dark = new WineDesertDarkTheme();
+		Assert.Equal(Color.FromArgb("#1B1214"), (Color)dark["PageBackgroundColor"]);
+		Assert.Equal(Color.FromArgb("#120B0D"), (Color)dark["NavigationBarColor"]);
+		Assert.Equal(Color.FromArgb("#EA859B"), (Color)dark["PrimaryColor"]);
+		Assert.Equal(Color.FromArgb("#E2A775"), (Color)dark["SecondaryColor"]);
+		Assert.Equal(Color.FromArgb("#E2A775"), (Color)dark["AccentColor"]);
+		Assert.Equal(Color.FromArgb("#261A1E"), (Color)dark["SurfaceColor"]);
+		Assert.Equal(Color.FromArgb("#38262C"), (Color)dark["SurfaceAltColor"]);
+		Assert.Equal(Color.FromArgb("#523840"), (Color)dark["BorderColor"]);
+		Assert.Equal(Color.FromArgb("#F9EFEF"), (Color)dark["PrimaryTextColor"]);
+		Assert.Equal(Color.FromArgb("#D2B8BE"), (Color)dark["SecondaryTextColor"]);
+		Assert.Equal(Color.FromArgb("#9E828A"), (Color)dark["TertiaryTextColor"]);
+
+		// Contrast tokens
+		Assert.True(dark.ContainsKey("PrimaryButtonTextColor"));
+		Assert.Equal(Color.FromArgb("#1B1214"), (Color)dark["PrimaryButtonTextColor"]);
+
+		Assert.True(dark.ContainsKey("AccentButtonTextColor"));
+		Assert.Equal(Color.FromArgb("#1B1214"), (Color)dark["AccentButtonTextColor"]);
+	}
+
+	[Fact]
+	public void ForestLavenderDarkTheme_DefinesPaletteAndContrastTokens()
+	{
+		var dark = new ForestLavenderDarkTheme();
+		Assert.Equal(Color.FromArgb("#111A15"), (Color)dark["PageBackgroundColor"]);
+		Assert.Equal(Color.FromArgb("#0B120E"), (Color)dark["NavigationBarColor"]);
+		Assert.Equal(Color.FromArgb("#57B88C"), (Color)dark["PrimaryColor"]);
+		Assert.Equal(Color.FromArgb("#B39DDB"), (Color)dark["SecondaryColor"]);
+		Assert.Equal(Color.FromArgb("#B39DDB"), (Color)dark["AccentColor"]);
+		Assert.Equal(Color.FromArgb("#18241E"), (Color)dark["SurfaceColor"]);
+		Assert.Equal(Color.FromArgb("#24352C"), (Color)dark["SurfaceAltColor"]);
+		Assert.Equal(Color.FromArgb("#375043"), (Color)dark["BorderColor"]);
+		Assert.Equal(Color.FromArgb("#F0F5F2"), (Color)dark["PrimaryTextColor"]);
+		Assert.Equal(Color.FromArgb("#B8C8C0"), (Color)dark["SecondaryTextColor"]);
+		Assert.Equal(Color.FromArgb("#7E9187"), (Color)dark["TertiaryTextColor"]);
+
+		// Contrast tokens
+		Assert.True(dark.ContainsKey("PrimaryButtonTextColor"));
+		Assert.Equal(Color.FromArgb("#111A15"), (Color)dark["PrimaryButtonTextColor"]);
+
+		Assert.True(dark.ContainsKey("AccentButtonTextColor"));
+		Assert.Equal(Color.FromArgb("#111A15"), (Color)dark["AccentButtonTextColor"]);
+	}
+
+	[Fact]
+	public void PristineCleanDarkTheme_DefinesPaletteAndContrastTokens()
+	{
+		var dark = new PristineCleanDarkTheme();
+		Assert.Equal(Color.FromArgb("#0E1816"), (Color)dark["PageBackgroundColor"]);
+		Assert.Equal(Color.FromArgb("#09110F"), (Color)dark["NavigationBarColor"]);
+		Assert.Equal(Color.FromArgb("#52C5A8"), (Color)dark["PrimaryColor"]);
+		Assert.Equal(Color.FromArgb("#80E0C9"), (Color)dark["SecondaryColor"]);
+		Assert.Equal(Color.FromArgb("#80E0C9"), (Color)dark["AccentColor"]);
+		Assert.Equal(Color.FromArgb("#152421"), (Color)dark["SurfaceColor"]);
+		Assert.Equal(Color.FromArgb("#1E3530"), (Color)dark["SurfaceAltColor"]);
+		Assert.Equal(Color.FromArgb("#2C4E47"), (Color)dark["BorderColor"]);
+		Assert.Equal(Color.FromArgb("#F0FAF7"), (Color)dark["PrimaryTextColor"]);
+		Assert.Equal(Color.FromArgb("#A8CEC5"), (Color)dark["SecondaryTextColor"]);
+		Assert.Equal(Color.FromArgb("#6E968E"), (Color)dark["TertiaryTextColor"]);
+
+		// Contrast tokens
+		Assert.True(dark.ContainsKey("PrimaryButtonTextColor"));
+		Assert.Equal(Color.FromArgb("#0E1816"), (Color)dark["PrimaryButtonTextColor"]);
+
+		Assert.True(dark.ContainsKey("AccentButtonTextColor"));
+		Assert.Equal(Color.FromArgb("#0E1816"), (Color)dark["AccentButtonTextColor"]);
+	}
+
 	// ==========================================
 	// 3. ThemeSelectorPopupViewModel Tests
 	// ==========================================
 
 	[Fact]
-	public void ThemeSelectorPopupViewModel_ContainsAllSixThemes()
+	public void ThemeSelectorPopupViewModel_ContainsAllTenCoffeehouseThemes()
 	{
 		var persistence = new TestDataPersistenceService();
 		var vm = new ThemeSelectorPopupViewModel(persistence);
 
-		Assert.Equal(6, vm.Themes.Count);
-		Assert.Contains("Regal Earth", vm.Themes);
-		Assert.Contains("Wine Desert", vm.Themes);
-		Assert.Contains("Forest Lavender", vm.Themes);
-		Assert.Contains("Pristine Clean", vm.Themes);
-		Assert.Contains("Coffee Light", vm.Themes);
-		Assert.Contains("Coffee Dark", vm.Themes);
+		Assert.Equal(10, vm.Themes.Count);
+		Assert.Equal("Espresso Crema Dark", vm.Themes[0]);
+		Assert.Equal("Steamed Oat Latte", vm.Themes[1]);
+		Assert.Contains("Espresso Crema Dark", vm.Themes);
+		Assert.Contains("Steamed Oat Latte", vm.Themes);
+		Assert.Contains("Caramel Macchiato", vm.Themes);
+		Assert.Contains("Mocha Velvet Dark", vm.Themes);
+		Assert.Contains("Iced Matcha Latte", vm.Themes);
+		Assert.Contains("Dirty Matcha Dark", vm.Themes);
+		Assert.Contains("Honey Lavender Latte", vm.Themes);
+		Assert.Contains("Midnight Cold Brew", vm.Themes);
+		Assert.Contains("Sweet Mint Cortado", vm.Themes);
+		Assert.Contains("Dark Mint Espresso", vm.Themes);
 	}
 
 	[Theory]
-	[InlineData("Coffee Light")]
-	[InlineData("Coffee Dark")]
-	[InlineData("Wine Desert")]
-	[InlineData("Forest Lavender")]
-	[InlineData("Pristine Clean")]
-	[InlineData("Regal Earth")]
+	[InlineData("Espresso Crema Dark")]
+	[InlineData("Steamed Oat Latte")]
+	[InlineData("Caramel Macchiato")]
+	[InlineData("Mocha Velvet Dark")]
+	[InlineData("Iced Matcha Latte")]
+	[InlineData("Dirty Matcha Dark")]
+	[InlineData("Honey Lavender Latte")]
+	[InlineData("Midnight Cold Brew")]
+	[InlineData("Sweet Mint Cortado")]
+	[InlineData("Dark Mint Espresso")]
 	public void ThemeSelectorPopupViewModel_SelectThemeCommand_AppliesAndPersistsTheme(string targetTheme)
 	{
 		var persistence = new TestDataPersistenceService();
@@ -207,34 +355,37 @@ public sealed class ThemeManagerTests : IDisposable
 	public void ThemeManager_ApplyTheme_HeadlessNullSafety_UpdatesCurrentThemeName()
 	{
 		// In xUnit testhost, Application.Current is null
-		ThemeManager.ApplyTheme("Coffee Light");
-		Assert.Equal("Coffee Light", ThemeManager.CurrentThemeName);
+		ThemeManager.ApplyTheme("Steamed Oat Latte");
+		Assert.Equal("Steamed Oat Latte", ThemeManager.CurrentThemeName);
 
-		ThemeManager.ApplyTheme("Coffee Dark");
-		Assert.Equal("Coffee Dark", ThemeManager.CurrentThemeName);
+		ThemeManager.ApplyTheme("Honey Lavender Latte");
+		Assert.Equal("Honey Lavender Latte", ThemeManager.CurrentThemeName);
 
 		ThemeManager.ApplyTheme("Unknown Theme");
-		Assert.Equal("Regal Earth", ThemeManager.CurrentThemeName);
+		Assert.Equal("Espresso Crema Dark", ThemeManager.CurrentThemeName);
 
 		ThemeManager.ApplyTheme(null);
-		Assert.Equal("Regal Earth", ThemeManager.CurrentThemeName);
+		Assert.Equal("Espresso Crema Dark", ThemeManager.CurrentThemeName);
 	}
 
 	[Fact]
 	public void ThemeManager_ApplyTheme_CaseInsensitiveAndTrims()
 	{
-		ThemeManager.ApplyTheme("  coffee dark  ");
-		Assert.Equal("Coffee Dark", ThemeManager.CurrentThemeName);
+		ThemeManager.ApplyTheme("  steamed oat latte  ");
+		Assert.Equal("Steamed Oat Latte", ThemeManager.CurrentThemeName);
 
-		ThemeManager.ApplyTheme("COFFEE LIGHT");
-		Assert.Equal("Coffee Light", ThemeManager.CurrentThemeName);
+		ThemeManager.ApplyTheme("ESPRESSO CREMA DARK");
+		Assert.Equal("Espresso Crema Dark", ThemeManager.CurrentThemeName);
+
+		ThemeManager.ApplyTheme("  caramel macchiato  ");
+		Assert.Equal("Caramel Macchiato", ThemeManager.CurrentThemeName);
 	}
 
 	[Fact]
 	public void ThemeManager_ApplyTheme_PreservesMergedDictionariesIndex()
 	{
 		var colors = new ResourceDictionary { { "White", Colors.White } };
-		var initialTheme = new RegalEarthTheme();
+		var initialTheme = new CoffeeDarkTheme();
 		var styles = new ResourceDictionary();
 
 		var merged = new ObservableCollection<ResourceDictionary>
@@ -244,13 +395,13 @@ public sealed class ThemeManagerTests : IDisposable
 			styles        // Index 2
 		};
 
-		ThemeManager.ApplyTheme("Coffee Light", merged);
+		ThemeManager.ApplyTheme("Steamed Oat Latte", merged);
 
 		Assert.Equal(3, merged.Count);
 		Assert.Same(colors, merged[0]);
 		Assert.IsType<CoffeeLightTheme>(merged[1]);
 		Assert.Same(styles, merged[2]);
-		Assert.Equal("Coffee Light", ThemeManager.CurrentThemeName);
+		Assert.Equal("Steamed Oat Latte", ThemeManager.CurrentThemeName);
 	}
 
 	[Fact]
@@ -265,7 +416,7 @@ public sealed class ThemeManagerTests : IDisposable
 			styles  // Index 1
 		};
 
-		ThemeManager.ApplyTheme("Coffee Dark", merged);
+		ThemeManager.ApplyTheme("Espresso Crema Dark", merged);
 
 		Assert.Equal(3, merged.Count);
 		Assert.Same(colors, merged[0]);
@@ -277,9 +428,13 @@ public sealed class ThemeManagerTests : IDisposable
 	public void ThemeManager_IsThemeDictionary_RecognizesAllThemes()
 	{
 		Assert.True(ThemeManager.IsThemeDictionary(new RegalEarthTheme()));
+		Assert.True(ThemeManager.IsThemeDictionary(new RegalEarthDarkTheme()));
 		Assert.True(ThemeManager.IsThemeDictionary(new WineDesertTheme()));
+		Assert.True(ThemeManager.IsThemeDictionary(new WineDesertDarkTheme()));
 		Assert.True(ThemeManager.IsThemeDictionary(new ForestLavenderTheme()));
+		Assert.True(ThemeManager.IsThemeDictionary(new ForestLavenderDarkTheme()));
 		Assert.True(ThemeManager.IsThemeDictionary(new PristineCleanTheme()));
+		Assert.True(ThemeManager.IsThemeDictionary(new PristineCleanDarkTheme()));
 		Assert.True(ThemeManager.IsThemeDictionary(new CoffeeLightTheme()));
 		Assert.True(ThemeManager.IsThemeDictionary(new CoffeeDarkTheme()));
 
@@ -328,13 +483,80 @@ public sealed class ThemeManagerTests : IDisposable
 		Assert.Null(exception);
 	}
 
+	[Fact]
+	public void TabSwitcher_DualButtonVisibilityPattern_AvoidsDataTriggersAndStyleSnapshots()
+	{
+		// Verifies the Dual-Button Visibility Pattern for segmented tab switcher:
+		// Active and inactive buttons use dedicated static styles and IsVisible toggles,
+		// with zero DataTriggers, eliminating WinUI 3 presentation caching bugs when themes change.
+		var activeBtn = new Button
+		{
+			HeightRequest = 38,
+			FontSize = 13,
+			FontAttributes = FontAttributes.Bold
+		};
+		var inactiveBtn = new Button
+		{
+			HeightRequest = 38,
+			FontSize = 13,
+			FontAttributes = FontAttributes.Bold
+		};
+
+		Assert.Empty(activeBtn.Triggers);
+		Assert.Empty(inactiveBtn.Triggers);
+	}
+
+	[Fact]
+	public void TabSwitcher_ButtonDataTrigger_UsesDirectColorSetters_NotStyleSetters()
+	{
+		// Verifies that a button configured with direct DynamicResource setters on DataTrigger
+		// updates its colors without replacing the underlying Style object (preventing the MAUI style snapshot bug).
+		var button = new Button
+		{
+			HeightRequest = 38,
+			FontSize = 13,
+			FontAttributes = FontAttributes.Bold
+		};
+
+		var trigger = new DataTrigger(typeof(Button))
+		{
+			Binding = new Binding("IsActive"),
+			Value = true
+		};
+
+		trigger.Setters.Add(new Setter
+		{
+			Property = VisualElement.BackgroundColorProperty,
+			Value = new DynamicResourceExtension { Key = "PrimaryColor" }
+		});
+		trigger.Setters.Add(new Setter
+		{
+			Property = Button.TextColorProperty,
+			Value = new DynamicResourceExtension { Key = "PrimaryButtonTextColor" }
+		});
+
+		button.Triggers.Add(trigger);
+
+		// Assert trigger does not target StyleProperty
+		foreach (var t in button.Triggers)
+		{
+			if (t is DataTrigger dt)
+			{
+				foreach (var s in dt.Setters)
+				{
+					Assert.NotEqual(VisualElement.StyleProperty, s.Property);
+				}
+			}
+		}
+	}
+
 	// ==========================================
 	// Test Helpers
 	// ==========================================
 
 	private sealed class TestDataPersistenceService : IDataPersistenceService
 	{
-		public string StoredTheme { get; set; } = "Regal Earth";
+		public string StoredTheme { get; set; } = "Espresso Crema Dark";
 
 		public Task<List<OracleDecisionLog>> LoadLogsAsync(CancellationToken cancellationToken = default)
 			=> Task.FromResult(new List<OracleDecisionLog>());

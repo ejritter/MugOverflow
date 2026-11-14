@@ -1,8 +1,9 @@
 using System.Diagnostics;
+using Dapper;
+using Microsoft.Data.Sqlite;
 using MugOverflowProject.Models;
 using MugOverflowProject.Services.Database;
 using MugOverflowProject.Tests.Fixtures;
-using SQLite;
 using Xunit;
 
 namespace MugOverflowProject.Tests.Database;
@@ -239,8 +240,14 @@ public sealed class SqliteDatabaseServiceStressTests : IAsyncLifetime
 			// Act: Execute a transaction that attempts to insert 20 items, but throws on item 10
 			var exception = await Record.ExceptionAsync(async () =>
 			{
-				await directConn.RunInTransactionAsync(db =>
+				await using var trans = await directConn.BeginTransactionAsync();
+				try
 				{
+					const string insertSql = """
+						INSERT INTO decision_logs (Id, Timestamp, LastModifiedUtc, Decision, Reason, CaffeineAmountMg, ItemName, ItemCategory, IsComplianceOverride, SyncStatus)
+						VALUES (@Id, @Timestamp, @LastModifiedUtc, @Decision, @Reason, @CaffeineAmountMg, @ItemName, @ItemCategory, @IsComplianceOverride, @SyncStatus);
+						""";
+
 					for (int i = 0; i < 20; i++)
 					{
 						if (i == 10)
@@ -249,9 +256,16 @@ public sealed class SqliteDatabaseServiceStressTests : IAsyncLifetime
 						}
 
 						var entity = SqliteTestDatabaseFixture.CreateSampleEntity(id: $"rollback-test-{i}");
-						db.Insert(entity);
+						await directConn.ExecuteAsync(insertSql, entity, transaction: trans);
 					}
-				});
+
+					await trans.CommitAsync();
+				}
+				catch
+				{
+					await trans.RollbackAsync();
+					throw;
+				}
 			});
 
 			Assert.NotNull(exception);
@@ -285,18 +299,30 @@ public sealed class SqliteDatabaseServiceStressTests : IAsyncLifetime
 			// Attempt transaction with raw Insert (not InsertOrReplace) containing duplicate PK
 			var exception = await Record.ExceptionAsync(async () =>
 			{
-				await directConn.RunInTransactionAsync(db =>
+				await using var trans = await directConn.BeginTransactionAsync();
+				try
 				{
-					db.Insert(SqliteTestDatabaseFixture.CreateSampleEntity(id: "new-valid-1"));
-					db.Insert(SqliteTestDatabaseFixture.CreateSampleEntity(id: "new-valid-2"));
+					const string insertSql = """
+						INSERT INTO decision_logs (Id, Timestamp, LastModifiedUtc, Decision, Reason, CaffeineAmountMg, ItemName, ItemCategory, IsComplianceOverride, SyncStatus)
+						VALUES (@Id, @Timestamp, @LastModifiedUtc, @Decision, @Reason, @CaffeineAmountMg, @ItemName, @ItemCategory, @IsComplianceOverride, @SyncStatus);
+						""";
+
+					await directConn.ExecuteAsync(insertSql, SqliteTestDatabaseFixture.CreateSampleEntity(id: "new-valid-1"), transaction: trans);
+					await directConn.ExecuteAsync(insertSql, SqliteTestDatabaseFixture.CreateSampleEntity(id: "new-valid-2"), transaction: trans);
 					// This violates primary key constraint
-					db.Insert(SqliteTestDatabaseFixture.CreateSampleEntity(id: "duplicate-pk-1", itemName: "Duplicate Attempt"));
-					db.Insert(SqliteTestDatabaseFixture.CreateSampleEntity(id: "new-valid-3"));
-				});
+					await directConn.ExecuteAsync(insertSql, SqliteTestDatabaseFixture.CreateSampleEntity(id: "duplicate-pk-1", itemName: "Duplicate Attempt"), transaction: trans);
+					await directConn.ExecuteAsync(insertSql, SqliteTestDatabaseFixture.CreateSampleEntity(id: "new-valid-3"), transaction: trans);
+					await trans.CommitAsync();
+				}
+				catch
+				{
+					await trans.RollbackAsync();
+					throw;
+				}
 			});
 
 			Assert.NotNull(exception);
-			Assert.IsAssignableFrom<SQLiteException>(exception);
+			Assert.IsAssignableFrom<SqliteException>(exception);
 
 			// Assert: Neither new-valid-1 nor new-valid-2 were committed
 			var log1 = await service.GetLogByIdAsync("new-valid-1");

@@ -7,8 +7,8 @@ using MugOverflowProject.Services;
 namespace MugOverflowProject.ViewModels;
 
 /// <summary>
-/// ViewModel for the ThemeSelectorPopup, presenting the 6 available application palettes
-/// and orchestrating theme switching and persistent storage.
+/// ViewModel for the ThemeSelectorPopup, presenting the 10 available application palettes
+/// (5 theme families, each with Light and Dark variants) and orchestrating theme switching and persistent storage.
 /// </summary>
 public sealed partial class ThemeSelectorPopupViewModel(IDataPersistenceService dataPersistenceService) : ObservableObject
 {
@@ -20,12 +20,16 @@ public sealed partial class ThemeSelectorPopupViewModel(IDataPersistenceService 
 	/// </summary>
 	public ObservableCollection<string> Themes { get; } =
 	[
-		"Regal Earth",
-		"Wine Desert",
-		"Forest Lavender",
-		"Pristine Clean",
-		"Coffee Light",
-		"Coffee Dark"
+		"Espresso Crema Dark",
+		"Steamed Oat Latte",
+		"Caramel Macchiato",
+		"Mocha Velvet Dark",
+		"Iced Matcha Latte",
+		"Dirty Matcha Dark",
+		"Honey Lavender Latte",
+		"Midnight Cold Brew",
+		"Sweet Mint Cortado",
+		"Dark Mint Espresso"
 	];
 
 	/// <summary>

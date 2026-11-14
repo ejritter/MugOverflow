@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="MugOverflowProject.Resources.Styles.Themes.WineDesertTheme">
 
-    <x:String x:Key="ThemeName">Wine Desert</x:String>
+    <x:String x:Key="ThemeName">Caramel Macchiato</x:String>
 
     <Color x:Key="PageBackgroundColor">#F6E7D2</Color>
     <Color x:Key="NavigationBarColor">#6B1E36</Color>
@@ -30,4 +30,7 @@
     <Color x:Key="PrimaryGradientEnd">#7B3F00</Color>
     <Color x:Key="CardShadowColor">#1A241A17</Color>
     <Color x:Key="AppShadowColor">#26241A17</Color>
+
+    <Color x:Key="PrimaryButtonTextColor">White</Color>
+    <Color x:Key="AccentButtonTextColor">White</Color>
 </ResourceDictionary>

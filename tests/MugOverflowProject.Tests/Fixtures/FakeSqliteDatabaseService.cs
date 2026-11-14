@@ -155,9 +155,24 @@ public sealed class FakeSqliteDatabaseService : ISqliteDatabaseService
 		return Task.FromResult("wal");
 	}
 
+	public int CheckpointWalCallCount { get; private set; }
+
+	public Task CheckpointWalAsync(CancellationToken cancellationToken = default)
+	{
+		CheckpointWalCallCount++;
+		return Task.CompletedTask;
+	}
+
 	public Task CloseConnectionAsync()
 	{
 		CloseCallCount++;
 		return Task.CompletedTask;
+	}
+
+	public bool IsDisposed { get; private set; }
+
+	public void Dispose()
+	{
+		IsDisposed = true;
 	}
 }

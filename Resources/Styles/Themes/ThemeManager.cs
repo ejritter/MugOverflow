@@ -12,11 +12,11 @@ namespace MugOverflowProject.Resources.Styles.Themes;
 /// </summary>
 public static class ThemeManager
 {
-	public const string DefaultTheme = "Regal Earth";
+	public const string DefaultTheme = "Espresso Crema Dark";
 
 	/// <summary>
 	/// Gets the name of the currently applied theme.
-	/// Defaults to "Regal Earth".
+	/// Defaults to "Espresso Crema Dark".
 	/// </summary>
 	public static string CurrentThemeName { get; private set; } = DefaultTheme;
 
@@ -104,16 +104,36 @@ public static class ThemeManager
 
 	/// <summary>
 	/// Instantiates a ResourceDictionary corresponding to the specified theme name.
-	/// Supports case-insensitive matching and falls back to RegalEarthTheme.
+	/// Supports case-insensitive matching for both Coffeehouse Drink themes and legacy aliases,
+	/// falling back to CoffeeDarkTheme ("Espresso Crema Dark").
 	/// </summary>
 	public static ResourceDictionary CreateThemeDictionary(string? themeName) => themeName?.Trim() switch
 	{
-		var name when string.Equals(name, "Coffee Light", StringComparison.OrdinalIgnoreCase) => new CoffeeLightTheme(),
-		var name when string.Equals(name, "Coffee Dark", StringComparison.OrdinalIgnoreCase) => new CoffeeDarkTheme(),
-		var name when string.Equals(name, "Wine Desert", StringComparison.OrdinalIgnoreCase) => new WineDesertTheme(),
-		var name when string.Equals(name, "Forest Lavender", StringComparison.OrdinalIgnoreCase) => new ForestLavenderTheme(),
-		var name when string.Equals(name, "Pristine Clean", StringComparison.OrdinalIgnoreCase) => new PristineCleanTheme(),
-		_ => new RegalEarthTheme()
+		var name when string.Equals(name, "Espresso Crema Dark", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Coffee Dark", StringComparison.OrdinalIgnoreCase) => new CoffeeDarkTheme(),
+		var name when string.Equals(name, "Steamed Oat Latte", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Coffee Light", StringComparison.OrdinalIgnoreCase) => new CoffeeLightTheme(),
+		var name when string.Equals(name, "Caramel Macchiato", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Wine Desert", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Wine Desert Light", StringComparison.OrdinalIgnoreCase) => new WineDesertTheme(),
+		var name when string.Equals(name, "Mocha Velvet Dark", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Wine Desert Dark", StringComparison.OrdinalIgnoreCase) => new WineDesertDarkTheme(),
+		var name when string.Equals(name, "Iced Matcha Latte", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Forest Lavender", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Forest Lavender Light", StringComparison.OrdinalIgnoreCase) => new ForestLavenderTheme(),
+		var name when string.Equals(name, "Dirty Matcha Dark", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Forest Lavender Dark", StringComparison.OrdinalIgnoreCase) => new ForestLavenderDarkTheme(),
+		var name when string.Equals(name, "Honey Lavender Latte", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Regal Earth", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Regal Earth Light", StringComparison.OrdinalIgnoreCase) => new RegalEarthTheme(),
+		var name when string.Equals(name, "Midnight Cold Brew", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Regal Earth Dark", StringComparison.OrdinalIgnoreCase) => new RegalEarthDarkTheme(),
+		var name when string.Equals(name, "Sweet Mint Cortado", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Pristine Clean", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Pristine Clean Light", StringComparison.OrdinalIgnoreCase) => new PristineCleanTheme(),
+		var name when string.Equals(name, "Dark Mint Espresso", StringComparison.OrdinalIgnoreCase) ||
+		              string.Equals(name, "Pristine Clean Dark", StringComparison.OrdinalIgnoreCase) => new PristineCleanDarkTheme(),
+		_ => new CoffeeDarkTheme()
 	};
 
 	/// <summary>
@@ -128,9 +148,13 @@ public static class ThemeManager
 		if (d is CoffeeLightTheme ||
 		    d is CoffeeDarkTheme ||
 		    d is RegalEarthTheme ||
+		    d is RegalEarthDarkTheme ||
 		    d is WineDesertTheme ||
+		    d is WineDesertDarkTheme ||
 		    d is ForestLavenderTheme ||
-		    d is PristineCleanTheme)
+		    d is ForestLavenderDarkTheme ||
+		    d is PristineCleanTheme ||
+		    d is PristineCleanDarkTheme)
 		{
 			return true;
 		}
@@ -152,7 +176,7 @@ public static class ThemeManager
 	}
 
 	/// <summary>
-	/// Resets the current theme name to the default ("Regal Earth") for testing isolation.
+	/// Resets the current theme name to the default ("Espresso Crema Dark") for testing isolation.
 	/// </summary>
 	public static void ResetToDefault()
 	{

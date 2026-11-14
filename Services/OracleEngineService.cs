@@ -2,7 +2,6 @@ namespace MugOverflowProject.Services;
 
 public sealed class OracleEngineService : IOracleEngineService
 {
-
 	private static readonly string[] OracleYes =
 	[
 		"YES. The java divine forces have aligned. Pour yourself another cup!",
@@ -111,11 +110,60 @@ public sealed class OracleEngineService : IOracleEngineService
 		"FINAL VERDICT: NO. Put down the pot and grab a water bottle!"
 	];
 
+	private static readonly string[] ReactionYesDrank =
+	[
+		"☕ Textbook coffeehouse harmony! That {0} (+{1} mg) is officially on the ledger—savor the crema.",
+		"✨ Barista and drinker in total alignment! Enjoy that fresh {0} (+{1} mg) while your focus hits cruise control.",
+		"☕ Pulled to perfection! Logged your {0} (+{1} mg)—may every sip turn straight into clean momentum.",
+		"🫘 The beans smiled and you answered! {0} (+{1} mg) is on the board—ride that golden roast wave.",
+		"☕ House favorite move! Your {0} (+{1} mg) is stamped on the receipt—warm mug, sharp mind."
+	];
+
+	private static readonly string[] ReactionNoDrank =
+	[
+		"😈 Certified espresso outlaw! Mugsy waved the caution towel, you brewed a {0} (+{1} mg) anyway—hold onto your keyboard!",
+		"⚡ Rogue pour at the counter! Logged that rebellious {0} (+{1} mg)—chase it with a glass of water, legend.",
+		"🔥 Defying the barista's cut-off for a {0} (+{1} mg)! Respect the boldness—your buzz gauge just climbed.",
+		"😈 Outlaw sipper spotted! {0} (+{1} mg) is on the tab despite the veto—channel that turbo charge wisely!",
+		"☕ No-filter rebellion! Mugsy said pause, your mug said {0} (+{1} mg)—logged and ticking on the half-life curve."
+	];
+
+	private static readonly string[] ReactionNoSkipped =
+	[
+		"🫗 Gold-star hydro discipline! Skipping this round keeps your evening sleep curve smooth as cold foam.",
+		"💧 Barista's tip of the cap! Holding the line now means tomorrow morning's first pour will taste twice as magical.",
+		"😇 Textbook pacing, champ! Zero extra caffeine logged—your future well-rested self owes you a croissant.",
+		"🫗 Wise call at the counter! Letting your current buzz coast down smoothly—hydration wins this round.",
+		"🌿 Smooth move! Resting the portafilter now keeps jitters at bay and your circadian rhythm happy."
+	];
+
+	private static readonly string[] ReactionYesSkipped =
+	[
+		"✨ Plot twist at the espresso bar! Mugsy gave the green light, yet you banked that caffeine token for later.",
+		"🎩 Mysterious restraint! Even with the barista's blessing, you passed on the pour—saving room for a peak moment.",
+		"🫗 Plot-twist pass logged! The beans said yes, you chose zen—zero mg added to your bloodstream gauge.",
+		"✨ Saving your shot for when it really counts! Logged a clean skip despite the green light.",
+		"😌 Cool-headed curveball! Turning down an approved cup takes serious main-character composure."
+	];
+
 	public (bool SaidYes, string VerdictText) ConsultOracle()
 	{
 		bool isYes = Random.Shared.Next(2) == 1;
 		string[] pool = isYes ? OracleYes : OracleNo;
 		string verdict = pool[Random.Shared.Next(pool.Length)];
 		return (isYes, verdict);
+	}
+
+	public string GetOutcomeReaction(bool oracleSaidYes, bool userDrank, string? coffeeName, int caffeineMg)
+	{
+		string brew = string.IsNullOrWhiteSpace(coffeeName) ? "coffee" : coffeeName;
+
+		return (oracleSaidYes, userDrank) switch
+		{
+			(true, true) => string.Format(ReactionYesDrank[Random.Shared.Next(ReactionYesDrank.Length)], brew, caffeineMg),
+			(false, true) => string.Format(ReactionNoDrank[Random.Shared.Next(ReactionNoDrank.Length)], brew, caffeineMg),
+			(false, false) => ReactionNoSkipped[Random.Shared.Next(ReactionNoSkipped.Length)],
+			(true, false) => ReactionYesSkipped[Random.Shared.Next(ReactionYesSkipped.Length)]
+		};
 	}
 }

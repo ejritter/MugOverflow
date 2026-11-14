@@ -144,4 +144,107 @@ public sealed class CaffeineMetabolismServiceTests
 		Assert.Equal(2, summary.ObeyedCount);
 		Assert.Equal(0, summary.RebelledCount);
 	}
+
+	[Fact]
+	public void CalculateDailyTotalCaffeineMg_FiltersByTodayAndDrankStatus()
+	{
+		var today = DateTime.Today;
+		var logs = new List<OracleDecisionLog>
+		{
+			// Drank today
+			new() { Timestamp = today.ToUniversalTime().AddHours(10), UserDrank = true, CaffeineMg = 95 },
+			// Drank today (evening)
+			new() { Timestamp = today.ToUniversalTime().AddHours(14), UserDrank = true, CaffeineMg = 65 },
+			// Drank yesterday
+			new() { Timestamp = today.AddDays(-1).ToUniversalTime().AddHours(10), UserDrank = true, CaffeineMg = 150 },
+			// Skipped today
+			new() { Timestamp = today.ToUniversalTime().AddHours(12), UserDrank = false, CaffeineMg = 100 }
+		};
+
+		int total = _service.CalculateDailyTotalCaffeineMg(logs);
+		Assert.Equal(160, total);
+	}
+
+	[Fact]
+	public void CalculateActiveCaffeine_ConstrainedTo48Hours_IgnoresOlderLogs()
+	{
+		var now = DateTime.UtcNow;
+		var logs = new List<OracleDecisionLog>
+		{
+			// Within 48h (e.g. 5 hours ago)
+			new() { Timestamp = now.AddHours(-5), UserDrank = true, CaffeineMg = 100 },
+			// Exactly older than 48h (e.g. 48.1 hours ago)
+			new() { Timestamp = now.AddHours(-48.1), UserDrank = true, CaffeineMg = 500 }
+		};
+
+		double active = _service.CalculateActiveCaffeine(logs, now);
+		// Only the 5h log (1 half-life = 50mg) should be counted, 48.1h log is ignored
+		Assert.Equal(50.0, active, precision: 2);
+	}
+
+	[Fact]
+	public void CalculateActiveCaffeine_DefensiveUtcNormalization_HandlesLocalAndUnspecifiedKinds()
+	{
+		var nowUtc = DateTime.UtcNow;
+		var nowLocal = nowUtc.ToLocalTime();
+		var logLocalTime = nowLocal.AddHours(-5.0);
+
+		var logs = new List<OracleDecisionLog>
+		{
+			new()
+			{
+				Timestamp = DateTime.SpecifyKind(logLocalTime, DateTimeKind.Local),
+				UserDrank = true,
+				CaffeineMg = 100
+			}
+		};
+
+		// Passing Local kind for both asOf and log
+		double active = _service.CalculateActiveCaffeine(logs, nowLocal);
+		Assert.Equal(50.0, active, precision: 2);
+	}
+
+	[Fact]
+	public void CalculateActiveCaffeine_SlightClockDriftWithinHalfHour_ClampsToZeroHoursElapsed()
+	{
+		var nowUtc = DateTime.UtcNow;
+		// 10 minutes in the future (clock skew)
+		var futureLogTime = nowUtc.AddMinutes(10);
+
+		var logs = new List<OracleDecisionLog>
+		{
+			new()
+			{
+				Timestamp = futureLogTime,
+				UserDrank = true,
+				CaffeineMg = 80
+			}
+		};
+
+		double active = _service.CalculateActiveCaffeine(logs, nowUtc);
+		// hoursElapsed should clamp from -0.166 to 0.0, retaining 100% caffeine
+		Assert.Equal(80.0, active, precision: 2);
+	}
+
+	[Fact]
+	public void ComputeSummary_CupsLoggedCount_FiltersOnlyTodayLocalDrankLogs()
+	{
+		var now = DateTime.UtcNow;
+		var today = DateTime.Today;
+		var logs = new List<OracleDecisionLog>
+		{
+			// Drank today
+			new() { Timestamp = now, UserDrank = true, CaffeineMg = 95 },
+			// Drank yesterday
+			new() { Timestamp = today.AddDays(-1).ToUniversalTime().AddHours(12), UserDrank = true, CaffeineMg = 100 },
+			// Skipped today
+			new() { Timestamp = now.AddHours(-1), UserDrank = false, CaffeineMg = 0 }
+		};
+
+		var compliance = new ComplianceStats { YesYes = 1, NoNo = 1 };
+		var summary = _service.ComputeSummary(logs, compliance);
+
+		Assert.Equal(1, summary.CupsLoggedCount);
+		Assert.Equal(95, summary.TotalCaffeineTodayMg);
+	}
 }

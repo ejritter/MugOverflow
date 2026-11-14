@@ -5,4 +5,15 @@
     xmlns:maui="using:Microsoft.Maui"
     xmlns:local="using:MugOverflowProject.WinUI">
 
+    <maui:MauiWinUIApplication.Resources>
+        <ResourceDictionary>
+            <SolidColorBrush x:Key="FlyoutPresenterBackground" Color="Transparent" />
+            <SolidColorBrush x:Key="FlyoutBorderThemeBrush" Color="Transparent" />
+            <Thickness x:Key="FlyoutBorderThemeThickness">0</Thickness>
+            <Thickness x:Key="FlyoutPresenterPadding">0</Thickness>
+            <SolidColorBrush x:Key="PopupBorderThemeBrush" Color="Transparent" />
+            <Thickness x:Key="PopupBorderThemeThickness">0</Thickness>
+        </ResourceDictionary>
+    </maui:MauiWinUIApplication.Resources>
+
 </maui:MauiWinUIApplication>

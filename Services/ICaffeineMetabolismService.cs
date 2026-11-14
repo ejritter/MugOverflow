@@ -8,4 +8,5 @@ public interface ICaffeineMetabolismService
 	double CalculateHoursToThreshold(double currentActiveMg, double targetMg);
 	MetabolismSummary ComputeSummary(IReadOnlyList<OracleDecisionLog> logs, ComplianceStats compliance);
 	IReadOnlyList<(double HourOffset, double RemainingMg)> Generate24HourDecayCurve(double initialActiveMg);
+	int CalculateDailyTotalCaffeineMg(IEnumerable<OracleDecisionLog> logs);
 }

@@ -45,3 +45,7 @@ agents/
 .agents/
 *.log
 log*.txt
+
+# Local OAuth secrets
+*.Local.cs
+Services/Storage/GoogleDriveConfig.Local.cs
